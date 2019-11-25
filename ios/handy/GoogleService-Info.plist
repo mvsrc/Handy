@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>965203411833-mh31aavsoj7bf7q0jjh4ga4frmi8s39q.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.965203411833-mh31aavsoj7bf7q0jjh4ga4frmi8s39q</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAqom0RGfUz5bZ2hi6c-ygWZakHK7tgml4</string>
+	<key>GCM_SENDER_ID</key>
+	<string>965203411833</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.handy</string>
+	<key>PROJECT_ID</key>
+	<string>src-techno-lab</string>
+	<key>STORAGE_BUCKET</key>
+	<string>src-techno-lab.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:965203411833:ios:17ba4a1972011fed0365a8</string>
+	<key>DATABASE_URL</key>
+	<string>https://src-techno-lab.firebaseio.com</string>
+</dict>
+</plist>
