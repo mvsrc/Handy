@@ -17,6 +17,9 @@ import { COLORS } from './Constants';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import SIcon from 'react-native-vector-icons/SimpleLineIcons'
 import MIcon from 'react-native-vector-icons/MaterialIcons'
+import Login from './Components/Login';
+import Registation from './Components/Registation';
+import Forgatepassword from './Components/Forgatepassword';
 const drawerNavigator = createDrawerNavigator({
     Home: {
         screen: Home,
@@ -43,11 +46,11 @@ const drawerNavigator = createDrawerNavigator({
         screen: Home,
     },
     Login: {
-        screen: Home,
+        screen:Login,
     },
 }, {
     contentComponent:Drawer,
-    initialRouteName: 'Home',
+    initialRouteName: 'Login',
     drawerPosition: 'left',
     backBehavior:'none'
 });
@@ -72,7 +75,10 @@ const AppNavigator = createStackNavigator({
     },
     Splash: {
         screen: Splash
-    }
+    },
+    Login:Login,
+    Registation:Registation,
+    Forgatepassword:Forgatepassword
 }, {
     headerMode: 'float',
     defaultNavigationOptions: ({ navigation }) => ({
@@ -81,6 +87,6 @@ const AppNavigator = createStackNavigator({
         },
         headerTintColor: '#fff',
     }),
-    initialRouteName: 'Splash'
+    initialRouteName: 'Registation'
 });
 export default createAppContainer(AppNavigator);
