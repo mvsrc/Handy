@@ -1,10 +1,10 @@
 import React from 'react'
 import { SafeAreaView, StyleSheet, ScrollView, View, Image, Text, TouchableOpacity } from 'react-native';
 import { DrawerActions } from 'react-navigation-drawer';
-import { COLORS } from '../Constants';
+import { COLORS, withLoggedIn } from '../Constants';
 import { connect } from 'react-redux';
 const CustomDrawerContentComponent = props => {
-    const { navigation, items, activeItemKey } = props;
+    const { navigation, items, activeItemKey, reducer } = props;
     return (
         <SafeAreaView
             style={styles.container}
@@ -17,6 +17,10 @@ const CustomDrawerContentComponent = props => {
             <ScrollView >
                 {
                     items.map((item, index) => {
+                        let navigateTo = item.routeName;
+                        if (withLoggedIn.includes(item.key)) {
+                            navigateTo = 'Login';
+                        }
                         return (
                             <TouchableOpacity key={'drawer-key' + index} style={{
                                 borderBottomColor: '#CCCCCC',
@@ -24,14 +28,44 @@ const CustomDrawerContentComponent = props => {
                                 paddingHorizontal: 10,
                                 paddingVertical: 7,
                                 backgroundColor: (activeItemKey == item.key) ? COLORS.Secondary : '#FFFFFF'
-                            }} onPress={()=>{
+                            }} onPress={() => {
                                 navigation.dispatch(DrawerActions.closeDrawer());
-                                navigation.navigate(item.routeName);
+                                navigation.navigate(navigateTo);
                             }}>
                                 <Text style={{ fontSize: 14, color: (activeItemKey == item.key) ? '#FFFFFF' : '#333333' }}>{item.key}</Text>
                             </TouchableOpacity>
                         );
                     })
+                }
+                {
+                    reducer.authorized == false &&
+                    <TouchableOpacity style={{
+                        borderBottomColor: '#CCCCCC',
+                        borderBottomWidth: 1,
+                        paddingHorizontal: 10,
+                        paddingVertical: 7,
+                        backgroundColor: '#FFFFFF'
+                    }} onPress={() => {
+                        navigation.dispatch(DrawerActions.closeDrawer());
+                        navigation.navigate('Login');
+                    }}>
+                        <Text style={{ fontSize: 14, color: '#333333' }}>Login</Text>
+                    </TouchableOpacity>
+                }
+                {
+                    reducer.authorized == true &&
+                    <TouchableOpacity style={{
+                        borderBottomColor: '#CCCCCC',
+                        borderBottomWidth: 1,
+                        paddingHorizontal: 10,
+                        paddingVertical: 7,
+                        backgroundColor: '#FFFFFF'
+                    }} onPress={() => {
+                        navigation.dispatch(DrawerActions.closeDrawer());
+                        navigation.navigate('Logout');
+                    }}>
+                        <Text style={{ fontSize: 14, color: '#333333' }}>Logout</Text>
+                    </TouchableOpacity>
                 }
             </ScrollView>
         </SafeAreaView>

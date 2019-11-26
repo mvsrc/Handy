@@ -13,9 +13,7 @@ export default class App extends React.Component {
     return (
       <Provider store={Store}>
         <StatusBar backgroundColor={COLORS.Primary} />
-        <MainNavigation screenProps={{
-
-        }} />
+        <MainNavigation screenProps={{}} />
       </Provider>
     )
   }

@@ -15,10 +15,11 @@ const reducer = (state = INITIAL_STATE, action) => {
 export default combineReducers({
     reducer
 });
-processUserSignIn = async (state, action) => {
+processUserSignIn = (state, action) => {
+    let dataSet = action.payload;
     return {
         ...state,
-        userData:action.userData,
+        userData:dataSet.userData,
         authorized: true,
     };
 }

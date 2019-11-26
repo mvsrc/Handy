@@ -16,7 +16,7 @@ class Splash extends Component {
         });
         setTimeout(()=>{
             this.props.navigation.navigate('Home');
-        },2000);
+        },1000);
         //this._checkingAuth();
     }
     _checkingAuth = async () => {
