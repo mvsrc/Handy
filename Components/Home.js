@@ -7,11 +7,13 @@ import { COLORS } from '../Constants';
 import { connect } from 'react-redux';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Carousel from 'react-native-banner-carousel';
+import TabBar from './TabBar';
+import { loadingChange } from '../Actions';
+import Axios from 'axios';
 const BannerWidth = Dimensions.get('window').width;
 const images = [
-    "http://kdoom.fundexpoinvestmentsolution.com/images/sliderimg/thumb/06111915730288971.jpg",
-    "http://kdoom.fundexpoinvestmentsolution.com/images/sliderimg/thumb/17111915740014671.JPG",
-    "http://kdoom.fundexpoinvestmentsolution.com/images/sliderimg/thumb/19111915741521231.jpg"
+    "http://kdoom.fundexpoinvestmentsolution.com/images/sliderimg/normal/26111915747737431.jpg",
+    "http://kdoom.fundexpoinvestmentsolution.com/images/sliderimg/normal/26111915747738231.jpg"
 ];
 class Home extends Component {
     constructor(props) {
@@ -22,9 +24,11 @@ class Home extends Component {
             showWelcomeMsg
         }
     }
+    async componentDidMount(){
+        
+    }
     render() {
         let { userData } = this.props.reducer;
-        console.log('userData', this.props.reducer);
         return (
             <SafeAreaView style={{ flex: 1 }}>
                 <ScrollView>
@@ -86,7 +90,6 @@ class Home extends Component {
                     <Modal
                         visible={this.state.showWelcomeMsg}
                         transparent={true}
-
                     >
                         <View style={{ backgroundColor: 'rgba(0,0,0,0.5)', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
                             <View style={{ backgroundColor: '#FFFFFF', padding: 15, width: '70%',borderRadius:10 }}>
@@ -98,7 +101,7 @@ class Home extends Component {
                         </View>
                     </Modal>
                 }
-
+                <TabBar navigation={this.props.navigation} />
             </SafeAreaView>
         );
     }
@@ -119,4 +122,7 @@ const mapStateToProps = (state) => {
     const { reducer } = state
     return { reducer }
 };
-export default connect(mapStateToProps)(Home);
+const mapDispatchToProps = dispatch => ({
+    LoadingStatusChange: (loading) => dispatch(loadingChange(loading)),
+});
+export default connect(mapStateToProps,mapDispatchToProps)(Home);

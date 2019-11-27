@@ -14,10 +14,7 @@ class Splash extends Component {
                 BackHandler.exitApp();
             }
         });
-        setTimeout(()=>{
-            this.props.navigation.navigate('Home');
-        },1000);
-        //this._checkingAuth();
+        this._checkingAuth();
     }
     _checkingAuth = async () => {
         try {
@@ -26,13 +23,17 @@ class Splash extends Component {
                     await AsyncStorage.getItem('userData').then((userData) => {
                         if (userData != "") {
                             this.props.checkAuth({ authorized: true, userData: JSON.parse(userData) });
-                            this.props.navigation.navigate('Home');
+                            setTimeout(()=>{
+                                this.props.navigation.navigate('Home');
+                            },100);
                         }
                     });
                 }
                 else {
                     this.props.checkAuth({ authorized: false, userData: null });
-                    this.props.navigation.navigate('Auth');
+                    setTimeout(()=>{
+                        this.props.navigation.navigate('Home');
+                    },100);
                 }
             });
         }

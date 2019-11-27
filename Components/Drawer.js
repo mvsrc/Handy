@@ -18,8 +18,14 @@ const CustomDrawerContentComponent = props => {
                 {
                     items.map((item, index) => {
                         let navigateTo = item.routeName;
-                        if (withLoggedIn.includes(item.key)) {
-                            navigateTo = 'Login';
+                        if(reducer.authorized == false){
+                            if (withLoggedIn.includes(item.key)) {
+                                navigateTo = 'Login';
+                            }
+                        }
+                        let key = item.key;
+                        if(key == 'UpdateProfile'){
+                            key = 'Update Profile';
                         }
                         return (
                             <TouchableOpacity key={'drawer-key' + index} style={{
@@ -32,7 +38,7 @@ const CustomDrawerContentComponent = props => {
                                 navigation.dispatch(DrawerActions.closeDrawer());
                                 navigation.navigate(navigateTo);
                             }}>
-                                <Text style={{ fontSize: 14, color: (activeItemKey == item.key) ? '#FFFFFF' : '#333333' }}>{item.key}</Text>
+                                <Text style={{ fontSize: 14, color: (activeItemKey == item.key) ? '#FFFFFF' : '#333333' }}>{key}</Text>
                             </TouchableOpacity>
                         );
                     })

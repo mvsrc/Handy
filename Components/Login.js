@@ -10,7 +10,6 @@ import { connect } from 'react-redux';
 import { actionUserSignIn, loadingChange } from '../Actions';
 import axios from 'axios';
 import Toast from 'react-native-simple-toast';
-import Loader from './Loader';
 class Login extends Component {
     constructor(props) {
         super(props)
@@ -29,11 +28,18 @@ class Login extends Component {
     };
     _signInAsync = async () => {
         let { email, password } = this.state;
+        if(email == ''){
+            Toast.show('Email ID is not valid', Toast.SHORT);
+            return false;
+        }
+        if(password == ''){
+            Toast.show('Password should not be blank', Toast.SHORT);
+            return false;
+        }
         this.props.LoadingStatusChange(true);
         await axios.get(`${API_URL}login.php?action=login&UserEmail=${email}&UserPass=${password}&UserToken=ios`)
             .then(async res => {
                 let uD = res.data;
-                console.log('uD',uD);
                 if (uD.success == 1) {
                     try{
                         Toast.show(uD.message, Toast.SHORT);
@@ -43,8 +49,7 @@ class Login extends Component {
                         await AsyncStorage.multiSet([['isUserLoggedIn',"true"],["userData",JSON.stringify(uD)]]).then(()=>{
                             setTimeout(()=>{
                                 this.props.navigation.navigate('Home',{showWelcomeMsg:true});
-                            },500);
-                            
+                            },100);
                             this.props.LoadingStatusChange(false);
                         });
                     }
@@ -56,8 +61,8 @@ class Login extends Component {
                 }
                 else{
                     Toast.show(uD.message, Toast.SHORT);
+                    this.props.LoadingStatusChange(false);
                 }
-                this.props.LoadingStatusChange(false);
             })
             .catch(err => {
                 this.props.LoadingStatusChange(false);
@@ -69,7 +74,6 @@ class Login extends Component {
         const behavior = (Platform.OS == 'ios') ? 'padding' : '';
         return (
             <SafeAreaView style={styles.main}>
-                <Loader loading={reducer.loading} />
                 <KeyboardAvoidingView enabled behavior={behavior}>
                     <ScrollView keyboardShouldPersistTaps="handled">
                         <View style={styles.logoimage}>

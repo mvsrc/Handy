@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { TouchableOpacity, Image, View, StyleSheet, Text } from 'react-native';
+import { Image, View, StyleSheet, Text } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
@@ -9,105 +10,74 @@ import { createDrawerNavigator, DrawerActions } from 'react-navigation-drawer';
 import Splash from './Components/Splash';
 /**** Drawer Screens *****/
 import Home from './Components/Home';
-
+import Myplan from "./Components/Myplan";
+import Orderdetails from "./Components/Orderdetails";
+import Message from "./Components/Message";
+import Notification from "./Components/Notification";
+import Updateprofile from "./Components/Updateprofile";
+import Changepassword from "./Components/Changepassword";
+import Contactus from "./Components/Contactus";
 /**** Custom Drawer *****/
 import Drawer from './Components/Drawer';
 import TabBar from './Components/TabBar';
 
 import { COLORS } from './Constants';
-import Icon from 'react-native-vector-icons/FontAwesome5';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import SIcon from 'react-native-vector-icons/SimpleLineIcons'
 import MIcon from 'react-native-vector-icons/MaterialIcons'
 import Login from './Components/Login';
+import Logout from './Components/Logout';
 import Registration from './Components/Registration';
 import ForgotPassword from './Components/ForgotPassword';
-const bottomTab = createBottomTabNavigator({
-    Home: {
-        screen: Home,
-        navigationOptions: {
-            tabBarIcon: <Image source={require('./assets/home.png')} style={{ height: 20, width: 21 }} />,
-            tabBarButtonComponent:TouchableOpacity
-        }
-    },
-    Notification: {
-        screen: Home,
-        navigationOptions: {
-            tabBarIcon: <Image source={require('./assets/well.png')} style={{ height: 20, width: 17 }} />,
-            tabBarButtonComponent:TouchableOpacity
-        }
-    },
-    Message: {
-        screen: Home,
-        navigationOptions: {
-            tabBarIcon: <Image source={require('./assets/message.png')} style={{ height: 20, width: 28 }} />,
-            tabBarButtonComponent:TouchableOpacity
-        }
-    },
-    User: {
-        screen: Home,
-        navigationOptions: {
-            tabBarIcon: <Image source={require('./assets/user.png')} style={{ height: 22, width: 20 }} />,
-            tabBarButtonComponent:TouchableOpacity
-        }
-    },
-}, {
-    tabBarOptions: {
-        showLabel: false,
-        showIcon: true,
-        keyboardHidesTabBar: true,
-        style: {
-            backgroundColor: COLORS.Primary,
-        },
-        safeAreaInset: { bottom: 'always', top: 'never' },
-        tabStyle: { borderRightWidth: 1, borderRightColor: '#999999' }
-    },
-    tabBarComponent:TabBar
-});
 const drawerNavigator = createDrawerNavigator({
-    Home: bottomTab,
+    Home: Home,
     ['My Plan']: {
-        screen: Home,
+        screen: Myplan,
     },
     ['Order Detail']: {
-        screen: Home,
+        screen: Orderdetails,
     },
     Notification: {
-        screen: Home,
+        screen: Notification,
     },
     Feedback: {
         screen: Home,
     },
-    ['Update Profile']: {
-        screen: Home,
+    ['UpdateProfile']: {
+        screen: Updateprofile,
     },
     Message: {
-        screen: Home,
+        screen: Message,
     },
     ['Contact Us']: {
-        screen: Home,
+        screen: Contactus,
     },
 }, {
     contentComponent: Drawer,
     initialRouteName: 'Home',
     drawerPosition: 'left',
-    backBehavior: 'none'
 });
 const AppNavigator = createStackNavigator({
     Home: {
         screen: drawerNavigator,
         navigationOptions: ({ navigation }) => {
+            let title = navigation.state.routes[navigation.state.index].key;
+            if(title == 'UpdateProfile'){
+                title = 'Profile';
+            }
             return {
-                headerTitle: navigation.state.routeName,
-                headerLeft: <TouchableOpacity onPress={() => { navigation.dispatch(DrawerActions.toggleDrawer()) }} style={{ paddingLeft: 20 }}>
-                    <SIcon name="menu" size={25} style={{ color: '#FFFFFF' }} />
-                </TouchableOpacity>,  // If you want to override the back button, use this.
-                headerRight: <TouchableOpacity style={{ paddingRight: 20 }}>
-                    {/* <Icon name="user-circle" size={25} style={{ color: '#FFFFFF' }} /> */}
-                </TouchableOpacity>,
-                headerTitleContainerStyle: {
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                },
+                title,
+                headerLeft: () => {
+                    if(navigation.state.routes[navigation.state.index].key == 'Home'){
+                    return(<TouchableOpacity onPress={() => { navigation.dispatch(DrawerActions.toggleDrawer()) }} style={{ paddingLeft: 20 }}>
+                        <Icon name="bars" size={25} style={{ color: '#FFFFFF' }} />
+                    </TouchableOpacity>)
+                    }
+                    return(<TouchableOpacity onPress={() => { navigation.navigate('Home') }} style={{ paddingLeft: 10 }}>
+                        <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />
+                    </TouchableOpacity>)
+                },  // If you want to override the back button, use this.
+                
             }
         }
     },
@@ -117,6 +87,20 @@ const AppNavigator = createStackNavigator({
     Login: {
         screen: Login,
     },
+    Changepassword:{
+        screen:Changepassword,
+        navigationOptions: ({ navigation }) => {
+            return {
+                title:'Change Password',
+                headerLeft:()=>(
+                    <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
+                        <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />
+                    </TouchableOpacity>
+                )
+            }
+        }
+    },
+    Logout: { screen: Logout },
     Registration: Registration,
     ForgotPassword: ForgotPassword
 }, {
