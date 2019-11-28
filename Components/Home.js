@@ -24,11 +24,12 @@ class Home extends Component {
             showWelcomeMsg
         }
     }
-    async componentDidMount(){
+    componentDidMount(){
         
     }
     render() {
         let { userData } = this.props.reducer;
+        console.log('Home UserData',userData);
         return (
             <SafeAreaView style={{ flex: 1 }}>
                 <ScrollView>
@@ -49,7 +50,11 @@ class Home extends Component {
                     <View style={{ paddingHorizontal: 15, marginVertical: 15 }}>
                         <Text style={{ color: COLORS.Primary, fontSize: 20, textAlign: 'center', fontWeight: 'bold' }}>Services</Text>
                         <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 15 }}>
-                            <TouchableNativeFeedback background={TouchableNativeFeedback.SelectableBackground()}>
+                            <TouchableNativeFeedback background={TouchableNativeFeedback.SelectableBackground()} onPress={()=>{
+                                if(userData.UserType == 'user'){
+                                    
+                                }
+                            }}>
                                 <View style={[styles.servicesBtn, { width: '100%', borderTopStartRadius: 10, borderBottomWidth: 1, borderTopEndRadius: 10, flexDirection: 'row' }]}>
                                     <View style={{ width: '50%', alignItems: 'center', justifyContent: 'center' }}>
                                         <Image source={require('../assets/wastage-icon.png')} style={{ width: 78, height: 97 }} />

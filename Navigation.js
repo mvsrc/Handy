@@ -23,12 +23,15 @@ import TabBar from './Components/TabBar';
 
 import { COLORS } from './Constants';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import SIcon from 'react-native-vector-icons/SimpleLineIcons'
-import MIcon from 'react-native-vector-icons/MaterialIcons'
+import SIcon from 'react-native-vector-icons/SimpleLineIcons';
+import MIcon from 'react-native-vector-icons/MaterialIcons';
+/**** Authentication Screens ****/
 import Login from './Components/Login';
 import Logout from './Components/Logout';
 import Registration from './Components/Registration';
 import ForgotPassword from './Components/ForgotPassword';
+/**** Plans Screen ****/
+import PlanHistory from "./Components/Planhistory";
 const drawerNavigator = createDrawerNavigator({
     Home: Home,
     ['My Plan']: {
@@ -92,6 +95,19 @@ const AppNavigator = createStackNavigator({
         navigationOptions: ({ navigation }) => {
             return {
                 title:'Change Password',
+                headerLeft:()=>(
+                    <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
+                        <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />
+                    </TouchableOpacity>
+                )
+            }
+        }
+    },
+    PlanHitory:{
+        screen:PlanHistory,
+        navigationOptions: ({ navigation }) => {
+            return {
+                title:'Plan History',
                 headerLeft:()=>(
                     <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
                         <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />

@@ -12,6 +12,7 @@ import { loadingChange } from '../Actions';
 import axios from 'axios';
 import Toast from 'react-native-simple-toast';
 class Myplan extends Component {
+    currentProps = this.props;
     constructor(props) {
         super(props)
         this.state = {
@@ -21,9 +22,14 @@ class Myplan extends Component {
         }
     }
     componentDidMount() {
-        let { userData } = this.props.reducer;
-        this.props.LoadingStatusChange(true);
-        axios.get(`${API_URL}myplan.php?action=myplan&UserId=${userData.UserId}`)
+        this.listner = this.props.navigation.addListener('didFocus', () => {
+            this.fetchPlan();
+        });
+    }
+    fetchPlan = async () => {
+        let { userData } = this.currentProps.reducer;
+        this.currentProps.LoadingStatusChange(true);
+        await axios.get(`${API_URL}myplan.php?action=myplan&UserId=${userData.UserId}`)
             .then(res => {
                 let { success, message, result } = res.data;
                 if (success == 1) {
@@ -36,10 +42,11 @@ class Myplan extends Component {
                 else {
                     Toast.show(message, Toast.SHORT);
                 }
-                this.props.LoadingStatusChange(false);
+                this.currentProps.LoadingStatusChange(false);
             })
             .catch(err => {
                 console.log('My Plan Error ', err);
+                this.currentProps.LoadingStatusChange(false);
             })
     }
     render() {
@@ -47,7 +54,7 @@ class Myplan extends Component {
             <View style={styles.main}>
                 <ScrollView contentContainerStyle={{ paddingHorizontal: 10, paddingVertical: 20 }}>
                     <View style={styles.container}>
-                        <TouchableOpacity style={styles.subcontainer} onPress={() => { this.props.navigation.navigate('Planhistory') }}>
+                        <TouchableOpacity style={styles.subcontainer} onPress={() => { this.props.navigation.navigate('PlanHitory') }}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 15, paddingVertical: 13 }}>
                                 <Text style={{ color: '#FFFFFF', fontSize: 15 }}>Plan:{this.state.SubscriptionPlan}</Text>
                                 <Text style={{ color: '#FFFFFF', fontSize: 15 }}>{this.state.RemainingDays} Days left</Text>
@@ -59,12 +66,12 @@ class Myplan extends Component {
                             <Text style={{ fontSize: 24, color: '#FFFFFF' }}>Gas &amp; Water Services</Text>
                         </TouchableOpacity>
                         <View style={{ marginTop: 5, alignItems: 'center' }}>
-                            <TouchableOpacity style={[styles.button,{backgroundColor: (this.state.RemainingDays > 5)?'#999999':COLORS.Primary,}]}
-                            onPress={()=>{
-                                if((this.state.RemainingDays <= 5)){
+                            <TouchableOpacity style={[styles.button, { backgroundColor: (this.state.RemainingDays > 5) ? '#999999' : COLORS.Primary, }]}
+                                onPress={() => {
+                                    if ((this.state.RemainingDays <= 5)) {
 
-                                }
-                            }}>
+                                    }
+                                }}>
                                 <Text style={{ textAlign: 'center', fontSize: 16, color: '#FFFFFF', fontWeight: 'bold' }}>Renew</Text>
                             </TouchableOpacity>
                         </View>
@@ -92,7 +99,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 5
     },
     button: {
-        elevation:4,
+        elevation: 4,
         width: 135,
         paddingVertical: 13,
         borderRadius: 50,
