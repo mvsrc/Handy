@@ -141,7 +141,6 @@ const styles = StyleSheet.create({
         textAlign: 'left',
         paddingLeft: 5,
         fontSize: 18,
-        fontFamily: 'AvenirLTStd-Medium',
         color: 'black'
     },
 

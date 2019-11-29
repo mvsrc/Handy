@@ -32,6 +32,7 @@ import Registration from './Components/Registration';
 import ForgotPassword from './Components/ForgotPassword';
 /**** Plans Screen ****/
 import PlanHistory from "./Components/Planhistory";
+import PlanService from "./Components/Planservice";
 const drawerNavigator = createDrawerNavigator({
     Home: Home,
     ['My Plan']: {
@@ -108,6 +109,19 @@ const AppNavigator = createStackNavigator({
         navigationOptions: ({ navigation }) => {
             return {
                 title:'Plan History',
+                headerLeft:()=>(
+                    <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
+                        <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />
+                    </TouchableOpacity>
+                )
+            }
+        }
+    },
+    PlanService:{
+        screen:PlanService,
+        navigationOptions: ({ navigation }) => {
+            return {
+                title:'Service',
                 headerLeft:()=>(
                     <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
                         <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />

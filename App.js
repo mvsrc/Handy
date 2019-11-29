@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StatusBar, SafeAreaView } from 'react-native';
+import { StatusBar, SafeAreaView,View } from 'react-native';
 import { COLORS } from './Constants';
 import { Provider, connect } from 'react-redux';
 import Store from './Store';
@@ -10,12 +10,12 @@ console.disableYellowBox = true;
 class AppComponent extends Component {
   render() {
     return (
-      <SafeAreaView style={{ flex: 1 }}>
-        <StatusBar backgroundColor={COLORS.Primary} />
+      <View style={{ flex: 1 }}>
+        <StatusBar backgroundColor={COLORS.Primary} barStyle="light-content" />
         <Loader loading={this.props.reducer.loading} />
         <MainNavigation />
         
-      </SafeAreaView>
+      </View>
     )
   }
 }

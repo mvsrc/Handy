@@ -28,3 +28,9 @@ export const updateProfileAction = (userData)=>{
         userData
     }
 }
+export const showWelcomeMessageAction = (showWelcomeMessage)=>{
+    return {
+        type:'SHOW_WELCOME_MESSAGE',
+        showWelcomeMessage
+    }
+}

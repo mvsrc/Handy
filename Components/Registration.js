@@ -1,20 +1,24 @@
 import React, { Component } from 'react';
 import {
-    SafeAreaView, View, Text,
+    View, Text,
     ScrollView, KeyboardAvoidingView, TextInput, TouchableOpacity,
     StyleSheet, Keyboard, Picker
 } from 'react-native';
-import { COLORS, API_URL } from '../Constants';
-import Loader from './Loader'
+import { COLORS, API_URL, IOSShadow } from '../Constants';
+import RNPickerSelect from 'react-native-picker-select';
 import Toast from 'react-native-simple-toast';
-import MapView from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import CheckBox from 'react-native-check-box';
 import Axios from 'axios';
 import { connect } from 'react-redux';
 import { loadingChange } from '../Actions';
+import Geolocation from 'react-native-geolocation-service';
 class Registration extends Component {
     constructor(props) {
-        super(props)
+        super(props);
+        this.inputRefs = {
+            favSport0: null,
+          };
         this.state = {
             name: '',
             lname: '',
@@ -25,6 +29,8 @@ class Registration extends Component {
             district: [],
             Homeno: '',
             ATC: false,
+            UserLat:0,
+            UserLng:0
         }
     }
     static navigationOptions = {
@@ -43,7 +49,12 @@ class Registration extends Component {
     districtdata = () => {
         Axios.get(API_URL + 'district.php?action=district')
             .then(res => {
-                this.setState({ district: res.data.district }, () => {
+                console.log(res.data.district);
+                let districtList = [];
+                res.data.district.map((item,index)=>{
+                    districtList.push({label:item.DistrictName,value:item.DistrictId});
+                })
+                this.setState({ district: districtList }, () => {
                     this.props.LoadingStatusChange(false);
                 });
 
@@ -55,16 +66,26 @@ class Registration extends Component {
 
     }
     componentDidMount() {
+        Geolocation.getCurrentPosition(
+            (position) => {
+                let {latitude,longitude} = position.coords;
+                this.setState({UserLat:latitude,UserLng:longitude});
+            },
+            (error) => {
+                // See error code charts below.
+                console.log(error.code, error.message);
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+        );
         this.props.LoadingStatusChange(true);
         this.districtdata();
     }
     render() {
         return (
-            <SafeAreaView style={styles.main}>
-                <Loader loading={this.props.reducer.loading} />
-                <KeyboardAvoidingView enabled>
-                    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 10, paddingVertical: 30 }}>
-                        <Text style={{ color: COLORS.Primary, marginLeft: 10, fontSize: 22, fontWeight: 'bold' }}>Regiser Here</Text>
+            <View style={styles.main}>
+                <KeyboardAvoidingView enabled={true} style={{flex:1}}>
+                    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 10, paddingVertical: 30,flex:1 }}>
+                        <Text style={{ color: COLORS.Primary, marginLeft: 10, fontSize: 22, fontWeight: 'bold' }}>Register Here</Text>
                         <View style={styles.textcontainer}>
                             <View style={styles.textinput}>
                                 <TextInput
@@ -134,7 +155,6 @@ class Registration extends Component {
                                     style={styles.textField}
                                 />
                             </View>
-
                             <View style={styles.textinput}>
                                 <TextInput
                                     placeholder='Password(min 8 characters)'
@@ -151,23 +171,38 @@ class Registration extends Component {
                                     style={styles.textField}
                                 />
                             </View>
-
-                            <View style={[styles.textinput, { width: '100%', paddingVertical: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
+                            <View style={[styles.textinput, { width: '100%', flexDirection: 'row', justifyContent: 'space-between',alignItems:'center' }]}>
                                 <Text style={{ fontSize: 17, width: '30%' }}>Select District</Text>
-                                <Picker
-                                    mode="dropdown"
-                                    selectedValue={this.state.language}
-                                    style={{ width: '70%' }}
-                                    onValueChange={(itemValue, itemIndex) =>
-                                        this.setState({ language: itemValue })
-                                    } itemStyle={{ fontSize: 17 }}>
-
-                                    <Picker.Item label='Select District' />
-                                    {this.state.district.map((item, index) => (
-                                        <Picker.Item key={'district-' + index} label={item.DistrictName} value={item.DistrictId} />
-                                    ))}
-                                </Picker>
-
+                                <View style={{width:'70%'}}>
+                                    <RNPickerSelect
+                                        placeholder={{
+                                            label: 'Select district',
+                                            value: null,
+                                            color: COLORS.Primary,
+                                        }}
+                                        items={this.state.district}
+                                        value={this.state.UserDistrictName}
+                                        style={{
+                                            inputIOS: {
+                                                fontSize: 16,
+                                                paddingVertical: 12,
+                                                paddingHorizontal: 10,
+                                                borderWidth: 1,
+                                                borderColor: '#666666',
+                                                borderRadius: 4,
+                                                color: 'black',
+                                                paddingRight: 30, // to ensure the text is never behind the icon
+                                            },
+                                        }}
+                                        onValueChange={value => {
+                                            this.setState({ UserDistrictName: value });
+                                        }}
+                                        ref={el => {
+                                            this.inputRefs.favSport0 = el;
+                                          }}
+                                          disabled={false}
+                                    />
+                                </View>
                             </View>
                             <View style={styles.textinput}>
                                 <TextInput
@@ -188,15 +223,18 @@ class Registration extends Component {
 
                             <Text style={{ fontSize: 18, marginLeft: 10, marginVertical: 10 }}>Home Location</Text>
 
-                            <View style={{ height: 90 }}>
+                            <View style={{ height: 150,width:'100%' }}>
                                 <MapView
+                                    provider={PROVIDER_GOOGLE}
                                     style={styles.map}
                                     initialRegion={{
-                                        latitude: 37.78825,
-                                        longitude: -122.4324,
+                                        latitude: this.state.UserLat,
+                                        longitude: this.state.UserLng,
                                         latitudeDelta: 0.0922,
                                         longitudeDelta: 0.0421,
-                                    }}></MapView>
+                                    }}>
+                                        <Marker coordinate={{latitude:this.state.UserLat,longitude:this.state.UserLng}} />
+                                    </MapView>
                             </View>
                             <View style={{ flexDirection: 'row', marginLeft: 10, justifyContent: 'flex-start', alignItems: 'center' }}>
                                 <CheckBox
@@ -215,14 +253,14 @@ class Registration extends Component {
                             </View>
 
                             <View style={{ marginVertical: 30, alignItems: 'center' }}>
-                                <TouchableOpacity>
+                                <TouchableOpacity style={[{ ...IOSShadow, backgroundColor: COLORS.Primary, width: 135, paddingVertical: 12, borderRadius: 20, }]}>
                                     <Text style={styles.button}>Register</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
                     </ScrollView>
                 </KeyboardAvoidingView>
-            </SafeAreaView>
+            </View>
         )
     }
 }
@@ -240,18 +278,17 @@ const styles = StyleSheet.create({
     },
     textinput: {
         borderBottomColor: 'gray',
-        paddingVertical: 4,
+        paddingVertical: 5,
         borderBottomWidth: 1,
-        width: 'auto', marginHorizontal: 10
+        width: 'auto',
+        marginBottom: 15
     },
     textField: {
         fontSize: 18
     },
     button: {
-        textAlign: 'center', backgroundColor: COLORS.Primary,
-        width: 135,
-        paddingVertical: 12,
-        borderRadius: 20,
+        textAlign: 'center',
+
         fontSize: 15,
         color: '#FFFFFF',
         fontWeight: 'bold'

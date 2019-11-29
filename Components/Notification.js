@@ -14,12 +14,15 @@ class Notification extends Component {
             isRefreshing: false,
         }
     }
+    curProps = this.props
     componentDidMount() {
-        this.props.LoadingStatusChange(true);
-        this.fetchNotification();
+        this.curProps.navigation.addListener('didFocus',()=>{
+            this.curProps.LoadingStatusChange(true);
+            this.fetchNotification();
+        })
     }
     fetchNotification = async () => {
-        let { userData } = this.props.reducer;
+        let { userData } = this.curProps.reducer;
         await Axios.get(`${API_URL}notification.php?action=notification&UserId=${userData.UserId}`)
             .then((res1) => {
                 if (res1.data.success == 1) {
@@ -28,13 +31,13 @@ class Notification extends Component {
                 else {
                     Toast.show(res1.data.message, Toast.LONG)
                 }
-                this.props.LoadingStatusChange(false);
+                this.curProps.LoadingStatusChange(false);
                 this.setState({ isRefreshing: false });
             })
             .catch((error) => {
                 console.log('Category List Error: ', error);
                 this.setState({ isRefreshing: false });
-                this.props.LoadingStatusChange(false);
+                this.curProps.LoadingStatusChange(false);
             });
     }
     render() {

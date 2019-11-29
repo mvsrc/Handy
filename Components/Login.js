@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
-import {
-    SafeAreaView, View, Text,
+import {View, Text,
     Image, ScrollView, KeyboardAvoidingView, TextInput, TouchableOpacity,
-    StyleSheet, CheckBox, Keyboard, Platform
+    StyleSheet, Keyboard, Platform
 } from 'react-native';
 import { COLORS, API_URL } from '../Constants';
 import { connect } from 'react-redux';
-import { actionUserSignIn, loadingChange } from '../Actions';
+import { actionUserSignIn, loadingChange,showWelcomeMessageAction } from '../Actions';
 import axios from 'axios';
 import Toast from 'react-native-simple-toast';
 class Login extends Component {
@@ -36,6 +35,7 @@ class Login extends Component {
             Toast.show('Password should not be blank', Toast.SHORT);
             return false;
         }
+        Keyboard.dismiss();
         this.props.LoadingStatusChange(true);
         await axios.get(`${API_URL}login.php?action=login&UserEmail=${email}&UserPass=${password}&UserToken=ios`)
             .then(async res => {
@@ -47,8 +47,9 @@ class Login extends Component {
                         delete uD['message'];
                         this.props.LoginUserAction({...uD});
                         await AsyncStorage.multiSet([['isUserLoggedIn',"true"],["userData",JSON.stringify(uD)]]).then(()=>{
+                            this.props.ShowWelcomeMessageAction(true);
                             setTimeout(()=>{
-                                this.props.navigation.navigate('Home',{showWelcomeMsg:true});
+                                this.props.navigation.navigate('Home');
                             },100);
                             this.props.LoadingStatusChange(false);
                         });
@@ -73,8 +74,8 @@ class Login extends Component {
         let { navigation, reducer } = this.props;
         const behavior = (Platform.OS == 'ios') ? 'padding' : '';
         return (
-            <SafeAreaView style={styles.main}>
-                <KeyboardAvoidingView enabled behavior={behavior}>
+            <View style={styles.main}>
+                <KeyboardAvoidingView enabled behavior={behavior} style={{flex:1}}>
                     <ScrollView keyboardShouldPersistTaps="handled">
                         <View style={styles.logoimage}>
                             <Image source={require('../assets/handy-logo.png')} style={{ width: '35%', height: 140, borderRadius: 20 }} />
@@ -134,19 +135,18 @@ class Login extends Component {
                             </View>
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 10 }}>
                                 <Text style={{ fontSize: 17, textAlign: 'center' }}>Do not have account?</Text>
-                                <Text style={{ fontSize: 17, color: COLORS.Primary }}>Registe Here</Text>
+                                <TouchableOpacity onPress={()=>{this.props.navigation.navigate('Registration')}} style={{marginLeft:5}}><Text style={{ fontSize: 17, color: COLORS.Primary }}>Registe Here</Text></TouchableOpacity>
                             </View>
                         </View>
                     </ScrollView>
                 </KeyboardAvoidingView>
-            </SafeAreaView>
+            </View>
         )
     }
 }
 const styles = StyleSheet.create({
     main: {
         flex: 1,
-        marginHorizontal: 10
     },
     logoimage: {
         alignItems: 'center',
@@ -154,12 +154,14 @@ const styles = StyleSheet.create({
     },
     textcontainer: {
         marginTop: 30,
+        paddingHorizontal:15
     },
     textinput: {
         borderBottomColor: 'gray',
-        paddingVertical: 4,
+        paddingVertical: 5,
         borderBottomWidth: 1,
-        width: 'auto', marginHorizontal: 10
+        width: 'auto',
+        marginBottom:15
     },
     textField: {
         fontSize: 20
@@ -178,7 +180,8 @@ const mapStatetoProps = (state) => {
     return { reducer };
 }
 const mapDispatchToProps = dispatch => ({
-    LoginUserAction: async (userData) => await dispatch(actionUserSignIn(userData)),
+    LoginUserAction: (userData) => dispatch(actionUserSignIn(userData)),
     LoadingStatusChange: (loading) => dispatch(loadingChange(loading)),
+    ShowWelcomeMessageAction:(showWelcomeMessage)=>dispatch(showWelcomeMessageAction(showWelcomeMessage))
 });
 export default connect(mapStatetoProps, mapDispatchToProps)(Login);

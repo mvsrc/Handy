@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-const INITIAL_STATE = { loading: false, userData: null, error: null, authorized: false };
+const INITIAL_STATE = { loading: false, userData: null, error: null, authorized: false,showWelcomeMessage:false };
 const reducer = (state = INITIAL_STATE, action) => {
     switch (action.type) {
         case 'USER_SIGNIN':
@@ -12,6 +12,8 @@ const reducer = (state = INITIAL_STATE, action) => {
             return processUserSignOut(state, action);
         case 'UPDATE_PROFILE':
             return processUpdateProfile(state,action);
+        case 'SHOW_WELCOME_MESSAGE':
+            return processWelcomeMessage(state,action);
         default:
             return state
     }
@@ -52,4 +54,10 @@ processUpdateProfile = (state,action)=>{
         ...state,
         userData: action.userData,
     };
+}
+processWelcomeMessage = (state,action)=>{
+    return{
+        ...state,
+        showWelcomeMessage:action.showWelcomeMessage
+    }
 }

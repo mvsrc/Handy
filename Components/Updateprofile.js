@@ -2,12 +2,12 @@ import React, { Component } from 'react';
 import {
     Platform, View, Text,
     ScrollView, KeyboardAvoidingView, TextInput, TouchableOpacity,
-    StyleSheet, Keyboard, Picker
+    StyleSheet, Keyboard, Picker, ActionSheetIOS
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
-import { COLORS, API_URL } from '../Constants';
+import { COLORS, API_URL,IOSShadow } from '../Constants';
 import Toast from 'react-native-simple-toast';
-import MapView from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import Axios from 'axios';
 import { connect } from 'react-redux';
 import { loadingChange, updateProfileAction } from '../Actions';
@@ -17,10 +17,14 @@ class Updateprofile extends Component {
     constructor(props) {
         super(props);
         let { userData } = this.props.reducer;
+        let userLatLng = userData.UserLocation.split(',');
+        let districtList = [userData.UserDistrictName]
+        districtList.unshift('Cancel');
         this.state = {
             showTabs: true,
-            userData:{...userData},
+            userData: { ...userData, UserLat: userLatLng[0], UserLng: userLatLng[1] },
             district: [],
+            districtList
         }
     }
     componentDidMount() {
@@ -40,28 +44,39 @@ class Updateprofile extends Component {
     }
     _updateProfile() {
         this.props.LoadingStatusChange(true);
-        let {userData} = this.state;
-        Axios.post(`${API_URL}updateprofile.php?action=updateprofile`,{
+        let { userData } = this.state;
+        Axios.post(`${API_URL}updateprofile.php?action=updateprofile`, {
             ...userData
         })
-        .then(async res=>{
-            let {success,message} = res.data;
-            if(success == 1){
-                this.props.UpdateProfileData(userData);
-                Toast.show(message,Toast.SHORT);
-                await AsyncStorage.setItem("userData",JSON.stringify(userData)).then(()=>{
+            .then(async res => {
+                let { success, message } = res.data;
+                if (success == 1) {
+                    this.props.UpdateProfileData(userData);
+                    Toast.show(message, Toast.SHORT);
+                    await AsyncStorage.setItem("userData", JSON.stringify(userData)).then(() => {
+                        this.props.LoadingStatusChange(false);
+                    });
+                }
+                else {
+                    Toast.show(message, Toast.SHORT);
                     this.props.LoadingStatusChange(false);
-                });
-            }
-            else{
-                Toast.show(message,Toast.SHORT);
+                }
+            })
+            .catch(err => {
+                console.log('Update Profile Error', err);
                 this.props.LoadingStatusChange(false);
-            }
-        })
-        .catch(err=>{
-            console.log('Update Profile Error',err);
-            this.props.LoadingStatusChange(false);
-        })
+            })
+    }
+    pickerDistrictList = () => {
+        ActionSheetIOS.showActionSheetWithOptions({
+            options: this.state.districtList,
+            cancelButtonIndex: 0,
+        },
+            (buttonIndex) => {
+                if (buttonIndex != 0) {
+                    this.setState({ userData:{...this.state.userData,UserDistrictName: this.state.districtList[buttonIndex]} });
+                }
+            });
     }
     render() {
         let behavior = Platform.OS == 'ios' ? 'padding' : '';
@@ -70,7 +85,7 @@ class Updateprofile extends Component {
             <View style={{ flex: 1 }}>
                 <KeyboardAvoidingView enabled behavior={behavior} style={{ flex: 1 }}>
                     <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 10, paddingVertical: 10 }}>
-                        <TouchableOpacity onPress={() => {navigation.navigate('Changepassword') }} style={{ marginBottom: 20 }}>
+                        <TouchableOpacity onPress={() => { navigation.navigate('Changepassword') }} style={{ marginBottom: 20 }}>
                             <View style={{ flexDirection: 'row', justifyContent: "space-between", paddingHorizontal: 17, backgroundColor: COLORS.Primary, paddingVertical: 14 }}>
                                 <Text style={{ fontSize: 17, color: '#FFFFFF' }}>Change Password</Text>
                                 <Icon name='right' size={18} color='#FFFFFF' />
@@ -81,7 +96,7 @@ class Updateprofile extends Component {
                             <Text style={styles.inputtext}>First Name</Text>
                             <View style={styles.textinput}>
                                 <TextInput
-                                    onChangeText={(txt) => this.setState({ userData:{...this.state.userData,UserFName: txt} })}
+                                    onChangeText={(txt) => this.setState({ userData: { ...this.state.userData, UserFName: txt } })}
                                     onSubmitEditing={() => { this.UserLName.focus(); }}
                                     underlineColorAndroid="transparent"
                                     keyboardType="default"
@@ -96,7 +111,7 @@ class Updateprofile extends Component {
                             <Text style={styles.inputtext}>Last Name</Text>
                             <View style={styles.textinput}>
                                 <TextInput
-                                    onChangeText={(txt) => this.setState({ userData:{...this.state.userData,UserLName: txt} })}
+                                    onChangeText={(txt) => this.setState({ userData: { ...this.state.userData, UserLName: txt } })}
                                     onSubmitEditing={() => { this.UserPhone.focus(); }}
                                     underlineColorAndroid="transparent"
                                     keyboardType="default"
@@ -112,7 +127,7 @@ class Updateprofile extends Component {
                             <Text style={styles.inputtext}>E-mail</Text>
                             <View style={styles.textinput}>
                                 <TextInput
-                                    onChangeText={(txt) => this.setState({ userData:{...this.state.userData,UserPhone: txt} })}
+                                    onChangeText={(txt) => this.setState({ userData: { ...this.state.userData, UserPhone: txt } })}
                                     onSubmitEditing={() => { this.UserPhone.focus(); }}
                                     underlineColorAndroid="transparent"
                                     keyboardType="email-address"
@@ -129,7 +144,7 @@ class Updateprofile extends Component {
                             <Text style={styles.inputtext}>Mobile</Text>
                             <View style={styles.textinput}>
                                 <TextInput
-                                    onChangeText={(txt) => this.setState({ userData:{...this.state.userData,UserPhone: txt} })}
+                                    onChangeText={(txt) => this.setState({ userData: { ...this.state.userData, UserPhone: txt } })}
                                     onSubmitEditing={() => { this.UserHome.focus(); }}
                                     underlineColorAndroid="transparent"
                                     keyboardType="number-pad"
@@ -142,23 +157,14 @@ class Updateprofile extends Component {
                                 />
                             </View>
                             {/* Mobile Ends */}
-                            <View style={[styles.textinput, { marginVertical: 20 }]}>
-                                <Picker
-                                    mode="dropdown"
-                                    selectedValue={this.state.UserDistrictId}
-                                    style={{ width: '100%' }}
-                                    onValueChange={(itemValue, itemIndex) =>
-                                        this.setState({ userData:{...this.state.userData,UserDistrictId: itemValue}  })
-                                    } itemStyle={{ fontSize: 17 }}>
-                                    <Picker.Item label={this.state.userData.UserDistrictName} value={this.state.userData.UserDistrictId} />
-                                </Picker>
-
-                            </View>
+                            <TouchableOpacity style={[styles.textinput, { alignItems: 'center', marginTop: 15 }]} onPress={() => { this.pickerDistrictList() }}>
+                                <Text style={{ color: '#03163a', fontSize: 18 }}>{this.state.userData.UserDistrictName}</Text>
+                            </TouchableOpacity>
                             {/* District Ends */}
                             <Text style={styles.inputtext}>Apartment No/Home No</Text>
                             <View style={styles.textinput}>
                                 <TextInput
-                                    onChangeText={(txt) => this.setState({ userData:{...this.state.userData,UserHome: txt} })}
+                                    onChangeText={(txt) => this.setState({ userData: { ...this.state.userData, UserHome: txt } })}
                                     returnKeyType={"go"}
                                     onBlur={() => { Keyboard.dismiss() }}
                                     ref={(input) => { this.UserHome = input; }}
@@ -170,18 +176,25 @@ class Updateprofile extends Component {
                             </View>
                             {/* Home No Ends */}
                             <Text style={{ fontSize: 18, marginLeft: 10, marginVertical: 10, marginTop: 20 }}>Home Location</Text>
-                            <View style={{ height: 100 }}>
+                            <View style={{ height: 200 }}>
                                 <MapView
+                                    provider={PROVIDER_GOOGLE}
                                     style={styles.map}
                                     initialRegion={{
-                                        latitude: 37.78825,
-                                        longitude: -122.4324,
-                                        latitudeDelta: 0.0922,
-                                        longitudeDelta: 0.0421,
-                                    }}></MapView>
+                                        latitude: this.state.userData.UserLat,
+                                        longitude: this.state.userData.UserLng,
+                                        latitudeDelta: 0.015,
+                                        longitudeDelta: 0.0121,
+                                    }}>
+                                    {
+                                        <Marker
+                                            coordinate={{ latitude: this.state.userData.UserLat, longitude: this.state.userData.UserLng }}
+                                        />
+                                    }
+                                </MapView>
                             </View>
                             <View style={{ marginVertical: 30, alignItems: 'center' }}>
-                                <TouchableOpacity onPress={()=>{this._updateProfile();}} style={{ width: '80%', backgroundColor: COLORS.Primary, borderRadius: 30 }}>
+                                <TouchableOpacity onPress={() => { this._updateProfile(); }} style={{ width: '70%', backgroundColor: COLORS.Primary, borderRadius: 50, paddingVertical: 12, ...IOSShadow  }}>
                                     <Text style={styles.button}>UPDATE PROFILE</Text>
                                 </TouchableOpacity>
                             </View>
@@ -223,10 +236,7 @@ const styles = StyleSheet.create({
     },
     button: {
         textAlign: 'center',
-        backgroundColor: COLORS.Primary,
-        paddingVertical: 12,
-        borderRadius: 30,
-        fontSize: 20,
+        fontSize: 18,
         color: '#FFFFFF',
         fontWeight: 'bold'
     },
