@@ -11,6 +11,7 @@ import TabBar from './TabBar';
 import { loadingChange } from '../Actions';
 import axios from 'axios';
 import Toast from 'react-native-simple-toast';
+
 class Myplan extends Component {
     currentProps = this.props;
     constructor(props) {
@@ -62,7 +63,7 @@ class Myplan extends Component {
                             <Text style={{ textAlign: "center", marginVertical: 45, fontSize: 24, color: '#FFFFFF' }}>Subscription No: {this.state.SubscriptionCount}</Text>
                             <Text style={{ textAlign: 'right', fontSize: 15, color: '#FFFFFF', paddingRight: 20 }}>more Detail {<Icon name='right' size={15} color='#FFFFFF' />}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => { alert('vikas') }} style={[styles.subcontainer, { backgroundColor: '#4fd43d', alignItems: 'center', justifyContent: 'center' }]}>
+                        <TouchableOpacity onPress={() => {this.props.navigation.navigate('Plangaswaterservice')}} style={[styles.subcontainer, { backgroundColor: '#4fd43d', alignItems: 'center', justifyContent: 'center' }]}>
                             <Text style={{ fontSize: 24, color: '#FFFFFF' }}>Gas &amp; Water Services</Text>
                         </TouchableOpacity>
                         <View style={{ marginTop: 5, alignItems: 'center' }}>

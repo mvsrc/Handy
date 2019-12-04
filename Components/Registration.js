@@ -80,12 +80,15 @@ class Registration extends Component {
         this.props.LoadingStatusChange(true);
         this.districtdata();
     }
+    registerUser = ()=>{
+
+    }
     render() {
         return (
             <View style={styles.main}>
                 <KeyboardAvoidingView enabled={true} style={{flex:1}}>
-                    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 10, paddingVertical: 30,flex:1 }}>
-                        <Text style={{ color: COLORS.Primary, marginLeft: 10, fontSize: 22, fontWeight: 'bold' }}>Register Here</Text>
+                    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 15, paddingVertical: 30,flex:1 }}>
+                        <Text style={{ color: COLORS.Primary, fontSize: 22}}>Register Here</Text>
                         <View style={styles.textcontainer}>
                             <View style={styles.textinput}>
                                 <TextInput
@@ -120,7 +123,8 @@ class Registration extends Component {
                                     style={styles.textField}
                                 />
                             </View>
-                            <View style={styles.textinput}>
+                            <View style={[styles.textinput,{flexDirection:'row',justifyContent:'space-between',alignItems:'center',borderBottomWidth:0}]}>
+                                <Text style={{borderWidth:1,borderColor:'#000000',width:'11%',textAlign:'center'}}>+996</Text>
                                 <TextInput
 
                                     placeholder='Phone Number'
@@ -128,13 +132,13 @@ class Registration extends Component {
                                     onChangeText={(txt) => this.setState({ mob: txt })}
                                     onSubmitEditing={() => { this.email.focus(); }}
                                     underlineColorAndroid="transparent"
-                                    keyboardType="number-pad"
+                                    keyboardType="phone-pad"
                                     autoCapitalize='none'
                                     ref={(input) => { this.mob = input; }}
                                     blurOnSubmit={false}
                                     returnKeyType={"next"}
                                     value={this.state.mob}
-                                    style={styles.textField}
+                                    style={[styles.textField,{width:'85%',borderBottomColor:'#666666',borderBottomWidth:1}]}
                                 />
                             </View>
                             <View style={styles.textinput}>
@@ -160,8 +164,8 @@ class Registration extends Component {
                                     placeholder='Password(min 8 characters)'
                                     onChangeText={(txt) => this.setState({ password: txt })}
                                     placeholderTextColor='gray'
-                                    returnKeyType={"go"}
-                                    onBlur={() => { Keyboard.dismiss() }}
+                                    returnKeyType={"next"}
+                                    onSubmitEditing={() => { this.cmpassword.focus(); }}
                                     secureTextEntry={true}
                                     ref={(input) => { this.password = input; }}
                                     blurOnSubmit={false}
@@ -171,9 +175,23 @@ class Registration extends Component {
                                     style={styles.textField}
                                 />
                             </View>
-                            <View style={[styles.textinput, { width: '100%', flexDirection: 'row', justifyContent: 'space-between',alignItems:'center' }]}>
-                                <Text style={{ fontSize: 17, width: '30%' }}>Select District</Text>
-                                <View style={{width:'70%'}}>
+                            <View style={styles.textinput}>
+                                <TextInput
+                                    placeholder='Confirm Password'
+                                    onChangeText={(txt) => this.setState({ cmpassword: txt })}
+                                    placeholderTextColor='gray'
+                                    returnKeyType={"go"}
+                                    onSubmitEditing={() => { this.inputRefs.favSport0.togglePicker();}}
+                                    secureTextEntry={true}
+                                    ref={(input) => { this.cmpassword = input; }}
+                                    blurOnSubmit={false}
+                                    maxLength={8}
+                                    underlineColorAndroid="transparent"
+                                    value={this.state.cmpassword}
+                                    style={styles.textField}
+                                />
+                            </View>
+                            <View style={[styles.textinput, { borderBottomWidth:0 }]}>
                                     <RNPickerSelect
                                         placeholder={{
                                             label: 'Select district',
@@ -184,13 +202,11 @@ class Registration extends Component {
                                         value={this.state.UserDistrictName}
                                         style={{
                                             inputIOS: {
-                                                fontSize: 16,
-                                                paddingVertical: 12,
-                                                paddingHorizontal: 10,
-                                                borderWidth: 1,
+                                                fontSize: 15,
+                                                paddingVertical: 5,
+                                                borderBottomWidth: 1,
                                                 borderColor: '#666666',
-                                                borderRadius: 4,
-                                                color: 'black',
+                                                color: '#000000',
                                                 paddingRight: 30, // to ensure the text is never behind the icon
                                             },
                                         }}
@@ -202,7 +218,6 @@ class Registration extends Component {
                                           }}
                                           disabled={false}
                                     />
-                                </View>
                             </View>
                             <View style={styles.textinput}>
                                 <TextInput
@@ -211,7 +226,6 @@ class Registration extends Component {
                                     placeholderTextColor='gray'
                                     returnKeyType={"go"}
                                     onBlur={() => { Keyboard.dismiss() }}
-                                    secureTextEntry={true}
                                     ref={(input) => { this.Homeno = input; }}
                                     blurOnSubmit={false}
 
@@ -253,7 +267,9 @@ class Registration extends Component {
                             </View>
 
                             <View style={{ marginVertical: 30, alignItems: 'center' }}>
-                                <TouchableOpacity style={[{ ...IOSShadow, backgroundColor: COLORS.Primary, width: 135, paddingVertical: 12, borderRadius: 20, }]}>
+                                <TouchableOpacity onPress={()=>{
+                                    this.registerUser();
+                                }} style={[{ ...IOSShadow, backgroundColor: COLORS.Primary, width: 135, paddingVertical: 12, borderRadius: 20, }]}>
                                     <Text style={styles.button}>Register</Text>
                                 </TouchableOpacity>
                             </View>
@@ -278,13 +294,13 @@ const styles = StyleSheet.create({
     },
     textinput: {
         borderBottomColor: 'gray',
-        paddingVertical: 5,
+        paddingVertical: 3,
         borderBottomWidth: 1,
         width: 'auto',
-        marginBottom: 15
+        marginBottom: 8
     },
     textField: {
-        fontSize: 18
+        fontSize: 15
     },
     button: {
         textAlign: 'center',

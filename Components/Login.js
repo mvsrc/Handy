@@ -135,7 +135,7 @@ class Login extends Component {
                             </View>
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 10 }}>
                                 <Text style={{ fontSize: 17, textAlign: 'center' }}>Do not have account?</Text>
-                                <TouchableOpacity onPress={()=>{this.props.navigation.navigate('Registration')}} style={{marginLeft:5}}><Text style={{ fontSize: 17, color: COLORS.Primary }}>Registe Here</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={()=>{this.props.navigation.navigate('PlanService');}} style={{marginLeft:5}}><Text style={{ fontSize: 17, color: COLORS.Primary }}>Registe Here</Text></TouchableOpacity>
                             </View>
                         </View>
                     </ScrollView>

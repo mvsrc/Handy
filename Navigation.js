@@ -11,6 +11,7 @@ import Splash from './Components/Splash';
 /**** Drawer Screens *****/
 import Home from './Components/Home';
 import Myplan from "./Components/Myplan";
+import Feedback from "./Components/Feedback";
 import Orderdetails from "./Components/Orderdetails";
 import Message from "./Components/Message";
 import Notification from "./Components/Notification";
@@ -33,6 +34,8 @@ import ForgotPassword from './Components/ForgotPassword';
 /**** Plans Screen ****/
 import PlanHistory from "./Components/Planhistory";
 import PlanService from "./Components/Planservice";
+import Plangaswaterservice from './Components/Plangaswaterservice';
+import Paycheckout from './Components/Paycheckout';
 const drawerNavigator = createDrawerNavigator({
     Home: Home,
     ['My Plan']: {
@@ -45,7 +48,7 @@ const drawerNavigator = createDrawerNavigator({
         screen: Notification,
     },
     Feedback: {
-        screen: Home,
+        screen:Feedback,
     },
     ['UpdateProfile']: {
         screen: Updateprofile,
@@ -132,7 +135,33 @@ const AppNavigator = createStackNavigator({
     },
     Logout: { screen: Logout },
     Registration: Registration,
-    ForgotPassword: ForgotPassword
+    ForgotPassword: ForgotPassword,
+    Plangaswaterservice:{
+        screen:Plangaswaterservice,
+        navigationOptions: ({ navigation }) => {
+            return {
+                title:'My plan',
+                headerLeft:()=>(
+                    <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
+                        <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />
+                    </TouchableOpacity>
+                )
+            }
+        }
+    },
+    Paycheckout:{
+        screen:Paycheckout,
+        navigationOptions: ({ navigation }) => {
+            return {
+                title:'Checkout',
+                headerLeft:()=>(
+                    <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
+                        <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />
+                    </TouchableOpacity>
+                )
+            }
+        }
+    },
 }, {
     mode: 'card',
     defaultNavigationOptions: ({ navigation }) => ({

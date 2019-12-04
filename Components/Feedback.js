@@ -2,15 +2,15 @@ import React,{Component} from 'react';
 import { SafeAreaView, View, Text, TouchableNativeFeedback, 
     Image, ScrollView, Dimensions,KeyboardAvoidingView,
     TextInput,TouchableOpacity,Picker,FlatList,
-    BackHandler,StyleSheet,StatusBar,CheckBox,Keyboard } from 'react-native';
+    BackHandler,StyleSheet,StatusBar,CheckBox,Keyboard} from 'react-native';
 
 import { COLORS, API_URL } from '../Constants';
 import {Loader} from './Loader'
 import Icon from 'react-native-vector-icons/AntDesign';
 import Toast from 'react-native-simple-toast';
+import Axios from 'axios';
+import AsyncStorage from '@react-native-community/async-storage'
 
-
- 
 export default class Feedback extends Component{
 
     constructor(props){
@@ -36,7 +36,7 @@ export default class Feedback extends Component{
                         },
              
                        
-                    ], selectedItem: '' 
+                    ], selectedItem: '' ,comtxt:''
                 }
                 }
 
@@ -49,8 +49,29 @@ export default class Feedback extends Component{
                             this.setState({ selectedItem: item.label });
                         }
                     });
+                  
                 }       
                 
+           
+
+            feedbackdata = async() => {
+                    const data = await AsyncStorage.getItem('userData');
+                    let t=JSON.parse(data)
+                
+                    Axios.post(API_URL + 'feedcom.php?action=feedcom&FeecomText='+this.state.comtxt+'&UserId='+t.UserId+'&FeecomType='+this.state.selectedItem)
+                        .then(res => {
+                           alert(JSON.stringify(res))
+                            this.setState({ district: res.data.district });
+                           })
+                        .catch(err => {
+                            this.props.LoadingStatusChange(false);
+                            console.log('District Error', err);
+                        })
+            
+                }
+                
+                     
+
      
      static navigationOptions = {
   
@@ -92,7 +113,7 @@ export default class Feedback extends Component{
         return(
             <View style={styles.main}>
                  <KeyboardAvoidingView enabled>
-                       <ScrollView keyboardShouldPersistTaps="handled">
+                       <ScrollView keyboardShouldPersistTaps="Never">
                          <View style={styles.container}> 
                         
                         {/* {
@@ -143,12 +164,13 @@ export default class Feedback extends Component{
                               numberOfLines={5}
                              multiline={true}
                              autoFocus={true}
+                             onChangeText={(txt)=>{this.setState({comtxt:txt})}}
                              underlineColorAndroid={COLORS.Primary}
-                             style={{borderWidth:0.6,marginTop:20,marginHorizontal:13,fontSize:17}}
+                             style={{borderWidth:0.3,marginTop:20,marginHorizontal:13,fontSize:17,paddingLeft:10,height:70}}
                             />
                            
                        <View style={{marginVertical:30,alignItems:'center'}}>
-                              <TouchableOpacity>
+                              <TouchableOpacity onPress={()=>{this.feedbackdata()}}>
                                   <Text style={styles.button}>Submit</Text>
                                </TouchableOpacity>
                          </View>

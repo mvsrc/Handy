@@ -3,7 +3,7 @@ import {
     SafeAreaView, View, Text, TouchableOpacity,
     Image, ScrollView, Dimensions, StyleSheet, Modal
 } from 'react-native';
-import { COLORS } from '../Constants';
+import { COLORS,API_URL } from '../Constants';
 import { connect } from 'react-redux';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Carousel from 'react-native-banner-carousel';
@@ -21,27 +21,47 @@ class Home extends Component {
         super(props);
         let { navigation } = this.props;
         this.state = {
+            banners : []
         }
+    }
+    componentDidMount(){
+        this.props.LoadingStatusChange(true);
+        Axios.get(`${API_URL}home.php?action=home`)
+        .then(res=>{
+            let banners = [];
+            for(var i in res.data.banners){
+                banners.push(i.BannerImg);
+            }
+            this.setState({banners})
+            this.props.LoadingStatusChange(false);
+        })
+        .catch(err=>{
+            console.log('Home Error',err);
+            this.props.LoadingStatusChange(false);
+        })
     }
     render() {
         let { userData, authorized,showWelcomeMessage } = this.props.reducer;
         return (
             <View style={{ flex: 1 }}>
                 <ScrollView>
-                    <Carousel
-                        autoplay
-                        autoplayTimeout={5000}
-                        loop
-                        index={0}
-                        pageSize={BannerWidth}
-                        showsPageIndicator={false}
-                    >
-                        {images.map((image, index) => (
-                            <View key={index}>
-                                <Image style={{ width: BannerWidth, height: 200 }} source={{ uri: image }} />
-                            </View>
-                        ))}
-                    </Carousel>
+                    {
+                        this.state.banners.length > 0 && 
+                        <Carousel
+                            autoplay
+                            autoplayTimeout={5000}
+                            loop
+                            index={0}
+                            pageSize={BannerWidth}
+                            showsPageIndicator={false}
+                        >
+                            {images.map((image, index) => (
+                                <View key={index}>
+                                    <Image style={{ width: BannerWidth, height: 200 }} source={{ uri: image }} />
+                                </View>
+                            ))}
+                        </Carousel>
+                    }
                     <View style={{ paddingHorizontal: 15, marginVertical: 15 }}>
                         <Text style={{ color: COLORS.Primary, fontSize: 20, textAlign: 'center', fontWeight: 'bold' }}>Services</Text>
                         <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 15 }}>
