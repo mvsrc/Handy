@@ -5,7 +5,7 @@ import {
     StyleSheet, Keyboard, Picker, ActionSheetIOS
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
-import { COLORS, API_URL,IOSShadow } from '../Constants';
+import { COLORS, API_URL, IOSShadow } from '../Constants';
 import Toast from 'react-native-simple-toast';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import Axios from 'axios';
@@ -13,13 +13,13 @@ import { connect } from 'react-redux';
 import { loadingChange, updateProfileAction } from '../Actions';
 import TabBar from './TabBar';
 import Icon from 'react-native-vector-icons/AntDesign';
+import RNPickerSelect from 'react-native-picker-select';
 class Updateprofile extends Component {
     constructor(props) {
         super(props);
         let { userData } = this.props.reducer;
         let userLatLng = userData.UserLocation.split(',');
-        let districtList = [userData.UserDistrictName]
-        districtList.unshift('Cancel');
+        let districtList = [{label:userData.UserDistrictName,value:userData.UserDistrictId}];
         this.state = {
             showTabs: true,
             userData: { ...userData, UserLat: userLatLng[0], UserLng: userLatLng[1] },
@@ -66,17 +66,6 @@ class Updateprofile extends Component {
                 console.log('Update Profile Error', err);
                 this.props.LoadingStatusChange(false);
             })
-    }
-    pickerDistrictList = () => {
-        ActionSheetIOS.showActionSheetWithOptions({
-            options: this.state.districtList,
-            cancelButtonIndex: 0,
-        },
-            (buttonIndex) => {
-                if (buttonIndex != 0) {
-                    this.setState({ userData:{...this.state.userData,UserDistrictName: this.state.districtList[buttonIndex]} });
-                }
-            });
     }
     render() {
         let behavior = Platform.OS == 'ios' ? 'padding' : '';
@@ -157,9 +146,34 @@ class Updateprofile extends Component {
                                 />
                             </View>
                             {/* Mobile Ends */}
-                            <TouchableOpacity style={[styles.textinput, { alignItems: 'center', marginTop: 15 }]} onPress={() => { this.pickerDistrictList() }}>
+                            <RNPickerSelect
+                                placeholder={{
+                                    label: 'Select district',
+                                    value: null,
+                                    color: COLORS.Primary,
+                                }}
+                                items={this.state.districtList}
+                                value={this.state.userData.UserDistrictId}
+                                style={{
+                                    inputIOS: {
+                                        marginVertical:15,
+                                        fontSize: 15,
+                                        paddingVertical: 5,
+                                        borderBottomWidth: 1,
+                                        borderColor: '#666666',
+                                        color: '#000000',
+                                        paddingRight: 30, // to ensure the text is never behind the icon
+                                        ...styles.textinput
+                                    },
+                                }}
+                                onValueChange={value => {
+                                    this.setState({ userData: { ...this.state.userData, UserDistrictId: value} });
+                                }}
+                                disabled={false}
+                            />
+                            {/* <TouchableOpacity style={[styles.textinput, { alignItems: 'center', marginTop: 15 }]} onPress={() => { this.pickerDistrictList() }}>
                                 <Text style={{ color: '#03163a', fontSize: 18 }}>{this.state.userData.UserDistrictName}</Text>
-                            </TouchableOpacity>
+                            </TouchableOpacity> */}
                             {/* District Ends */}
                             <Text style={styles.inputtext}>Apartment No/Home No</Text>
                             <View style={styles.textinput}>
@@ -176,9 +190,13 @@ class Updateprofile extends Component {
                             </View>
                             {/* Home No Ends */}
                             <Text style={{ fontSize: 18, marginLeft: 10, marginVertical: 10, marginTop: 20 }}>Home Location</Text>
-                            <View style={{ height: 200 }}>
+                            <View style={{ height: 250 }}>
                                 <MapView
-                                    provider={PROVIDER_GOOGLE}
+                                    loadingEnabled={true}
+                                    userLocationAnnotationTitle="Your Location"
+                                    showsMyLocationButton={true}
+                                    paddingAdjustmentBehavior="automatic"
+                                    showsUserLocation={true}
                                     style={styles.map}
                                     initialRegion={{
                                         latitude: this.state.userData.UserLat,
@@ -188,13 +206,13 @@ class Updateprofile extends Component {
                                     }}>
                                     {
                                         <Marker
-                                            coordinate={{ latitude: this.state.userData.UserLat, longitude: this.state.userData.UserLng }}
+                                            coordinate={{ latitude: this.state.userData.UserLat, longitude: this.state.userData.UserLng }} draggable={true} pinColor={COLORS.Primary}
                                         />
                                     }
                                 </MapView>
                             </View>
                             <View style={{ marginVertical: 30, alignItems: 'center' }}>
-                                <TouchableOpacity onPress={() => { this._updateProfile(); }} style={{ width: '70%', backgroundColor: COLORS.Primary, borderRadius: 50, paddingVertical: 12, ...IOSShadow  }}>
+                                <TouchableOpacity onPress={() => { this._updateProfile(); }} style={{ width: '70%', backgroundColor: COLORS.Primary, borderRadius: 50, paddingVertical: 12, ...IOSShadow }}>
                                     <Text style={styles.button}>UPDATE PROFILE</Text>
                                 </TouchableOpacity>
                             </View>

@@ -2,23 +2,24 @@ import React, { Component } from 'react';
 import {
     View, Text,
     ScrollView, KeyboardAvoidingView, TextInput, TouchableOpacity,
-    StyleSheet, Keyboard, Picker
+    StyleSheet, Keyboard
 } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 import { COLORS, API_URL, IOSShadow } from '../Constants';
 import RNPickerSelect from 'react-native-picker-select';
 import Toast from 'react-native-simple-toast';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import CheckBox from 'react-native-check-box';
 import Axios from 'axios';
 import { connect } from 'react-redux';
-import { loadingChange } from '../Actions';
+import { actionUserSignIn, loadingChange } from '../Actions';
 import Geolocation from 'react-native-geolocation-service';
 class Registration extends Component {
     constructor(props) {
         super(props);
         this.inputRefs = {
             favSport0: null,
-          };
+        };
         this.state = {
             name: '',
             lname: '',
@@ -27,32 +28,24 @@ class Registration extends Component {
             password: '',
             cmpassword: '',
             district: [],
+            UserDistrictName:'',
             Homeno: '',
-            ATC: false,
-            UserLat:0,
-            UserLng:0
+            ATC: true,
+            UserLat: 'null',
+            UserLng: 'null',
+            subscription:this.props.navigation.getParam('subscription'),
+            hasGarbage:this.props.navigation.getParam('hasGarbage'),
         }
     }
     static navigationOptions = {
-        title: 'Registration',
-        headerStyle: {
-            backgroundColor: COLORS.Primary,
-        },
-        headerTintColor: '#FFFFFF',
-        headerTitleStyle: {
-            fontWeight: 'bold',
-            fontSize: 18,
-            marginLeft: 50,
-
-        },
+        title: 'Registration'
     };
     districtdata = () => {
         Axios.get(API_URL + 'district.php?action=district')
             .then(res => {
-                console.log(res.data.district);
                 let districtList = [];
-                res.data.district.map((item,index)=>{
-                    districtList.push({label:item.DistrictName,value:item.DistrictId});
+                res.data.district.map((item, index) => {
+                    districtList.push({ label: item.DistrictName, value: item.DistrictId });
                 })
                 this.setState({ district: districtList }, () => {
                     this.props.LoadingStatusChange(false);
@@ -66,29 +59,140 @@ class Registration extends Component {
 
     }
     componentDidMount() {
+        this.props.LoadingStatusChange(true);
         Geolocation.getCurrentPosition(
             (position) => {
-                let {latitude,longitude} = position.coords;
-                this.setState({UserLat:latitude,UserLng:longitude});
+                let { latitude, longitude } = position.coords;
+                this.setState({ UserLat: latitude, UserLng: longitude },()=>{
+                    this.districtdata();
+                });
+                
             },
             (error) => {
                 // See error code charts below.
                 console.log(error.code, error.message);
+                Toast.show(error.message,Toast.SHORT);
+                this.props.LoadingStatusChange(false);
             },
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+            { enableHighAccuracy: true }
         );
-        this.props.LoadingStatusChange(true);
-        this.districtdata();
+        
     }
-    registerUser = ()=>{
-
+    registerUser = async () => {
+        let {name,lname,mob,email,password,cmpassword,UserDistrictName,Homeno,ATC,UserLat,UserLng,subscription,hasGarbage} = this.state;
+        let subDuration = subscription.SubDuration.split(' ');
+        let subDurationInteger = parseInt(subDuration[0]);
+        let subDurationMonth = subDuration[1].toLowerCase();
+        let todayDate = new Date();
+        let StartDateString = new Date();
+        let extendsMonth = todayDate.getFullYear();
+        if(subDurationMonth === "month"){
+            extendsMonth = todayDate.getMonth()
+        }
+        let endDateString = new Date(todayDate.setMonth(extendsMonth+subDurationInteger));
+        let StartDay = (StartDateString.getDate() < 10)?'0'+StartDateString.getDate():StartDateString.getDate();
+        let StartMonth = (StartDateString.getMonth()+1 < 10)?'0'+(StartDateString.getMonth()+1):StartDateString.getMonth()+1;
+        let StartDate = StartDay+'-'+StartMonth+'-'+StartDateString.getFullYear();
+        //End Date
+        let EndDay = (endDateString.getDate() < 10)?'0'+endDateString.getDate():endDateString.getDate();
+        let EndMonth = (endDateString.getMonth()+1 < 10)?'0'+(endDateString.getMonth()+1):endDateString.getMonth()+1;
+        let EndDate = EndDay+'-'+EndMonth+'-'+endDateString.getFullYear();
+        if (name == '') {
+            Toast.show('Name should not be blank', Toast.SHORT);
+            return false;
+        }
+        if (lname == '') {
+            Toast.show('Last Name should not be blank', Toast.SHORT);
+            return false;
+        }
+        if (mob == '') {
+            Toast.show('Mobile should not be blank', Toast.SHORT);
+            return false;
+        }
+        if (email == '') {
+            Toast.show('Email should not be blank', Toast.SHORT);
+            return false;
+        }
+        if (password == '') {
+            Toast.show('Password should not be blank', Toast.SHORT);
+            return false;
+        }
+        if (cmpassword == '') {
+            Toast.show('Confirm Password should not be blank', Toast.SHORT);
+            return false;
+        }
+        if (password != cmpassword) {
+            Toast.show('Password not matched', Toast.SHORT);
+            return false;
+        }
+        if (UserDistrictName == '') {
+            Toast.show('User district should not be blank', Toast.SHORT);
+            return false;
+        }
+        if (Homeno == '') {
+            Toast.show('Apartment/Home should not be blank', Toast.SHORT);
+            return false;
+        }
+        if (ATC == false) {
+            Toast.show('Please accept the Terms & Conditions', Toast.SHORT);
+            return false;
+        }
+        this.props.LoadingStatusChange(true);
+        let urlBuild =  `${API_URL}registration.php?action=registration&UserFName=${name}&UserLName=${lname}&UserEmail=${email}&UserPhone=${mob}&UserPass=${password}&UserDistrict=${UserDistrictName}&UserHome=${Homeno}&UserLocation=${UserLat},${UserLng}`;
+        console.log(urlBuild);
+        await Axios.get(urlBuild)
+        .then(async res=>{
+            let uD = res.data;
+            if (uD.success == 1) {
+                try{
+                    Toast.show(uD.message, Toast.SHORT);
+                    delete uD['success'];
+                    delete uD['message'];
+                    uD['UserType'] = 'user';
+                    this.props.LoginUserAction({...uD});
+                    await AsyncStorage.multiSet([['isUserLoggedIn',"true"],["userData",JSON.stringify(uD)]]).then( async ()=>{
+                        let subsUrlBuild = `${API_URL}getsubscription.php?action=getsubscription&SubscriptionPlanId=${subscription.SubId}&UserId=${uD.UserId}&SubscriptionAmount=${subscription.SubPrice}&GarbageCan=${hasGarbage}&SubscriptionStartDate=${StartDate}&SubscriptionEndDate=${EndDate}`;
+                        console.log(subsUrlBuild);
+                        await Axios.get(subsUrlBuild)
+                        .then(res=>{
+                            if(res.data.success == 1){
+                                setTimeout(()=>{
+                                    this.props.navigation.navigate('Home');
+                                },100);
+                            }
+                            else{
+                                setTimeout(()=>{Toast.show(res.data.message, Toast.SHORT);},300);
+                            }
+                            this.props.LoadingStatusChange(false);
+                        })
+                        .catch(err=>{
+                            this.props.LoadingStatusChange(false);
+                            console.log('Subscritption Registration Error ',err);
+                        });
+                    });
+                }
+                catch(e){
+                    console.log('Asyncstorage Reducer Saving Time',e);
+                    this.props.LoadingStatusChange(false);
+                    setTimeout(()=>{Toast.show("Asyncstorage Reducer Saving Time", Toast.SHORT);},300);
+                }
+            }
+            else{
+                this.props.LoadingStatusChange(false);
+                setTimeout(()=>{Toast.show(uD.message, Toast.SHORT);},300);
+            }
+        })
+        .catch(err=>{
+            console.log('Registration Error ',err);
+            this.props.LoadingStatusChange(false);
+        })
     }
     render() {
         return (
             <View style={styles.main}>
-                <KeyboardAvoidingView enabled={true} style={{flex:1}}>
-                    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 15, paddingVertical: 30,flex:1 }}>
-                        <Text style={{ color: COLORS.Primary, fontSize: 22}}>Register Here</Text>
+                <KeyboardAvoidingView enabled={true} style={{ flex: 1 }} behavior="padding">
+                    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 15, paddingVertical: 30 }}>
+                        <Text style={{ color: COLORS.Primary, fontSize: 22 }}>Register Here</Text>
                         <View style={styles.textcontainer}>
                             <View style={styles.textinput}>
                                 <TextInput
@@ -123,8 +227,8 @@ class Registration extends Component {
                                     style={styles.textField}
                                 />
                             </View>
-                            <View style={[styles.textinput,{flexDirection:'row',justifyContent:'space-between',alignItems:'center',borderBottomWidth:0}]}>
-                                <Text style={{borderWidth:1,borderColor:'#000000',width:'11%',textAlign:'center'}}>+996</Text>
+                            <View style={[styles.textinput, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 0 }]}>
+                                <Text style={{ borderWidth: 1, borderColor: '#000000', width: '11%', textAlign: 'center' }}>+996</Text>
                                 <TextInput
 
                                     placeholder='Phone Number'
@@ -138,7 +242,7 @@ class Registration extends Component {
                                     blurOnSubmit={false}
                                     returnKeyType={"next"}
                                     value={this.state.mob}
-                                    style={[styles.textField,{width:'85%',borderBottomColor:'#666666',borderBottomWidth:1}]}
+                                    style={[styles.textField, { width: '85%', borderBottomColor: '#666666', borderBottomWidth: 1 }]}
                                 />
                             </View>
                             <View style={styles.textinput}>
@@ -181,7 +285,7 @@ class Registration extends Component {
                                     onChangeText={(txt) => this.setState({ cmpassword: txt })}
                                     placeholderTextColor='gray'
                                     returnKeyType={"go"}
-                                    onSubmitEditing={() => { this.inputRefs.favSport0.togglePicker();}}
+                                    onSubmitEditing={() => { this.inputRefs.favSport0.togglePicker(); }}
                                     secureTextEntry={true}
                                     ref={(input) => { this.cmpassword = input; }}
                                     blurOnSubmit={false}
@@ -191,33 +295,33 @@ class Registration extends Component {
                                     style={styles.textField}
                                 />
                             </View>
-                            <View style={[styles.textinput, { borderBottomWidth:0 }]}>
-                                    <RNPickerSelect
-                                        placeholder={{
-                                            label: 'Select district',
-                                            value: null,
-                                            color: COLORS.Primary,
-                                        }}
-                                        items={this.state.district}
-                                        value={this.state.UserDistrictName}
-                                        style={{
-                                            inputIOS: {
-                                                fontSize: 15,
-                                                paddingVertical: 5,
-                                                borderBottomWidth: 1,
-                                                borderColor: '#666666',
-                                                color: '#000000',
-                                                paddingRight: 30, // to ensure the text is never behind the icon
-                                            },
-                                        }}
-                                        onValueChange={value => {
-                                            this.setState({ UserDistrictName: value });
-                                        }}
-                                        ref={el => {
-                                            this.inputRefs.favSport0 = el;
-                                          }}
-                                          disabled={false}
-                                    />
+                            <View style={[styles.textinput, { borderBottomWidth: 0 }]}>
+                                <RNPickerSelect
+                                    placeholder={{
+                                        label: 'Select district',
+                                        value: null,
+                                        color: COLORS.Primary,
+                                    }}
+                                    items={this.state.district}
+                                    value={this.state.UserDistrictName}
+                                    style={{
+                                        inputIOS: {
+                                            fontSize: 15,
+                                            paddingVertical: 5,
+                                            borderBottomWidth: 1,
+                                            borderColor: '#666666',
+                                            color: '#000000',
+                                            paddingRight: 30, // to ensure the text is never behind the icon
+                                        },
+                                    }}
+                                    onValueChange={value => {
+                                        this.setState({ UserDistrictName: value });
+                                    }}
+                                    ref={el => {
+                                        this.inputRefs.favSport0 = el;
+                                    }}
+                                    disabled={false}
+                                />
                             </View>
                             <View style={styles.textinput}>
                                 <TextInput
@@ -235,24 +339,32 @@ class Registration extends Component {
                                 />
                             </View>
 
-                            <Text style={{ fontSize: 18, marginLeft: 10, marginVertical: 10 }}>Home Location</Text>
+                            <Text style={{ fontSize: 15, marginVertical: 10, color: 'gray' }}>Home Location</Text>
 
-                            <View style={{ height: 150,width:'100%' }}>
-                                <MapView
-                                    provider={PROVIDER_GOOGLE}
-                                    style={styles.map}
-                                    initialRegion={{
-                                        latitude: this.state.UserLat,
-                                        longitude: this.state.UserLng,
-                                        latitudeDelta: 0.0922,
-                                        longitudeDelta: 0.0421,
-                                    }}>
-                                        <Marker coordinate={{latitude:this.state.UserLat,longitude:this.state.UserLng}} />
+                            <View style={{ height: 250, width: '100%' }}>
+                                {
+                                    this.state.UserLat != 'null' &&
+                                    <MapView
+                                        loadingEnabled={true}
+                                        userLocationAnnotationTitle="Your Location"
+                                        showsMyLocationButton={true}
+                                        paddingAdjustmentBehavior="automatic"
+                                        //provider={PROVIDER_GOOGLE}
+                                        showsUserLocation={true}
+                                        style={styles.map}
+                                        region={{
+                                            latitude: this.state.UserLat,
+                                            longitude: this.state.UserLng,
+                                            latitudeDelta: 0.0922,
+                                            longitudeDelta: 0.0421,
+                                        }}>
+                                        <Marker coordinate={{ latitude: this.state.UserLat, longitude: this.state.UserLng }} draggable={true} pinColor={COLORS.Primary}/>
                                     </MapView>
+                                }
                             </View>
-                            <View style={{ flexDirection: 'row', marginLeft: 10, justifyContent: 'flex-start', alignItems: 'center' }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
                                 <CheckBox
-                                    style={{ padding: 10 }}
+                                    style={{ padding: 10, paddingLeft: 0, }}
                                     onClick={() => {
                                         this.setState({
                                             ATC: !this.state.ATC
@@ -262,12 +374,12 @@ class Registration extends Component {
                                     checkBoxColor={COLORS.Primary}
                                     checkedCheckBoxColor={COLORS.Primary}
                                 />
-                                <Text style={{ fontSize: 19 }}>Accept</Text>
-                                <Text style={{ fontSize: 19, color: COLORS.Primary, marginLeft: 5 }}>Terms Conditions</Text>
+                                <Text style={{ fontSize: 17 }}>Accept</Text>
+                                <Text style={{ fontSize: 17, color: COLORS.Primary, marginLeft: 5 }}>Terms Conditions</Text>
                             </View>
 
                             <View style={{ marginVertical: 30, alignItems: 'center' }}>
-                                <TouchableOpacity onPress={()=>{
+                                <TouchableOpacity onPress={() => {
                                     this.registerUser();
                                 }} style={[{ ...IOSShadow, backgroundColor: COLORS.Primary, width: 135, paddingVertical: 12, borderRadius: 20, }]}>
                                     <Text style={styles.button}>Register</Text>
@@ -323,6 +435,7 @@ const mapStateToProps = (state) => {
     return { reducer }
 };
 const mapDispatchToProps = dispatch => ({
+    LoginUserAction: (userData) => dispatch(actionUserSignIn(userData)),
     LoadingStatusChange: (loading) => dispatch(loadingChange(loading)),
 });
 export default connect(mapStateToProps, mapDispatchToProps)(Registration);

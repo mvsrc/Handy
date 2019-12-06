@@ -36,6 +36,8 @@ import PlanHistory from "./Components/Planhistory";
 import PlanService from "./Components/Planservice";
 import Plangaswaterservice from './Components/Plangaswaterservice';
 import Paycheckout from './Components/Paycheckout';
+
+import Productdetaile from './Components/Productdetaile';
 const drawerNavigator = createDrawerNavigator({
     Home: Home,
     ['My Plan']: {
@@ -162,6 +164,19 @@ const AppNavigator = createStackNavigator({
             }
         }
     },
+    Productdetaile:{
+        screen:Productdetaile,
+        navigationOptions: ({ navigation }) => {
+            return {
+                title:'Product Details',
+                headerLeft:()=>(
+                    <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
+                        <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />
+                    </TouchableOpacity>
+                )
+            }
+        }
+    }
 }, {
     mode: 'card',
     defaultNavigationOptions: ({ navigation }) => ({

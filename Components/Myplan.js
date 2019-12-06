@@ -23,7 +23,7 @@ class Myplan extends Component {
         }
     }
     componentDidMount() {
-        this.listner = this.props.navigation.addListener('didFocus', () => {
+        this.listner = this.props.navigation.addListener('willFocus', () => {
             this.fetchPlan();
         });
     }
@@ -78,7 +78,7 @@ class Myplan extends Component {
                         </View>
                     </View>
                 </ScrollView>
-                <TabBar />
+                <TabBar navigation={this.props.navigation} />
             </View>
         )
     }

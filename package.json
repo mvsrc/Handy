@@ -11,11 +11,15 @@
   },
   "dependencies": {
     "@react-native-community/async-storage": "^1.6.3",
+    "@react-native-firebase/app": "^6.1.0",
+    "@react-native-firebase/messaging": "^6.1.0",
     "axios": "^0.19.0",
     "react": "16.9.0",
     "react-native": "0.61.5",
     "react-native-banner-carousel": "^1.0.3",
     "react-native-check-box": "^2.1.7",
+    "react-native-exit-app": "^1.1.0",
+    "react-native-firebase": "^5.5.6",
     "react-native-geolocation-service": "^3.1.0",
     "react-native-gesture-handler": "^1.5.1",
     "react-native-maps": "^0.26.1",
@@ -30,7 +34,8 @@
     "react-navigation-stack": "^1.10.3",
     "react-navigation-tabs": "^2.6.0",
     "react-redux": "^7.1.3",
-    "redux": "^4.0.4"
+    "redux": "^4.0.4",
+    "underscore": "^1.9.1"
   },
   "devDependencies": {
     "@babel/core": "^7.7.4",

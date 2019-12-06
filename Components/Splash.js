@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, BackHandler, Image } from 'react-native';
+import { View, Text, Image } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import { COLORS } from '../Constants';
 import { connect } from 'react-redux';
@@ -10,8 +10,8 @@ class Splash extends Component {
     }
     componentDidMount = () => {
         this.props.navigation.addListener('willFocus', payload => {
-            if ((payload.context).search('Navigation/BACK_Root') != -1) {
-                BackHandler.exitApp();
+            if(payload.action.type == "Navigation/BACK"){
+                this._checkingAuth();
             }
         });
         this._checkingAuth();

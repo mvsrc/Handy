@@ -53,7 +53,7 @@ export default class Planhistory extends Component {
                             <Image source={require('../assets/gas-blue.png')} style={{ width: 47, height: 97, }} />
                             <Text style={{ fontSize: 18, color: COLORS.Primary, paddingTop: 10 }}>2 Times</Text></View>
                         <View>
-                            <Image source={require('../assets/wastage-blue.png')} style={{ width: 60, height: 97, }} />
+                            <Image source={require('../assets/water-blue.png')} style={{ width: 60, height: 97, }} />
                             <Text style={{ fontSize: 18, color: COLORS.Primary, paddingTop: 10 }}>0 Times</Text></View>
                     </View>
                 </View>

@@ -31,7 +31,6 @@ class PlanService extends Component {
     fetchSubscription = async () => {
         await Axios.get(`${API_URL}subscription.php?action=subscription`)
             .then(res => {
-                console.log(res.data);
                 this.setState({ subscriptionList: res.data.subscription, garbageCan: res.data.garbage[0] }, () => {
                     this.curProps.LoadingStatusChange(false);
                 });
@@ -94,7 +93,7 @@ class PlanService extends Component {
                                     this.props.navigation.navigate('');
                                 }
                                 else{
-                                    this.props.navigation.navigate('Registration',{subscription:this.state.subscriptionList[this.state.selectedSubscription],hasGarbage:(this.state.hasGarbage == true)?this.state.garbageCan:false});
+                                    this.props.navigation.navigate('Registration',{subscription:this.state.subscriptionList[this.state.selectedSubscription],hasGarbage:(this.state.hasGarbage == true)?'Y':'N'});
                                 }
                             }}>
                                 <Text style={styles.btnText}>SUBSCRIBE</Text>

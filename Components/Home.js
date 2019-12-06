@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {
-    SafeAreaView, View, Text, TouchableOpacity,
+    View, Text, TouchableOpacity,
     Image, ScrollView, Dimensions, StyleSheet, Modal
 } from 'react-native';
 import { COLORS,API_URL } from '../Constants';
@@ -68,13 +68,14 @@ class Home extends Component {
                             <TouchableOpacity onPress={() => {
                                 if (authorized == true) {
                                     if (userData.UserType == 'user') {
+                                        
                                         this.props.navigation.navigate('My Plan');
                                     }
                                 }
                                 else {
                                     this.props.navigation.navigate('PlanService');
                                 }
-                            }} style={[styles.servicesBtn, { width: '100%', borderTopStartRadius: 10, borderBottomWidth: 1, borderTopEndRadius: 10, flexDirection: 'row' }]}>
+                            }} style={[styles.servicesBtn, { width: '100%',maxWidth:500, borderTopStartRadius: 10, borderBottomWidth: 1, borderTopEndRadius: 10, flexDirection: 'row' }]}>
                                 <View style={{ width: '50%', alignItems: 'center', justifyContent: 'center' }}>
                                     <Image source={require('../assets/wastage-icon.png')} style={{ width: 78, height: 97 }} />
                                 </View>
@@ -82,8 +83,18 @@ class Home extends Component {
                                     <Text style={{ color: '#FFFFFF', fontSize: 18 }}>Home wastage</Text>
                                 </View>
                             </TouchableOpacity>
-                            <View style={{ flexDirection: 'row' }}>
-                                <TouchableOpacity style={[styles.servicesBtn, { width: '50%', borderBottomStartRadius: 10, borderRightWidth: 1 }]}>
+                            <View style={{ flexDirection: 'row',maxWidth:500 }}>
+                                <TouchableOpacity style={[styles.servicesBtn, { width: '50%', borderBottomStartRadius: 10, borderRightWidth: 1 }]} onPress={() => {
+                                if (authorized == true) {
+                                    if (userData.UserType == 'user') {
+                                        
+                                        this.props.navigation.navigate('My Plan');
+                                    }
+                                }
+                                else {
+                                    this.props.navigation.navigate('PlanService');
+                                }
+                            }}>
                                     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                                         <Image source={require('../assets/gas-icon.png')} style={{ width: 47, height: 97 }} />
                                     </View>
@@ -91,7 +102,17 @@ class Home extends Component {
                                         <Text style={{ color: '#FFFFFF', fontSize: 18 }}>Gas Services</Text>
                                     </View>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={[styles.servicesBtn, { width: '50%', borderBottomEndRadius: 10 }]}>
+                                <TouchableOpacity style={[styles.servicesBtn, { width: '50%', borderBottomEndRadius: 10 }]} onPress={() => {
+                                if (authorized == true) {
+                                    if (userData.UserType == 'user') {
+                                        
+                                        this.props.navigation.navigate('My Plan');
+                                    }
+                                }
+                                else {
+                                    this.props.navigation.navigate('PlanService');
+                                }
+                            }}>
                                     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                                         <Image source={require('../assets/water-icon.png')} style={{ width: 60, height: 97 }} />
                                     </View>
