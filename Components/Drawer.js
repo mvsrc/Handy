@@ -13,6 +13,10 @@ const CustomDrawerContentComponent = props => {
             <View style={{ backgroundColor: COLORS.Primary, width: '100%', height: 170, justifyContent: 'center', alignItems: 'center' }}>
                 <Image source={require('../assets/handy-logo.png')} style={{ width: 80, height: 80 }} />
                 <Text style={{ fontSize: 20, marginTop: 10, color: '#FFFFFF', fontWeight: 'bold' }}>HANDY</Text>
+                {
+                    reducer.userData != 'null' && reducer.userData != null && 
+                    <Text style={{ fontSize: 20, marginTop: 10, color: '#FFFFFF', fontWeight: 'bold' }}>{reducer.userData.UserFName} {reducer.userData.UserLName}</Text>
+                }
             </View>
             <ScrollView >
                 {

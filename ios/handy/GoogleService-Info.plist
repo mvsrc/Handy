@@ -3,21 +3,23 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>965203411833-mh31aavsoj7bf7q0jjh4ga4frmi8s39q.apps.googleusercontent.com</string>
+	<string>492477036774-k1q8krv1ddur4jshfedfnb0j9krn3bei.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.965203411833-mh31aavsoj7bf7q0jjh4ga4frmi8s39q</string>
+	<string>com.googleusercontent.apps.492477036774-k1q8krv1ddur4jshfedfnb0j9krn3bei</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>492477036774-9h2egjlv0h7fildeiehh8bjta7lap90r.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyAqom0RGfUz5bZ2hi6c-ygWZakHK7tgml4</string>
+	<string>AIzaSyCe2cgTkGBErJT7p-9270rqjg7xHFhmaqk</string>
 	<key>GCM_SENDER_ID</key>
-	<string>965203411833</string>
+	<string>492477036774</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.handy</string>
+	<string>com.montychawda.handyapp</string>
 	<key>PROJECT_ID</key>
-	<string>src-techno-lab</string>
+	<string>upheld-garage-255912</string>
 	<key>STORAGE_BUCKET</key>
-	<string>src-techno-lab.appspot.com</string>
+	<string>upheld-garage-255912.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,8 +31,8 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:965203411833:ios:17ba4a1972011fed0365a8</string>
+	<string>1:492477036774:ios:c9e04f47fa6248a9b86327</string>
 	<key>DATABASE_URL</key>
-	<string>https://src-techno-lab.firebaseio.com</string>
+	<string>https://upheld-garage-255912.firebaseio.com</string>
 </dict>
 </plist>

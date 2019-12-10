@@ -1,96 +1,83 @@
 import React, { Component } from 'react';
 import {
-    SafeAreaView, View, Text, TouchableNativeFeedback,
-    Image, ScrollView, Dimensions, KeyboardAvoidingView,
-    TextInput, Linking,Platform,TouchableOpacity, Picker, FlatList,
-    BackHandler, StyleSheet, StatusBar, CheckBox, Keyboard
+    View, Text,
+    ScrollView,
+    Linking,
+    StyleSheet, TouchableOpacity, Image
 } from 'react-native';
-import { COLORS,API_URL } from '../Constants';
-import { Loader } from './Loader'
+import { COLORS, IOSShadow } from '../Constants';
 import Icon from 'react-native-vector-icons/FontAwesome';
-
-import  Axios from 'axios' 
-export default class Homewastageorderdetail extends Component {
-
+import { connect } from 'react-redux';
+import { loadingChange } from '../Actions';
+class Homewastageorderdetail extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            userdata:''
+            userdata: '',
+            productList: this.props.navigation.getParam('productList')
         }
     }
-    static navigationOptions = {
-
-        title: 'Order Detail',
-        headerStyle: {
-            backgroundColor: COLORS.Primary,
-
-        },
-        headerTintColor: '#FFFFFF',
-        headerTitleStyle: {
-            fontWeight: 'bold',
-            fontSize: 18,
-            marginLeft: 50,
-
-        },
-    };
-
-
-    
-    dialCall = (number) => {
-        let phoneNumber = '';
-        if (Platform.OS === 'android') { phoneNumber = `tel:${number}`; }
-        else {phoneNumber = `telprompt:${number}`; }
-        Linking.openURL(phoneNumber);
-     };
-    
-    
-     
-
-
     render() {
-        let user=this.props.navigation.getParam('itemdata')
+        let user = this.props.navigation.getParam('itemdata');
         return (
             <View style={styles.main}>
-                
-                    <ScrollView keyboardShouldPersistTaps="handled">
-                        <View style={styles.container}>
-                              
-                            <View style={{flexDirection:'row',width:'100%',marginTop:20}}>
-                                <Text style={{width:'47%',fontSize:16,fontWeight:'900'}}>Name</Text>
-                                  <Text style={{width:'47%',fontSize:16,fontWeight:'900'}}>{user.UserFName} {user.UserLName}</Text>
-                            </View>
-                             
-                            <View style={{flexDirection:'row',width:'100%',marginTop:20}}>
-                                <Text style={{width:'47%',fontSize:16,fontWeight:'900'}}>Phone Number</Text>
-                                  <Text style={{width:'47%',fontSize:16,fontWeight:'900'}}>{user.UserPhone}</Text>
-                            </View>
 
-                            <View style={{flexDirection:'row',width:'100%',marginTop:20}}>
-                                <Text style={{width:'47%',fontSize:16,fontWeight:'900'}}>E-mail</Text>
-                                  <Text style={{width:'47%',fontSize:16,fontWeight:'900'}}>{user.UserEmail}</Text>
-                            </View>
+                <ScrollView keyboardShouldPersistTaps="handled">
+                    <View style={styles.container}>
 
-                            <View style={{flexDirection:'row',width:'100%',marginTop:20}}>
-                            <Text style={{width:'47%',fontSize:16,fontWeight:'900'}}>Home Location</Text>
-                             <Text style={{width:'47%',fontSize:16,fontWeight:'900'}}>{user.UserHome}</Text>
-                            </View>
-
-                            <View style={{flexDirection:'row',width:'100%',marginTop:20}}>
-                            <Text style={{width:'47%',fontSize:16,fontWeight:'900'}}>City</Text>
-                             <Text style={{width:'47%',fontSize:16,fontWeight:'900'}}>{user.UserDistrictName}</Text>
-                            </View>
-
-                            <View style={{flexDirection:'row',justifyContent:"space-between",marginTop:30}}>
-                                <Text style={styles.button}  onPress={()=>{this.dialCall(user.UserPhone)}}>Call</Text>
-                                  <Icon name='map-marker' size='23' color='#FFFFFF' style={styles.button}/>
-                            </View>
-
+                        <View style={{ flexDirection: 'row', width: '100%', marginTop: 20 }}>
+                            <Text style={{ width: '47%', fontSize: 16, }}>Name</Text>
+                            <Text style={{ width: '47%', fontSize: 16, }}>{user.UserFName} {user.UserLName}</Text>
                         </View>
 
+                        <View style={{ flexDirection: 'row', width: '100%', marginTop: 20 }}>
+                            <Text style={{ width: '47%', fontSize: 16, }}>Phone Number</Text>
+                            <Text style={{ width: '47%', fontSize: 16, }}>{user.UserPhone}</Text>
+                        </View>
 
-                    </ScrollView>
-              
-              
+                        <View style={{ flexDirection: 'row', width: '100%', marginTop: 20 }}>
+                            <Text style={{ width: '47%', fontSize: 16, }}>E-mail</Text>
+                            <Text style={{ width: '47%', fontSize: 16, }}>{user.UserEmail}</Text>
+                        </View>
+
+                        <View style={{ flexDirection: 'row', width: '100%', marginTop: 20 }}>
+                            <Text style={{ width: '47%', fontSize: 16, }}>Home Location</Text>
+                            <Text style={{ width: '47%', fontSize: 16, }}>{user.UserHome}</Text>
+                        </View>
+
+                        <View style={{ flexDirection: 'row', width: '100%', marginTop: 20 }}>
+                            <Text style={{ width: '47%', fontSize: 16, }}>City</Text>
+                            <Text style={{ width: '47%', fontSize: 16, }}>{user.UserDistrictName}</Text>
+                        </View>
+
+                        <View style={{ flexDirection: 'row', justifyContent: "center", alignItems: 'center', marginTop: 30 }}>
+                            {/* <TouchableOpacity style={styles.button}  onPress={() => { this.dialCall(user.UserPhone) }}>
+                                <Text style={styles.btnText}>Call</Text>
+                            </TouchableOpacity> */}
+                            <TouchableOpacity style={styles.button} onPress={() => {
+                                this.props.navigation.navigate('OrderLocation', { orderLocation: user.UserLocation });
+                            }}>
+                                <Icon name='paper-plane-o' size={23} color='#FFFFFF' style={styles.btnText} />
+                            </TouchableOpacity>
+                        </View>
+
+                    </View>
+
+                    {
+                        typeof (this.state.productList) != 'undefined' && this.state.productList != '' &&
+                        this.state.productList.map((item, index) => (
+                            <View style={{ borderBottomWidth: 1, paddingVertical: 10, paddingHorizontal: 10, marginBottom: 20 }} key={'key' + index}>
+                                <View style={{ flexDirection: 'row', marginVertical: 10, alignItems: 'center' }}>
+                                    <Image source={{ uri: item.ProductImage }} style={{ width: 70, height: 60 }} />
+                                    <Text style={{ fontSize: 16, color: COLORS.Primary, paddingLeft: 20 }}>SR: {item.ProductPrice}{'\n'}<Text style={{ color: 'black' }}>Qty {item.ProductQuantity}</Text>{'\n'}Total SR {item.ProductPriceTotal}</Text>
+                                </View>
+                            </View>
+                        ))
+
+                    }
+                </ScrollView>
+
+
             </View>
         )
     }
@@ -111,17 +98,28 @@ const styles = StyleSheet.create({
     container: {
         marginVertical: 10,
         marginHorizontal: 15,
-       
+
     },
     button: {
-        width:'25%',fontSize:16,
-        fontWeight:'900',
-        color:'#FFFFFF',
-        backgroundColor:COLORS.Primary,
-        paddingVertical:4 ,
-        textAlign:'center',
-        fontSize:17
-      }
-    
+        paddingHorizontal: 30,
+        ...IOSShadow,
+        backgroundColor: COLORS.Primary,
+        paddingVertical: 5,
 
-})
+    },
+    btnText: {
+        fontSize: 16,
+        color: '#FFFFFF',
+        textAlign: 'center',
+        fontSize: 17
+    }
+
+});
+const mapStateToProps = (state) => {
+    const { reducer } = state
+    return { reducer }
+};
+const mapDispatchToProps = dispatch => ({
+    LoadingStatusChange: (loading) => dispatch(loadingChange(loading)),
+});
+export default connect(mapStateToProps, mapDispatchToProps)(Homewastageorderdetail);

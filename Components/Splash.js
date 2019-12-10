@@ -5,35 +5,55 @@ import { COLORS } from '../Constants';
 import { connect } from 'react-redux';
 import { checkAuthentication } from '../Actions';
 class Splash extends Component {
+    curProps = this.props
     static navigationOptions = () => {
         return { header: null }
     }
     componentDidMount = () => {
-        this.props.navigation.addListener('willFocus', payload => {
-            if(payload.action.type == "Navigation/BACK"){
+        this.curProps.navigation.addListener('willFocus', payload => {
+            if (payload.action.type == "Navigation/BACK") {
                 this._checkingAuth();
             }
+            this._checkingAuth();
         });
-        this._checkingAuth();
     }
     _checkingAuth = async () => {
         try {
-            await AsyncStorage.getItem('isUserLoggedIn').then(async (res) => {
-                if (res == "true") {
-                    await AsyncStorage.getItem('userData').then((userData) => {
-                        if (userData != "") {
-                            this.props.checkAuth({ authorized: true, userData: JSON.parse(userData) });
+            await AsyncStorage.multiGet(['isUserLoggedIn', 'userData', 'lang']).then(async (res) => {
+                if (res[0][1] == "true") {
+                    if (res[1][1] != "") {
+                        let lang = 'en';
+                        if(res[2][1] != ''){
+                            lang = res[2][1];
+                        }
+                        let uD = JSON.parse(res[1][1]);
+                        this.curProps.checkAuth({ authorized: true, userData: uD,lang });
+                        if (uD.UserType == 'provider') {
+                            setTimeout(() => {
+                                this.curProps.navigation.navigate('ProHome');
+                            }, 100);
+                        }
+                        else {
+                            setTimeout(() => {
+                                this.curProps.navigation.navigate('Home');
+                            }, 100);
+                        }
+                    }
+                }
+                else{
+                    setTimeout(()=>{
+                        this.curProps.checkAuth({ authorized: false, userData: null,lang:'' });
+                        if(this.curProps.reducer.lang == ''){
                             setTimeout(()=>{
-                                this.props.navigation.navigate('Home');
+                                this.curProps.navigation.navigate('LanguageSelect');
                             },100);
                         }
-                    });
-                }
-                else {
-                    this.props.checkAuth({ authorized: false, userData: null });
-                    setTimeout(()=>{
-                        this.props.navigation.navigate('Home');
-                    },100);
+                        else{
+                            setTimeout(()=>{
+                                this.curProps.navigation.navigate('Home');
+                            },100);
+                        }
+                    },1500)
                 }
             });
         }

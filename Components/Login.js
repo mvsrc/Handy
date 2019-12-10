@@ -8,6 +8,7 @@ import {
 import { COLORS, API_URL, IOSShadow } from '../Constants';
 import { connect } from 'react-redux';
 import { actionUserSignIn, loadingChange, showWelcomeMessageAction } from '../Actions';
+import { LangValue } from '../lang';
 import axios from 'axios';
 import Toast from 'react-native-simple-toast';
 class Login extends Component {
@@ -29,16 +30,16 @@ class Login extends Component {
     _signInAsync = async () => {
         let { email, password } = this.state;
         if (email == '') {
-            Toast.show('Email ID is not valid', Toast.SHORT);
+            Toast.show(LangValue[this.props.reducer.lang].INVALID_EMAIL, Toast.SHORT);
             return false;
         }
         if (password == '') {
-            Toast.show('Password should not be blank', Toast.SHORT);
+            Toast.show(LangValue[this.props.reducer.lang].PASSWORD_BLANK, Toast.SHORT);
             return false;
         }
         Keyboard.dismiss();
         this.props.LoadingStatusChange(true);
-        await axios.get(`${API_URL}login.php?action=login&UserEmail=${email}&UserPass=${password}&UserToken=ios`)
+        await axios.get(`${API_URL}login.php?action=login&UserEmail=${email}&UserPass=${password}&UserToken=ios&${this.props.reducer.lang}`)
             .then(async res => {
                 let uD = res.data;
                 if (uD.success == 1) {
@@ -49,9 +50,16 @@ class Login extends Component {
                         this.props.LoginUserAction({ ...uD });
                         await AsyncStorage.multiSet([['isUserLoggedIn', "true"], ["userData", JSON.stringify(uD)]]).then(() => {
                             this.props.ShowWelcomeMessageAction(true);
-                            setTimeout(() => {
-                                this.props.navigation.navigate('Home');
-                            }, 100);
+                            if (uD.UserType == 'provider') {
+                                setTimeout(() => {
+                                    this.props.navigation.navigate('ProHome');
+                                }, 100);
+                            }
+                            else {
+                                setTimeout(() => {
+                                    this.props.navigation.navigate('Home');
+                                }, 100);
+                            }
                             this.props.LoadingStatusChange(false);
                         });
                     }
@@ -79,13 +87,13 @@ class Login extends Component {
                 <KeyboardAvoidingView enabled behavior={behavior} style={{ flex: 1 }}>
                     <ScrollView keyboardShouldPersistTaps="handled">
                         <View style={styles.logoimage}>
-                            <Image source={require('../assets/handy-logo.png')} style={{ width: 140, height: 140}} />
+                            <Image source={require('../assets/handy-logo.png')} style={{ width: 140, height: 140 }} />
                         </View>
-                        <Text style={{ color: COLORS.Primary, marginLeft: 20, fontSize: 20, fontWeight: 'bold',textAlign:'center' }}>Welcome</Text>
+                        <Text style={{ color: COLORS.Primary, marginLeft: 20, fontSize: 20, fontWeight: 'bold', textAlign: 'center' }}>{LangValue[reducer.lang].WELCOME}</Text>
                         <View style={styles.textcontainer}>
                             <View style={styles.textinput}>
                                 <TextInput
-                                    placeholder='Email id'
+                                    placeholder={LangValue[reducer.lang].EMAIL_ID}
                                     placeholderTextColor='gray'
                                     onChangeText={(txt) => this.setState({ email: txt })}
                                     onSubmitEditing={() => { this.password.focus(); }}
@@ -95,13 +103,13 @@ class Login extends Component {
                                     blurOnSubmit={false}
                                     returnKeyType={"next"}
                                     value={this.state.email}
-                                    style={styles.textField}
+                                    style={[styles.textField,{textAlign:(reducer.lang=='ar'?'right':'left')}]}
                                 />
                             </View>
 
                             <View style={styles.textinput}>
                                 <TextInput
-                                    placeholder='Password'
+                                    placeholder={LangValue[reducer.lang].PASSWORD}
                                     onChangeText={(txt) => this.setState({ password: txt })}
                                     placeholderTextColor='gray'
                                     returnKeyType={"go"}
@@ -112,15 +120,15 @@ class Login extends Component {
                                     blurOnSubmit={false}
                                     underlineColorAndroid="transparent"
                                     value={this.state.password}
-                                    style={styles.textField}
+                                    style={[styles.textField,{textAlign:(reducer.lang=='ar'?'right':'left')}]}
                                 />
                             </View>
                             <View style={{ marginLeft: 10, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', width: '100%', marginTop: 20 }}>
                                 {/* <CheckBox value={false} style={{ width: '10%' }} />
                                 <Text style={{ fontWeight: 'bold', width: '42%' }}>Remember password</Text> */}
-                                <TouchableOpacity style={{ marginRight: 15, width: '45%' }} onPress={() => { navigation.navigate('Forgatepassword') }}>
+                                <TouchableOpacity style={{ marginRight: 15, width: '45%' }} onPress={() => { navigation.navigate('ForgotPassword') }}>
                                     <Text style={{ fontWeight: 'bold', textAlign: 'right', }}>
-                                        Forgot password?
+                                    {LangValue[reducer.lang].FORGOT_PASSWORD}
                                     </Text>
                                 </TouchableOpacity>
                             </View>
@@ -132,12 +140,12 @@ class Login extends Component {
                                     borderRadius: 20,
                                     ...IOSShadow
                                 }} onPress={() => { Keyboard.dismiss(); this._signInAsync(); }}>
-                                    <Text style={styles.button}>Login</Text>
+                                    <Text style={styles.button}>{LangValue[reducer.lang].LOGIN}</Text>
                                 </TouchableOpacity>
                             </View>
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 10 }}>
-                                <Text style={{ fontSize: 17, textAlign: 'center' }}>Do not have account?</Text>
-                                <TouchableOpacity onPress={() => { this.props.navigation.navigate('PlanService'); }} style={{ marginLeft: 5 }}><Text style={{ fontSize: 17, color: COLORS.Primary }}>Registe Here</Text></TouchableOpacity>
+                                <Text style={{ fontSize: 17, textAlign: 'center' }}>{LangValue[reducer.lang].DO_NOT_HAVE_ACCOUNT}</Text>
+                                <TouchableOpacity onPress={() => { this.props.navigation.navigate('PlanService'); }} style={{ marginLeft: 5 }}><Text style={{ fontSize: 17, color: COLORS.Primary }}>{LangValue[reducer.lang].REGISTER_HERE}</Text></TouchableOpacity>
                             </View>
                         </View>
                     </ScrollView>
@@ -152,7 +160,7 @@ const styles = StyleSheet.create({
     },
     logoimage: {
         alignItems: 'center',
-        justifyContent:'center',
+        justifyContent: 'center',
         marginVertical: 40
     },
     textcontainer: {

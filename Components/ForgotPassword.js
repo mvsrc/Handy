@@ -1,48 +1,42 @@
-import React,{Component} from 'react';
-import { SafeAreaView, View, Text, TouchableNativeFeedback, 
-    Image, ScrollView, Dimensions,KeyboardAvoidingView,TextInput,TouchableOpacity,
-    BackHandler,StyleSheet,StatusBar,CheckBox,Keyboard } from 'react-native';
-import { COLORS } from '../Constants';
+import React, { Component } from 'react';
+import {
+    View, Text,
+    Image, ScrollView, KeyboardAvoidingView, TextInput, TouchableOpacity,
+    StyleSheet, Keyboard
+} from 'react-native';
+import { COLORS, API_URL, IOSShadow } from '../Constants';
+import { connect } from 'react-redux';
+import { loadingChange } from '../Actions';
+import { LangValue } from '../lang';
 
-export default class Forgatepassword extends Component{
+class Forgatepassword extends Component {
 
-    constructor(props){
+    constructor(props) {
         super(props)
-              this.state={
-                  email:'',
-                  password:''
-               }
-     }
-     static navigationOptions = {
-        header:null,
-        title: 'Login',
-        headerStyle: {
-            backgroundColor: COLORS.Primary,
-
-        },
-        headerTintColor: COLORS.headertxtcolor,
-        headerTitleStyle: {
-            fontWeight: 'bold',
-            fontSize: 18,
-            marginLeft: 50,
-
-        },
+        this.state = {
+            email: '',
+            password: ''
+        }
+    }
+    static navigationOptions = {
+        header: null,
     };
-    render(){
-        return(
+    render() {
+        let {reducer,navigation} = this.props;
+        return (
             <View style={styles.main}>
                 <KeyboardAvoidingView enabled>
                     <ScrollView keyboardShouldPersistTaps="handled">
-            <View style={styles.logoimage}>
-             <Image source={require('../assets/handy-logo.png')} style={{ width:'40%', height:160,borderRadius:20 }} />
-            </View>
-            <Text style={{color:COLORS.Primary,marginLeft:10,fontSize:22,fontWeight:'bold'}}>Forgot Password</Text>
-              <View style={styles.textcontainer}>
-                     
+                        <View style={styles.logoimage}>
+                            <Image source={require('../assets/handy-logo.png')} style={{ width: '40%', height: 160, borderRadius: 20 }} />
+                        </View>
+                        <Text style={{ color: COLORS.Primary, marginLeft: 10, fontSize: 22, fontWeight: 'bold',textAlign:reducer.lang == 'ar'?'right':'left' }}>{LangValue[reducer.lang].FORGOT_PASSWORD}</Text>
+                        <View style={styles.textcontainer}>
 
-                     <View style={styles.textinput}>
-                              <TextInput
-                                    placeholder='Email Id'
+
+                            <View style={styles.textinput}>
+                                <TextInput
+                                    placeholder={LangValue[reducer.lang].EMAIL_ID}
                                     onChangeText={(txt) => this.setState({ email: txt })}
                                     placeholderTextColor='gray'
                                     returnKeyType={"go"}
@@ -52,52 +46,62 @@ export default class Forgatepassword extends Component{
                                     blurOnSubmit={false}
                                     underlineColorAndroid="transparent"
                                     value={this.state.email}
-                                    style={styles.textField}
+                                    style={[styles.textField,{textAlign:(reducer.lang=='ar'?'right':'left')}]}
                                 />
-                     </View> 
-                    
-                     <View style={{marginVertical:30,alignItems:'center'}}>
-                         <TouchableOpacity>
-                             <Text style={styles.button}>SUBMIT</Text>
-                         </TouchableOpacity>
-                         </View>
-                        
-               </View>  
-               </ScrollView>
-               </KeyboardAvoidingView>
+                            </View>
+
+                            <View style={{ marginVertical: 30, alignItems: 'center' }}>
+                                <TouchableOpacity style={styles.button}>
+                                    <Text style={styles.btnText}>{LangValue[reducer.lang].SUBMIT}</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                        </View>
+                    </ScrollView>
+                </KeyboardAvoidingView>
             </View>
         )
     }
 }
-const styles=StyleSheet.create({
-    main:{
-        flex:1,
-        marginHorizontal:10
+const styles = StyleSheet.create({
+    main: {
+        flex: 1,
+        marginHorizontal: 10
     },
-    logoimage:{
-              alignItems:'center',
-             marginVertical:40
+    logoimage: {
+        alignItems: 'center',
+        marginVertical: 40
     },
-    textcontainer:{
-        marginTop:30,
+    textcontainer: {
+        marginTop: 30,
     },
-    textinput:{
-        borderBottomColor:'gray',
-        paddingVertical:4,
-        borderBottomWidth:1.5,
-        width:'auto',marginHorizontal:10
+    textinput: {
+        borderBottomColor: 'gray',
+        paddingVertical: 4,
+        borderBottomWidth: 1.5,
+        width: 'auto', marginHorizontal: 10
     },
-    textField:{
-        fontSize:20
+    textField: {
+        fontSize: 20
     },
-    button:{
-        textAlign:'center',backgroundColor:COLORS.Primary,
-        width:135,
-        paddingVertical:12,
-        borderRadius:20,
-        fontSize:15,
-        color:'#FFFFFF',
-        fontWeight:'bold'
+    button: {
+         backgroundColor: COLORS.Primary,
+        width: 135,
+        paddingVertical: 12,
+        borderRadius: 20,
+    },
+    btnText:{
+        fontSize: 15,
+        textAlign: 'center',
+        color: '#FFFFFF',
+        fontWeight: 'bold'
     }
-
-})
+});
+const mapStatetoProps = (state) => {
+    const { reducer } = state;
+    return { reducer };
+}
+const mapDispatchToProps = dispatch => ({
+    LoadingStatusChange: (loading) => dispatch(loadingChange(loading)),
+});
+export default connect(mapStatetoProps, mapDispatchToProps)(Forgatepassword);

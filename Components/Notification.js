@@ -23,7 +23,7 @@ class Notification extends Component {
     }
     fetchNotification = async () => {
         let { userData } = this.curProps.reducer;
-        await Axios.get(`${API_URL}notification.php?action=notification&UserId=${userData.UserId}`)
+        await Axios.get(`${API_URL}notification.php?action=notification&UserId=${userData.UserId}&lang=ar`)
             .then((res1) => {
                 if (res1.data.success == 1) {
                     this.setState({ notificationdata: res1.data.notification });

@@ -1,107 +1,74 @@
 import React, { Component } from 'react';
 import {
-    SafeAreaView, View, Text, TouchableNativeFeedback,
-    Image, ScrollView, Dimensions, KeyboardAvoidingView,
-    TextInput, TouchableOpacity, Picker, FlatList,
-    BackHandler, StyleSheet, StatusBar, CheckBox, Keyboard
+    View, Text,
+    Image, ScrollView, KeyboardAvoidingView,
+    TouchableOpacity, FlatList, StyleSheet
 } from 'react-native';
-import { COLORS,API_URL } from '../Constants';
-import { Loader } from './Loader'
-import Icon from 'react-native-vector-icons/FontAwesome5';
-import icon1 from 'react-native-vector-icons/Entypo'
-import  Axios from 'axios' 
-export default class Homewastage extends Component {
-
+import { COLORS, API_URL } from '../Constants';
+import Axios from 'axios';
+import TabBar from './TabBar';
+import { connect } from 'react-redux';
+import { loadingChange } from '../Actions';
+class Homewastage extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            garbage:[]
+            garbage: [],
+            districtId: this.props.navigation.getParam('districtId')
         }
     }
-    static navigationOptions = {
-
-        title: 'HOME WASTAGE',
-        headerStyle: {
-            backgroundColor: COLORS.Primary,
-
-        },
-        headerTintColor: '#FFFFFF',
-        headerTitleStyle: {
-            fontWeight: 'bold',
-            fontSize: 18,
-            marginLeft: 50,
-
-        },
-    };
-
-
     garbagedata = () => {
-        Axios.get(API_URL+'garbagecan.php?action=getList&DistrictId=1&ProviderId=6')
+        this.props.LoadingStatusChange(true);
+        let { userData } = this.props.reducer;
+        Axios.get(`${API_URL}orderlist.php?action=wastage&UserDistrict=${this.state.districtId}&ProviderId=${userData.UserId}&lang=ar`)
             .then(res => {
-                
-                 this.setState({ garbage:res.data.result});
-             
-                
+                console.log(res.data);
+                this.setState({ garbage: res.data.result },()=>{
+                    this.props.LoadingStatusChange(false);
+                });
             })
             .catch(err => {
                 this.props.LoadingStatusChange(false);
-                console.log('District Error', err);
+                console.log('Wastage Order List Error', err);
             })
-
     }
     componentDidMount() {
-         this.garbagedata();
+        this.garbagedata();
     }
-     
-
-
     render() {
         let sum = 0;
         return (
             <View style={styles.main}>
-                <KeyboardAvoidingView enabled>
-                    <ScrollView keyboardShouldPersistTaps="handled">
-                        <View style={styles.container}>
-                    <View style={{ marginVertical: 23 }}>
-                                <FlatList
-                                    data={this.state.garbage}
+                <FlatList
+                    data={this.state.garbage}
+                    contentContainerStyle={{paddingHorizontal:5}}
+                    renderItem={({ item, index }) => {
+                        return (
+                            <View style={{ borderBottomWidth: 0.8,borderColor:'#F1F1F1', paddingHorizontal: 5, marginBottom: 8, paddingLeft: 16 }}>
+                                <View style={{ flexDirection: 'row', marginVertical: 10, alignItems: 'center', width: '100%' }}>
+                                    <View style={{ width: '61%' }}>
+                                        <Text style={{ fontSize: 15, color: '#555555', marginBottom: 8 }}>{index + 1}.{item.UserFName} {item.UserLName}</Text>
 
-                                    renderItem={({ item ,index}) => {
+                                        <Text style={{ fontSize: 13, color: '#666666', }}>{item.UserHome},{item.UserDistrictName}</Text>
+                                    </View>
+                                    <View style={{ flexDirection: 'row', justifyContent: "space-around", width: '33%', marginHorizontal: 30, alignItems: 'center' }}>
+                                        <TouchableOpacity onPress={()=>{
+                                            console.log(item);
+                                            this.props.navigation.navigate('OrderLocation',{orderLocation:item.UserLocation});
+                                        }}>
 
-
-                                        return (
-                                            <View style={{ borderBottomWidth:0.8, paddingHorizontal: 10, marginBottom: 8,paddingLeft:16 }}>
-                                                <View style={{ flexDirection:'row',marginVertical:10,alignItems:'center',width:'100%' }}>
-                                               <View style={{width:'61%'}}>
-                                               <Text style={{ fontSize: 18, color: 'gray',paddingBottom:3  }}>{index+1}.{item.UserFName} {item.UserLName}</Text>
-              
-                                             <Text style={{ fontSize: 17, color: 'gray', }}>{item.UserHome},{item.UserDistrictName}</Text>
-                                               </View>
-                                                    <View style={{flexDirection:'row',justifyContent:"space-around",width:'33%',marginHorizontal:30,alignItems:'center'}}>
-                                                    <Image source={require('../assets/all-order-map-icon.png')} style={{width:20,height:22}}/>
-                                                    <TouchableOpacity onPress={()=>{this.props.navigation.navigate('Homewastageorderdetail',{itemdata:item})}}><Image source={require('../assets/all-order-view-icon.png')} style={{width:22,height:22}}/></TouchableOpacity>
-                                                    <Image source={require('../assets/wastage-gray.png')} style={{width:28,height:34}}/>
-                                                  </View>
-                                                </View>
-                                            </View>
-                                        )
-                                    }}
-                                    keyExtractor={item => item.id}
-                                />
+                                            <Image source={require('../assets/all-order-map-icon.png')} style={{ width: 20, height: 17 }} />
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={() => { this.props.navigation.navigate('ProOrderDetails', { itemdata: item }) }}><Image source={require('../assets/all-order-view-icon.png')} style={{ width: 22, height: 22 }} /></TouchableOpacity>
+                                        <Image source={require('../assets/wastage-gray.png')} style={{ width: 28, height: 34 }} />
+                                    </View>
+                                </View>
                             </View>
-
-
-                        </View>
-
-
-                    </ScrollView>
-                </KeyboardAvoidingView>
-                <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 ,backgroundColor:COLORS.Primary}}>
-                    <View style={{flexDirection:'row',justifyContent:"space-between",paddingHorizontal:20,borderTopWidth:1,paddingVertical:15}}>
-                        <Text style={{fontSize:17,color:'#FFFFFF'}}>Total</Text>
-                        <Text style={{fontSize:17,color:'#FFFFFF'}}>SR:37.0</Text>
-                    </View>
-                </View>
+                        )
+                    }}
+                    keyExtractor={(item,index) => `key-${index}`}
+                />
+                <TabBar navigation={this.props.navigation} />
             </View>
         )
     }
@@ -109,8 +76,6 @@ export default class Homewastage extends Component {
 const styles = StyleSheet.create({
     main: {
         flex: 1,
-        marginHorizontal: 1,
-        marginVertical: 2
     },
     subcontainer: {
         backgroundColor: COLORS.Primary,
@@ -133,4 +98,12 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     }
 
-})
+});
+const mapStateToProps = (state) => {
+    const { reducer } = state
+    return { reducer }
+};
+const mapDispatchToProps = dispatch => ({
+    LoadingStatusChange: (loading) => dispatch(loadingChange(loading)),
+});
+export default connect(mapStateToProps, mapDispatchToProps)(Homewastage);

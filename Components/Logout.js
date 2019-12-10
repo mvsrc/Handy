@@ -11,12 +11,10 @@ class Logout extends Component {
     async componentDidMount() {
         const { navigation } = this.props;
         this.props.LoadingStatusChange(true);
-        await AsyncStorage.setItem('isUserLoggedIn', "").then(async () => {
-            await AsyncStorage.setItem('userData', "").then(() => {
+        await AsyncStorage.multiSet([['isUserLoggedIn', ""],['userData', ""],["lang",""]]).then(async () => {
                 this.props.LoadingStatusChange(false);
                 this.props.LogoutUser();
-                navigation.navigate('Home');
-            });
+                navigation.navigate('Splash');
         });
     }
     render() {

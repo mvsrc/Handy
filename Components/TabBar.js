@@ -65,7 +65,7 @@ class TabBar extends Component {
 }
 const styles = StyleSheet.create({
     tabBarBtns: {
-        borderRightColor: '#999999',
+        borderRightColor: '#83abac',
         borderRightWidth: 1,
         width: '25%',
         paddingVertical: 7,

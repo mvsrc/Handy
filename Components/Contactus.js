@@ -17,7 +17,7 @@ class Contactus extends Component {
         this.contactdata()
     }
     contactdata = () => {
-        Axios.get(API_URL + 'contactus.php')
+        Axios.get(API_URL + 'contactus.php?lang=ar')
             .then((res1) => {
                 let {succcess,message} = res1.data;
                 this.setState({ contactdata: res1.data });

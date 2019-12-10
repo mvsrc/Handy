@@ -5,9 +5,9 @@ import { Provider, connect } from 'react-redux';
 import Store from './Store';
 import MainNavigation from './Navigation';
 import Loader from './Components/Loader';
-
 console.disableYellowBox = true;
 class AppComponent extends Component {
+
   render() {
     return (
       <View style={{ flex: 1 }}>

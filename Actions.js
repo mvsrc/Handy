@@ -34,3 +34,9 @@ export const showWelcomeMessageAction = (showWelcomeMessage)=>{
         showWelcomeMessage
     }
 }
+export const SetLanguageAction = (lang)=>{
+    return {
+        type:'SET_LANGUAGE',
+        lang
+    }
+}
