@@ -5,7 +5,7 @@ import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 import { createDrawerNavigator, DrawerActions } from 'react-navigation-drawer';
-
+import { LangValue } from './lang';
 /**** Main Screens *****/
 import Splash from './Components/Splash';
 import LanguageSelect from './Components/LanguageSelect';
@@ -49,108 +49,172 @@ import ProOrderDetails from './Components/Homewastageorderdetail';
 import ProGasWaterList from './Components/ProGasWaterList';
 import Garbagecan from './Components/Garbagecan';
 const drawerNavigator = createDrawerNavigator({
-    Home: Home,
+    Home: {
+        screen:Home,
+        navigationOptions: {
+            drawerLabel: 'HOME'
+        }
+    },
     ['My Plan']: {
         screen: Myplan,
+        navigationOptions: {
+            drawerLabel: 'MY_PLAN'
+        }
     },
     ['Order Detail']: {
         screen: Orderdetails,
+        navigationOptions: {
+            drawerLabel: 'ORDER_DETAIL'
+        }
     },
     Notification: {
         screen: Notification,
+        navigationOptions: {
+            drawerLabel: 'NOTIFICATION'
+        }
     },
     Feedback: {
-        screen:Feedback,
+        screen: Feedback,
+        navigationOptions: {
+            drawerLabel: 'FEEDBACK'
+        }
     },
     ['UpdateProfile']: {
         screen: Updateprofile,
+        navigationOptions: {
+            drawerLabel: 'UPDATE_PROFILE'
+        }
     },
     Message: {
         screen: Message,
+        navigationOptions: {
+            drawerLabel: 'MESSAGE'
+        }
     },
     ['Contact Us']: {
         screen: Contactus,
+        navigationOptions: {
+            drawerLabel: 'CONTACT_US'
+        }
     },
 }, {
     contentComponent: Drawer,
     initialRouteName: 'Home',
-    drawerPosition: 'left',
+    drawerType:'front',
+    unmountInactiveRoutes:true
 });
 const ProDrawerNavigator = createDrawerNavigator({
-    Home: ProHome,
+    Home: {
+        screen:ProHome,
+        navigationOptions: {
+            drawerLabel: 'HOME'
+        }
+    },
     ['All Orders']: {
         screen: ProHome,
+        navigationOptions: {
+            drawerLabel: 'ALL_ORDERS'
+        }
     },
-    ['Add District']:{
-        screen:AddDistrict
+    ['Add District']: {
+        screen: AddDistrict,
+        navigationOptions: {
+            drawerLabel: 'ADD_DISTRICT'
+        }
     },
     Notification: {
         screen: Notification,
+        navigationOptions: {
+            drawerLabel: 'NOTIFICATION'
+        }
     },
     Feedback: {
-        screen:Feedback,
+        screen: Feedback,
+        navigationOptions: {
+            drawerLabel: 'FEEDBACK'
+        }
     },
     ['UpdateProfile']: {
         screen: Updateprofile,
+        navigationOptions: {
+            drawerLabel: 'UPDATE_PROFILE'
+        }
     },
     Message: {
         screen: Message,
+        navigationOptions: {
+            drawerLabel: 'MESSAGE'
+        }
     },
     ['Contact Us']: {
         screen: Contactus,
+        navigationOptions: {
+            drawerLabel: 'CONTACT_US'
+        }
     },
     ['Garbage Can']: {
         screen: Garbagecan,
+        navigationOptions: {
+            drawerLabel: 'GARBAGE_CAN'
+        }
     },
 }, {
     contentComponent: Drawer,
     initialRouteName: 'Home',
-    drawerPosition: 'left',
+    drawerType:'front'
 });
 const AppNavigator = createStackNavigator({
     Home: {
         screen: drawerNavigator,
-        navigationOptions: ({ navigation }) => {
+        navigationOptions: ({ navigation,screenProps }) => {
             let title = navigation.state.routes[navigation.state.index].key;
-            if(title == 'UpdateProfile'){
-                title = 'Profile';
+            if (title == 'UpdateProfile') {
+                title = LangValue[screenProps.lang].PROFILE;//'Profile';
+            }
+            else{
+                title = title.replace(' ','_');
+                title = LangValue[screenProps.lang][title.toUpperCase()];
             }
             return {
                 title,
                 headerLeft: () => {
-                    if(navigation.state.routes[navigation.state.index].key == 'Home'){
-                    return(<TouchableOpacity onPress={() => { navigation.dispatch(DrawerActions.toggleDrawer()) }} style={{ paddingLeft: 20 }}>
-                        <Icon name="bars" size={25} style={{ color: '#FFFFFF' }} />
-                    </TouchableOpacity>)
+                    if (navigation.state.routes[navigation.state.index].key == 'Home') {
+                        return (<TouchableOpacity onPress={() => { navigation.dispatch(DrawerActions.toggleDrawer()) }} style={{ paddingLeft: 20 }}>
+                            <Icon name="bars" size={25} style={{ color: '#FFFFFF' }} />
+                        </TouchableOpacity>)
                     }
-                    return(<TouchableOpacity onPress={() => { navigation.navigate('Home') }} style={{ paddingLeft: 10 }}>
-                        <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />
+                    return (<TouchableOpacity onPress={() => { navigation.navigate('Home') }} style={{ paddingLeft: 10 }}>
+                        <MIcon name={screenProps.lang=='en'?"chevron-left":"chevron-right"} size={35} style={{ color: '#FFFFFF' }} />
                     </TouchableOpacity>)
                 },  // If you want to override the back button, use this.
-                
+
             }
         }
     },
-    ProHome:{
+    ProHome: {
         screen: ProDrawerNavigator,
-        navigationOptions: ({ navigation }) => {
+        navigationOptions: ({ navigation,screenProps }) => {
             let title = navigation.state.routes[navigation.state.index].key;
-            if(title == 'UpdateProfile'){
-                title = 'Profile';
+            if (title == 'UpdateProfile') {
+                title = LangValue[screenProps.lang].PROFILE;//'Profile';
+            }
+            else{
+                title = title.replace(' ','_');
+                title = LangValue[screenProps.lang][title.toUpperCase()];
             }
             return {
                 title,
                 headerLeft: () => {
-                    if(navigation.state.routes[navigation.state.index].key == 'Home'){
-                    return(<TouchableOpacity onPress={() => { navigation.dispatch(DrawerActions.toggleDrawer()) }} style={{ paddingLeft: 20 }}>
-                        <Icon name="bars" size={25} style={{ color: '#FFFFFF' }} />
-                    </TouchableOpacity>)
+                    if (navigation.state.routes[navigation.state.index].key == 'Home') {
+                        return (<TouchableOpacity onPress={() => { navigation.dispatch(DrawerActions.toggleDrawer()) }} style={{ paddingLeft: 20 }}>
+                            <Icon name="bars" size={25} style={{ color: '#FFFFFF' }} />
+                        </TouchableOpacity>)
                     }
-                    return(<TouchableOpacity onPress={() => { navigation.navigate('Home') }} style={{ paddingLeft: 10 }}>
-                        <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />
+                    return (<TouchableOpacity onPress={() => { navigation.navigate('Home') }} style={{ paddingLeft: 10 }}>
+                        <MIcon name={screenProps.lang=='en'?"chevron-left":"chevron-right"} size={35} style={{ color: '#FFFFFF' }} />
                     </TouchableOpacity>)
                 },  // If you want to override the back button, use this.
-                
+
             }
         }
     },
@@ -159,142 +223,176 @@ const AppNavigator = createStackNavigator({
     },
     Login: {
         screen: Login,
-    },
-    Changepassword:{
-        screen:Changepassword,
-        navigationOptions: ({ navigation }) => {
+        navigationOptions: ({ navigation,screenProps:{lang} }) => {
             return {
-                title:'Change Password',
-                headerLeft:()=>(
+                title: LangValue[lang].LOGIN,
+                headerLeft: () => (
                     <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
-                        <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />
+                        <MIcon name={lang=='en'?"chevron-left":"chevron-right"} size={35} style={{ color: '#FFFFFF' }} />
                     </TouchableOpacity>
                 )
             }
         }
     },
-    PlanHitory:{
-        screen:PlanHistory,
-        navigationOptions: ({ navigation }) => {
+    Changepassword: {
+        screen: Changepassword,
+        navigationOptions: ({ navigation,screenProps:{lang} }) => {
             return {
-                title:'Plan History',
-                headerLeft:()=>(
+                title: 'Change Password',
+                headerLeft: () => (
                     <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
-                        <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />
+                        <MIcon name={lang=='en'?"chevron-left":"chevron-right"} size={35} style={{ color: '#FFFFFF' }} />
                     </TouchableOpacity>
                 )
             }
         }
     },
-    PlanService:{
-        screen:PlanService,
-        navigationOptions: ({ navigation }) => {
+    PlanHitory: {
+        screen: PlanHistory,
+        navigationOptions: ({ navigation,screenProps:{lang} }) => {
             return {
-                title:'Service',
-                headerLeft:()=>(
+                title: 'Plan History',
+                headerLeft: () => (
                     <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
-                        <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />
+                        <MIcon name={lang=='en'?"chevron-left":"chevron-right"} size={35} style={{ color: '#FFFFFF' }} />
+                    </TouchableOpacity>
+                )
+            }
+        }
+    },
+    PlanService: {
+        screen: PlanService,
+        navigationOptions: ({ navigation,screenProps:{lang} }) => {
+            return {
+                title: LangValue[lang].SERVICES,
+                headerLeft: () => (
+                    <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
+                        <MIcon name={lang=='en'?"chevron-left":"chevron-right"} size={35} style={{ color: '#FFFFFF' }} />
                     </TouchableOpacity>
                 )
             }
         }
     },
     Logout: { screen: Logout },
-    Registration: Registration,
-    ForgotPassword: ForgotPassword,
-    Plangaswaterservice:{
-        screen:Plangaswaterservice,
-        navigationOptions: ({ navigation }) => {
+    Registration: {
+        screen:Registration,
+        navigationOptions: ({ navigation,screenProps:{lang} }) => {
             return {
-                title:'My plan',
-                headerLeft:()=>(
+                title: LangValue[lang].REGISTER,
+                headerLeft: () => (
                     <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
-                        <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />
+                        <MIcon name={lang=='en'?"chevron-left":"chevron-right"} size={35} style={{ color: '#FFFFFF' }} />
                     </TouchableOpacity>
                 )
             }
         }
     },
-    Paycheckout:{
-        screen:Paycheckout,
-        navigationOptions: ({ navigation }) => {
+    ForgotPassword: {
+        screen: ForgotPassword,
+        navigationOptions: ({ navigation,screenProps:{lang} }) => {
             return {
-                title:'Checkout',
-                headerLeft:()=>(
+                title: LangValue[lang].FORGOT_PASSWORD,
+                headerLeft: () => (
                     <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
-                        <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />
+                        <MIcon name={lang=='en'?"chevron-left":"chevron-right"} size={35} style={{ color: '#FFFFFF' }} />
                     </TouchableOpacity>
                 )
             }
         }
     },
-    Productdetaile:{
-        screen:Productdetaile,
-        navigationOptions: ({ navigation }) => {
+    Plangaswaterservice: {
+        screen: Plangaswaterservice,
+        navigationOptions: ({ navigation,screenProps:{lang} }) => {
             return {
-                title:'Product Details',
-                headerLeft:()=>(
+                title: LangValue[lang].MY_PLAN,
+                headerLeft: () => (
                     <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
-                        <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />
+                        <MIcon name={lang=='en'?"chevron-left":"chevron-right"} size={35} style={{ color: '#FFFFFF' }} />
                     </TouchableOpacity>
                 )
             }
         }
     },
-    HomeWastage:{
-        screen:Homewastage,
-        navigationOptions: ({ navigation }) => {
+    Paycheckout: {
+        screen: Paycheckout,
+        navigationOptions: ({ navigation,screenProps:{lang} }) => {
             return {
-                title:'Home',
-                headerLeft:()=>(
+                //title: 'Checkout',
+                headerLeft: () => (
                     <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
-                        <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />
+                        <MIcon name={lang=='en'?"chevron-left":"chevron-right"} size={35} style={{ color: '#FFFFFF' }} />
                     </TouchableOpacity>
                 )
             }
         }
     },
-    ProOrderDetails:{
-        screen:ProOrderDetails,
-        navigationOptions: ({ navigation }) => {
+    Productdetaile: {
+        screen: Productdetaile,
+        navigationOptions: ({ navigation,screenProps:{lang} }) => {
             return {
-                title:'Order Details',
-                headerLeft:()=>(
+                title: LangValue[lang].PRODUCT_DETAILS,
+                headerLeft: () => (
                     <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
-                        <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />
+                        <MIcon name={lang=='en'?"chevron-left":"chevron-right"} size={35} style={{ color: '#FFFFFF' }} />
                     </TouchableOpacity>
                 )
             }
         }
     },
-    OrderLocation:{
-        screen:OrderLocation,
-        navigationOptions: ({ navigation }) => {
+    HomeWastage: {
+        screen: Homewastage,
+        navigationOptions: ({ navigation,screenProps:{lang} }) => {
             return {
-                title:'Order Destination',
-                headerLeft:()=>(
+                title: LangValue[lang].HOME,
+                headerLeft: () => (
                     <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
-                        <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />
+                        <MIcon name={lang=='en'?"chevron-left":"chevron-right"} size={35} style={{ color: '#FFFFFF' }} />
                     </TouchableOpacity>
                 )
             }
         }
     },
-    ProGasWaterList:{
-        screen:ProGasWaterList,
-        navigationOptions: ({ navigation }) => {
+    ProOrderDetails: {
+        screen: ProOrderDetails,
+        navigationOptions: ({ navigation,screenProps:{lang} }) => {
             return {
-                title:'Home',
-                headerLeft:()=>(
+                title: LangValue[lang].ORDER_DETAIL,
+                headerLeft: () => (
                     <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
-                        <MIcon name="chevron-left" size={35} style={{ color: '#FFFFFF' }} />
+                        <MIcon name={lang=='en'?"chevron-left":"chevron-right"} size={35} style={{ color: '#FFFFFF' }} />
                     </TouchableOpacity>
                 )
             }
         }
     },
-    LanguageSelect:{
-        screen:LanguageSelect,
+    OrderLocation: {
+        screen: OrderLocation,
+        navigationOptions: ({ navigation,screenProps:{lang} }) => {
+            return {
+                title: 'Order Destination',
+                headerLeft: () => (
+                    <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
+                        <MIcon name={lang=='en'?"chevron-left":"chevron-right"} size={35} style={{ color: '#FFFFFF' }} />
+                    </TouchableOpacity>
+                )
+            }
+        }
+    },
+    ProGasWaterList: {
+        screen: ProGasWaterList,
+        navigationOptions: ({ navigation,screenProps:{lang} }) => {
+            return {
+                title: LangValue[lang].HOME,
+                headerLeft: () => (
+                    <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ paddingLeft: 10 }}>
+                        <MIcon name={lang=='en'?"chevron-left":"chevron-right"} size={35} style={{ color: '#FFFFFF' }} />
+                    </TouchableOpacity>
+                )
+            }
+        }
+    },
+    LanguageSelect: {
+        screen: LanguageSelect,
     }
 }, {
     mode: 'card',

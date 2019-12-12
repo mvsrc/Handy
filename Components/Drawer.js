@@ -3,8 +3,9 @@ import { SafeAreaView, StyleSheet, ScrollView, View, Image, Text, TouchableOpaci
 import { DrawerActions } from 'react-navigation-drawer';
 import { COLORS, withLoggedIn } from '../Constants';
 import { connect } from 'react-redux';
+import { LangValue } from '../lang';
 const CustomDrawerContentComponent = props => {
-    const { navigation, items, activeItemKey, reducer } = props;
+    const { navigation, items, activeItemKey, reducer, descriptors } = props;
     return (
         <SafeAreaView
             style={styles.container}
@@ -12,23 +13,24 @@ const CustomDrawerContentComponent = props => {
         >
             <View style={{ backgroundColor: COLORS.Primary, width: '100%', height: 170, justifyContent: 'center', alignItems: 'center' }}>
                 <Image source={require('../assets/handy-logo.png')} style={{ width: 80, height: 80 }} />
-                <Text style={{ fontSize: 20, marginTop: 10, color: '#FFFFFF', fontWeight: 'bold' }}>HANDY</Text>
+                <Text style={{ fontSize: 20, marginTop: 10, color: '#FFFFFF', fontWeight: 'bold' }}>{LangValue[reducer.lang].HANDY}</Text>
                 {
-                    reducer.userData != 'null' && reducer.userData != null && 
+                    reducer.userData != 'null' && reducer.userData != null &&
                     <Text style={{ fontSize: 20, marginTop: 10, color: '#FFFFFF', fontWeight: 'bold' }}>{reducer.userData.UserFName} {reducer.userData.UserLName}</Text>
                 }
             </View>
             <ScrollView >
                 {
                     items.map((item, index) => {
+                        let dL = descriptors[item.key].options.drawerLabel;
                         let navigateTo = item.routeName;
-                        if(reducer.authorized == false){
+                        if (reducer.authorized == false) {
                             if (withLoggedIn.includes(item.key)) {
                                 navigateTo = 'Login';
                             }
                         }
                         let key = item.key;
-                        if(key == 'UpdateProfile'){
+                        if (key == 'UpdateProfile') {
                             key = 'Update Profile';
                         }
                         return (
@@ -42,7 +44,7 @@ const CustomDrawerContentComponent = props => {
                                 navigation.dispatch(DrawerActions.closeDrawer());
                                 navigation.navigate(navigateTo);
                             }}>
-                                <Text style={{ fontSize: 14, color: (activeItemKey == item.key) ? '#FFFFFF' : '#333333' }}>{key}</Text>
+                                <Text style={{ fontSize: 14, color: (activeItemKey == item.key) ? '#FFFFFF' : '#333333',textAlign:(reducer.lang=='ar'?'right':'left') }}>{LangValue[reducer.lang][dL]}</Text>
                             </TouchableOpacity>
                         );
                     })
@@ -59,7 +61,7 @@ const CustomDrawerContentComponent = props => {
                         navigation.dispatch(DrawerActions.closeDrawer());
                         navigation.navigate('Login');
                     }}>
-                        <Text style={{ fontSize: 14, color: '#333333' }}>Login</Text>
+                        <Text style={{ fontSize: 14, color: '#333333',textAlign:(reducer.lang=='ar'?'right':'left') }}>{LangValue[reducer.lang].LOGIN}</Text>
                     </TouchableOpacity>
                 }
                 {
@@ -74,7 +76,7 @@ const CustomDrawerContentComponent = props => {
                         navigation.dispatch(DrawerActions.closeDrawer());
                         navigation.navigate('Logout');
                     }}>
-                        <Text style={{ fontSize: 14, color: '#333333' }}>Logout</Text>
+                        <Text style={{ fontSize: 14, color: '#333333',textAlign:(reducer.lang=='ar'?'right':'left') }}>{LangValue[reducer.lang].LOGOUT}</Text>
                     </TouchableOpacity>
                 }
             </ScrollView>

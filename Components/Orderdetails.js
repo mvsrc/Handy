@@ -7,6 +7,7 @@ import TabBar from './TabBar';
 import Axios from 'axios';
 import { loadingChange } from "../Actions";
 import Toast from 'react-native-simple-toast';
+import { LangValue } from '../lang';
 class Orderdetails extends Component {
     constructor(props) {
         super(props)
@@ -35,7 +36,7 @@ class Orderdetails extends Component {
             })
     }
     render() {
-        let { navigation } = this.props;
+        let { navigation,reducer:{lang} } = this.props;
         return (
             <View style={{ flex: 1 }}>
                 <FlatList
@@ -51,13 +52,13 @@ class Orderdetails extends Component {
                                 <Text style={{ fontSize: 16, paddingLeft: 15 }}>Status: {item.OrderStatus}</Text>
                                 <Text style={{ fontSize: 17, fontWeight: 'bold', paddingVertical: 10, paddingLeft: 15 }}>Delivered To</Text>
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 20, marginTop: 10 }}>
-                    <Text style={{ fontSize: 17 }}>{item.UserHome} {'\n'}{item.UserDistrictName}</Text>
-                        <Text style={{ fontSize: 16, paddingRight: 30 }}>{item.UserFName} {item.UserLName} {'\n'}{item.UserPhone}</Text>
+                                    <Text style={{ fontSize: 17 }}>{item.UserHome} {'\n'}{item.UserDistrictName}</Text>
+                                    <Text style={{ fontSize: 16, paddingRight: 30 }}>{item.UserFName} {item.UserLName} {'\n'}{item.UserPhone}</Text>
                                 </View>
 
                                 <View style={{ marginVertical: 5, alignItems: 'flex-end' }}>
-                                    <TouchableOpacity style={styles.button} onPress={() => { this.props.navigation.navigate('Productdetaile',{products:item.product,ordetTotal:item.OrderTotal}) }}>
-                                        <Text style={styles.buttonText}>View Products</Text>
+                                    <TouchableOpacity style={styles.button} onPress={() => { this.props.navigation.navigate('Productdetaile', { products: item.product, ordetTotal: item.OrderTotal }) }}>
+                                        <Text style={styles.buttonText}>{LangValue[lang].VIEW_PRODUCTS}</Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>

@@ -13,6 +13,8 @@
 		13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB11A68108700A75B9A /* LaunchScreen.xib */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		187CC47A23A2220B00C2DDCE /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 187CC47923A2220B00C2DDCE /* UserNotifications.framework */; };
+		187CC47D23A2241700C2DDCE /* libRNFirebase.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 187CC47C23A2241700C2DDCE /* libRNFirebase.a */; };
 		18DE6F53239A8A3B00C1B20E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 18DE6F52239A8A3B00C1B20E /* GoogleService-Info.plist */; };
 		18FF3A2739064665B09749C7 /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 05B68D6EC01A455CA11EF9EF /* Ionicons.ttf */; };
 		231552CDC7344FE78002CCBE /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6D1209018F17445DBCD8F231 /* Zocial.ttf */; };
@@ -47,6 +49,13 @@
 			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
 			remoteInfo = handy;
 		};
+		187CC47723A221E100C2DDCE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 187CC47323A221E100C2DDCE /* RNFirebase.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = RNFirebase;
+		};
 		2D02E4911E0B4A5D006451C7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
@@ -57,7 +66,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		008F07F21AC5B25A0029DE68 /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
 		00E356EE1AD99517003FC87E /* handyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = handyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* handyTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = handyTests.m; sourceTree = "<group>"; };
@@ -72,6 +80,9 @@
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = handy/main.m; sourceTree = "<group>"; };
 		164D14A2B86E4C80B1CE9310 /* Foundation.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Foundation.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Foundation.ttf"; sourceTree = "<group>"; };
 		182EF420239A591100215FA0 /* handy.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = handy.entitlements; path = handy/handy.entitlements; sourceTree = "<group>"; };
+		187CC47323A221E100C2DDCE /* RNFirebase.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNFirebase.xcodeproj; path = "../node_modules/react-native-firebase/ios/RNFirebase.xcodeproj"; sourceTree = "<group>"; };
+		187CC47923A2220B00C2DDCE /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
+		187CC47C23A2241700C2DDCE /* libRNFirebase.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libRNFirebase.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		18DE6F52239A8A3B00C1B20E /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "handy/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		2773A434BEEA4CEE9223C7E6 /* FontAwesome5_Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome5_Regular.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Regular.ttf"; sourceTree = "<group>"; };
 		2B69D076D9B98FCE22A455BC /* libPods-handyTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-handyTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -117,6 +128,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				187CC47D23A2241700C2DDCE /* libRNFirebase.a in Frameworks */,
+				187CC47A23A2220B00C2DDCE /* UserNotifications.framework in Frameworks */,
 				0E790B1DEB483FFE31FB5BA0 /* libPods-handy.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -177,7 +190,6 @@
 			children = (
 				18DE6F52239A8A3B00C1B20E /* GoogleService-Info.plist */,
 				182EF420239A591100215FA0 /* handy.entitlements */,
-				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -188,9 +200,19 @@
 			name = handy;
 			sourceTree = "<group>";
 		};
+		187CC47423A221E100C2DDCE /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				187CC47823A221E100C2DDCE /* libRNFirebase.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				187CC47C23A2241700C2DDCE /* libRNFirebase.a */,
+				187CC47923A2220B00C2DDCE /* UserNotifications.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				ED2971642150620600B7C4FE /* JavaScriptCore.framework */,
 				3250A74CABBB0739FDF6C3A3 /* libPods-handy.a */,
@@ -204,6 +226,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				187CC47323A221E100C2DDCE /* RNFirebase.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -382,6 +405,12 @@
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 187CC47423A221E100C2DDCE /* Products */;
+					ProjectRef = 187CC47323A221E100C2DDCE /* RNFirebase.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				13B07F861A680F5B00A75B9A /* handy */,
@@ -391,6 +420,16 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		187CC47823A221E100C2DDCE /* libRNFirebase.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNFirebase.a;
+			remoteRef = 187CC47723A221E100C2DDCE /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		00E356EC1AD99517003FC87E /* Resources */ = {
@@ -792,6 +831,7 @@
 				PRODUCT_NAME = handy;
 				PROVISIONING_PROFILE_SPECIFIER = handyapp;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				"USER_HEADER_SEARCH_PATHS[arch=*]" = "$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -817,6 +857,7 @@
 				PRODUCT_NAME = handy;
 				PROVISIONING_PROFILE_SPECIFIER = handyapp;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				"USER_HEADER_SEARCH_PATHS[arch=*]" = "$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;

@@ -9,6 +9,7 @@ import { COLORS, IOSShadow } from '../Constants';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { connect } from 'react-redux';
 import { loadingChange } from '../Actions';
+import { LangValue } from '../lang';
 class Homewastageorderdetail extends Component {
     constructor(props) {
         super(props)
@@ -19,6 +20,7 @@ class Homewastageorderdetail extends Component {
     }
     render() {
         let user = this.props.navigation.getParam('itemdata');
+        let { lang } = this.props.reducer;
         return (
             <View style={styles.main}>
 
@@ -31,22 +33,22 @@ class Homewastageorderdetail extends Component {
                         </View>
 
                         <View style={{ flexDirection: 'row', width: '100%', marginTop: 20 }}>
-                            <Text style={{ width: '47%', fontSize: 16, }}>Phone Number</Text>
+                            <Text style={{ width: '47%', fontSize: 16, }}>{LangValue[lang].PHONE_NUMBER}</Text>
                             <Text style={{ width: '47%', fontSize: 16, }}>{user.UserPhone}</Text>
                         </View>
 
                         <View style={{ flexDirection: 'row', width: '100%', marginTop: 20 }}>
-                            <Text style={{ width: '47%', fontSize: 16, }}>E-mail</Text>
+                            <Text style={{ width: '47%', fontSize: 16, }}>{LangValue[lang].REGISTER_EMAIL}</Text>
                             <Text style={{ width: '47%', fontSize: 16, }}>{user.UserEmail}</Text>
                         </View>
 
                         <View style={{ flexDirection: 'row', width: '100%', marginTop: 20 }}>
-                            <Text style={{ width: '47%', fontSize: 16, }}>Home Location</Text>
+                            <Text style={{ width: '47%', fontSize: 16, }}>{LangValue[lang].HOME_LOCATION}</Text>
                             <Text style={{ width: '47%', fontSize: 16, }}>{user.UserHome}</Text>
                         </View>
 
                         <View style={{ flexDirection: 'row', width: '100%', marginTop: 20 }}>
-                            <Text style={{ width: '47%', fontSize: 16, }}>City</Text>
+                            <Text style={{ width: '47%', fontSize: 16, }}>{LangValue[lang].CITY}</Text>
                             <Text style={{ width: '47%', fontSize: 16, }}>{user.UserDistrictName}</Text>
                         </View>
 
@@ -55,7 +57,7 @@ class Homewastageorderdetail extends Component {
                                 <Text style={styles.btnText}>Call</Text>
                             </TouchableOpacity> */}
                             <TouchableOpacity style={styles.button} onPress={() => {
-                                this.props.navigation.navigate('OrderLocation', { orderLocation: user.UserLocation });
+                                this.props.navigation.navigate('OrderLocation', { orderLocation: user.UserLocation, itemdata: user, type: this.props.navigation.getParam('type') });
                             }}>
                                 <Icon name='paper-plane-o' size={23} color='#FFFFFF' style={styles.btnText} />
                             </TouchableOpacity>

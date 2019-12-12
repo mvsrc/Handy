@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import {
     View, Text,
     Image, ScrollView, KeyboardAvoidingView, TextInput, TouchableOpacity,
-    StyleSheet, Keyboard, Platform
+    StyleSheet, Keyboard, Platform, Alert
 } from 'react-native';
 import { COLORS, API_URL, IOSShadow } from '../Constants';
 import { connect } from 'react-redux';
@@ -11,6 +11,7 @@ import { actionUserSignIn, loadingChange, showWelcomeMessageAction } from '../Ac
 import { LangValue } from '../lang';
 import axios from 'axios';
 import Toast from 'react-native-simple-toast';
+import firebase from 'react-native-firebase';
 class Login extends Component {
     constructor(props) {
         super(props)
@@ -19,15 +20,77 @@ class Login extends Component {
             password: '',
         }
     }
-    static navigationOptions = {
-        title: 'Login',
-        headerTitleStyle: {
-            color: '#FFFFFF',
-            fontWeight: 'bold',
-            fontSize: 18,
-        },
-    };
+    async checkPermission() {
+        const enabled = await firebase.messaging().hasPermission();
+        if (enabled) {
+            this.getToken();
+        } else {
+            this.requestPermission();
+        }
+    }
+    async requestPermission() {
+        try {
+            await firebase.messaging().requestPermission();
+            // User has authorised
+            this.getToken();
+        } catch (error) {
+            // User has rejected permissions
+            console.log('permission rejected');
+            Alert.alert('Please give permission for notifications');
+            this.props.LoadingStatusChange(false);
+        }
+    }
+    async getToken() {
+        let { email, password } = this.state;
+        await firebase.messaging().getToken().then(async fcmToken => {
+            if (fcmToken) {
+                await axios.get(`${API_URL}login.php?action=login&UserEmail=${email}&UserPass=${password}&UserToken=${fcmToken}&lang=${this.props.reducer.lang}`)
+                    .then(async res => {
+                        let uD = res.data;
+                        if (uD.success == 1) {
+                            try {
+                                setTimeout(() => { Toast.show(uD.message, Toast.SHORT); }, 200);
+                                delete uD['success'];
+                                delete uD['message'];
+                                this.props.LoginUserAction({ ...uD });
+                                await AsyncStorage.multiSet([['isUserLoggedIn', "true"], ["userData", JSON.stringify(uD)]]).then(() => {
+                                    this.props.ShowWelcomeMessageAction(true);
+                                    if (uD.UserType == 'provider') {
+                                        setTimeout(() => {
+                                            this.props.navigation.navigate('ProHome');
+                                        }, 100);
+                                    }
+                                    else {
+                                        setTimeout(() => {
+                                            this.props.navigation.navigate('Home');
+                                        }, 100);
+                                    }
+                                    this.props.LoadingStatusChange(false);
+                                });
+                            }
+                            catch (e) {
+                                setTimeout(() => { Toast.show("Asyncstorage Reducer Saving Time", Toast.LONG); }, 200);
+                                console.log('Asyncstorage Reducer Saving Time', e);
+                                this.props.LoadingStatusChange(false);
+                            }
+                        }
+                        else {
+                            this.props.LoadingStatusChange(false);
+                            setTimeout(() => { Toast.show(uD.message, Toast.SHORT); }, 200);
+                        }
+                    })
+                    .catch(err => {
+                        this.props.LoadingStatusChange(false);
+                        console.log('Login Error', err);
+                    })
+            }
+            else{
+                this.props.LoadingStatusChange(false);
+            }
+        });
+    }
     _signInAsync = async () => {
+        Keyboard.dismiss();
         let { email, password } = this.state;
         if (email == '') {
             Toast.show(LangValue[this.props.reducer.lang].INVALID_EMAIL, Toast.SHORT);
@@ -37,47 +100,8 @@ class Login extends Component {
             Toast.show(LangValue[this.props.reducer.lang].PASSWORD_BLANK, Toast.SHORT);
             return false;
         }
-        Keyboard.dismiss();
         this.props.LoadingStatusChange(true);
-        await axios.get(`${API_URL}login.php?action=login&UserEmail=${email}&UserPass=${password}&UserToken=ios&${this.props.reducer.lang}`)
-            .then(async res => {
-                let uD = res.data;
-                if (uD.success == 1) {
-                    try {
-                        setTimeout(() => { Toast.show(uD.message, Toast.SHORT); }, 200);
-                        delete uD['success'];
-                        delete uD['message'];
-                        this.props.LoginUserAction({ ...uD });
-                        await AsyncStorage.multiSet([['isUserLoggedIn', "true"], ["userData", JSON.stringify(uD)]]).then(() => {
-                            this.props.ShowWelcomeMessageAction(true);
-                            if (uD.UserType == 'provider') {
-                                setTimeout(() => {
-                                    this.props.navigation.navigate('ProHome');
-                                }, 100);
-                            }
-                            else {
-                                setTimeout(() => {
-                                    this.props.navigation.navigate('Home');
-                                }, 100);
-                            }
-                            this.props.LoadingStatusChange(false);
-                        });
-                    }
-                    catch (e) {
-                        setTimeout(() => { Toast.show("Asyncstorage Reducer Saving Time", Toast.LONG); }, 200);
-                        console.log('Asyncstorage Reducer Saving Time', e);
-                        this.props.LoadingStatusChange(false);
-                    }
-                }
-                else {
-                    this.props.LoadingStatusChange(false);
-                    setTimeout(() => { Toast.show(uD.message, Toast.SHORT); }, 200);
-                }
-            })
-            .catch(err => {
-                this.props.LoadingStatusChange(false);
-                console.log('Login Error', err);
-            })
+        this.checkPermission();
     };
     render() {
         let { navigation, reducer } = this.props;
@@ -103,7 +127,7 @@ class Login extends Component {
                                     blurOnSubmit={false}
                                     returnKeyType={"next"}
                                     value={this.state.email}
-                                    style={[styles.textField,{textAlign:(reducer.lang=='ar'?'right':'left')}]}
+                                    style={[styles.textField, { textAlign: (reducer.lang == 'ar' ? 'right' : 'left') }]}
                                 />
                             </View>
 
@@ -120,7 +144,7 @@ class Login extends Component {
                                     blurOnSubmit={false}
                                     underlineColorAndroid="transparent"
                                     value={this.state.password}
-                                    style={[styles.textField,{textAlign:(reducer.lang=='ar'?'right':'left')}]}
+                                    style={[styles.textField, { textAlign: (reducer.lang == 'ar' ? 'right' : 'left') }]}
                                 />
                             </View>
                             <View style={{ marginLeft: 10, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', width: '100%', marginTop: 20 }}>
@@ -128,7 +152,7 @@ class Login extends Component {
                                 <Text style={{ fontWeight: 'bold', width: '42%' }}>Remember password</Text> */}
                                 <TouchableOpacity style={{ marginRight: 15, width: '45%' }} onPress={() => { navigation.navigate('ForgotPassword') }}>
                                     <Text style={{ fontWeight: 'bold', textAlign: 'right', }}>
-                                    {LangValue[reducer.lang].FORGOT_PASSWORD}
+                                        {LangValue[reducer.lang].FORGOT_PASSWORD}
                                     </Text>
                                 </TouchableOpacity>
                             </View>

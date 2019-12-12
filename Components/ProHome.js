@@ -10,6 +10,7 @@ import TabBar from './TabBar';
 import RNPickerSelect from 'react-native-picker-select';
 import { loadingChange, showWelcomeMessageAction } from '../Actions';
 import Axios from 'axios';
+import { LangValue } from '../lang';
 class ProHome extends Component {
     curProps = this.props;
     constructor(props) {
@@ -45,7 +46,7 @@ class ProHome extends Component {
         });
     }
     runProHomeApi = () => {
-        Axios.get(`${API_URL}/prohome.php?action=home&UserDistrict=${this.state.UserDistrictName}&lang=ar`)
+        Axios.get(`${API_URL}/prohome.php?action=home&UserDistrict=${this.state.UserDistrictName}&lang=${this.curProps.reducer.lang}`)
             .then(res => {
                 this.setState({ gasCount: res.data.gas[0], waterCount: res.data.water[0], wastageCount: res.data.wastage[0] }, () => {
                     this.curProps.LoadingStatusChange(false);
@@ -57,12 +58,17 @@ class ProHome extends Component {
             })
     }
     render() {
-        let { userData, authorized, showWelcomeMessage } = this.props.reducer;
+        let { userData, authorized, showWelcomeMessage, lang } = this.props.reducer;
         return (
             <View style={{ flex: 1 }}>
-                <ScrollView>
+                <ScrollView keyboardDismissMode="on-drag">
                     <View style={[styles.textinput, { borderBottomWidth: 0 }]}>
                         <RNPickerSelect
+                            placeholder={{
+                                label: LangValue[lang].SELECT_DISTRICT,
+                                value: null,
+                                color: COLORS.Primary,
+                            }}
                             items={this.state.districtList}
                             value={this.state.UserDistrictName}
                             style={{
@@ -73,7 +79,9 @@ class ProHome extends Component {
                                     borderWidth: 1,
                                     borderColor: '#F1F1F1',
                                     color: '#000000',
-                                    paddingRight: 30, // to ensure the text is never behind the icon
+                                    textAlign: (lang == 'ar' ? 'right' : 'left'),
+                                    paddingRight: (lang == 'ar' ? 10 : 30), // to ensure the text is never behind the icon
+                                    paddingLeft: (lang == 'en' ? 30 : 10), // to ensure the text is never behind the icon
                                 },
                             }}
                             onValueChange={value => {
@@ -91,10 +99,10 @@ class ProHome extends Component {
                         />
                     </View>
                     <View style={{ paddingHorizontal: 15, marginVertical: 15 }}>
-                        <Text style={{ color: COLORS.Primary, fontSize: 20, textAlign: 'center', fontWeight: 'bold' }}>Services</Text>
+                        <Text style={{ color: COLORS.Primary, fontSize: 20, textAlign: 'center', fontWeight: 'bold' }}>{LangValue[lang].SERVICES}</Text>
                         <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 15 }}>
                             <TouchableOpacity onPress={() => {
-                                this.curProps.navigation.navigate('HomeWastage',{districtId:this.state.UserDistrictName});
+                                this.curProps.navigation.navigate('HomeWastage', { districtId: this.state.UserDistrictName });
                             }} style={[styles.servicesBtn, { width: '100%', maxWidth: 500, borderTopStartRadius: 10, borderBottomWidth: 1, borderTopEndRadius: 10, flexDirection: 'row' }]}>
                                 <View style={{ width: '50%', alignItems: 'center', justifyContent: 'center' }}>
                                     <Image source={require('../assets/wastage-icon.png')} style={{ width: 78, height: 97 }} />
@@ -103,12 +111,12 @@ class ProHome extends Component {
                                     <View style={styles.countWrapper}>
                                         <Text style={styles.countText}>{this.state.wastageCount}</Text>
                                     </View>
-                                    <Text style={{ color: '#FFFFFF', fontSize: 18 }}>Home wastage</Text>
+                                    <Text style={{ color: '#FFFFFF', fontSize: 18 }}>{LangValue[lang].HOME_WASTAGE}</Text>
                                 </View>
                             </TouchableOpacity>
                             <View style={{ flexDirection: 'row', maxWidth: 500 }}>
                                 <TouchableOpacity style={[styles.servicesBtn, { width: '50%', borderBottomStartRadius: 10, borderRightWidth: 1 }]} onPress={() => {
-                                    this.curProps.navigation.navigate('ProGasWaterList',{districtId:this.state.UserDistrictName});
+                                    this.curProps.navigation.navigate('ProGasWaterList', { districtId: this.state.UserDistrictName });
                                 }}>
                                     <View style={styles.countWrapper}>
                                         <Text style={styles.countText}>{this.state.gasCount}</Text>
@@ -118,11 +126,11 @@ class ProHome extends Component {
                                     </View>
                                     <View style={styles.textWrapper}>
 
-                                        <Text style={{ color: '#FFFFFF', fontSize: 18 }}>Gas Services</Text>
+                                        <Text style={{ color: '#FFFFFF', fontSize: 18 }}>{LangValue[lang].GAS_SERVICES}</Text>
                                     </View>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={[styles.servicesBtn, { width: '50%', borderBottomEndRadius: 10 }]} onPress={() => {
-                                    this.curProps.navigation.navigate('ProGasWaterList',{districtId:this.state.UserDistrictName});
+                                    this.curProps.navigation.navigate('ProGasWaterList', { districtId: this.state.UserDistrictName });
                                 }}>
                                     <View style={styles.countWrapper}>
                                         <Text style={styles.countText}>{this.state.waterCount}</Text>
@@ -132,7 +140,7 @@ class ProHome extends Component {
                                     </View>
                                     <View style={styles.textWrapper}>
 
-                                        <Text style={{ color: '#FFFFFF', fontSize: 18 }}>Water Services</Text>
+                                        <Text style={{ color: '#FFFFFF', fontSize: 18 }}>{LangValue[lang].WATER_SERVICES}</Text>
                                     </View>
                                 </TouchableOpacity>
                             </View>

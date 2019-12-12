@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {
     View, Text,
-    ScrollView, KeyboardAvoidingView, TouchableOpacity,
+    ScrollView, TouchableOpacity,
     StyleSheet
 } from 'react-native';
 import { COLORS, API_URL } from '../Constants';
@@ -11,6 +11,7 @@ import TabBar from './TabBar';
 import { loadingChange } from '../Actions';
 import axios from 'axios';
 import Toast from 'react-native-simple-toast';
+import { LangValue } from '../lang';
 
 class Myplan extends Component {
     currentProps = this.props;
@@ -28,9 +29,9 @@ class Myplan extends Component {
         });
     }
     fetchPlan = async () => {
-        let { userData } = this.currentProps.reducer;
+        let { userData,lang } = this.currentProps.reducer;
         this.currentProps.LoadingStatusChange(true);
-        await axios.get(`${API_URL}myplan.php?action=myplan&UserId=${userData.UserId}`)
+        await axios.get(`${API_URL}myplan.php?action=myplan&UserId=${userData.UserId}&lang=${lang}`)
             .then(res => {
                 let { success, message, result } = res.data;
                 if (success == 1) {
@@ -51,6 +52,7 @@ class Myplan extends Component {
             })
     }
     render() {
+        let {lang} = this.props.reducer;
         return (
             <View style={styles.main}>
                 <ScrollView contentContainerStyle={{ paddingHorizontal: 10, paddingVertical: 20 }}>
@@ -58,22 +60,25 @@ class Myplan extends Component {
                         <TouchableOpacity style={styles.subcontainer} onPress={() => { this.props.navigation.navigate('PlanHitory') }}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 15, paddingVertical: 13 }}>
                                 <Text style={{ color: '#FFFFFF', fontSize: 15 }}>Plan:{this.state.SubscriptionPlan}</Text>
-                                <Text style={{ color: '#FFFFFF', fontSize: 15 }}>{this.state.RemainingDays} Days left</Text>
+                                <Text style={{ color: '#FFFFFF', fontSize: 15 }}>{this.state.RemainingDays} {LangValue[lang].DAYS_LEFT}</Text>
                             </View>
-                            <Text style={{ textAlign: "center", marginVertical: 45, fontSize: 24, color: '#FFFFFF' }}>Subscription No: {this.state.SubscriptionCount}</Text>
-                            <Text style={{ textAlign: 'right', fontSize: 15, color: '#FFFFFF', paddingRight: 20 }}>more Detail {<Icon name='right' size={15} color='#FFFFFF' />}</Text>
+                            <Text style={{ textAlign: "center", marginVertical: 45, fontSize: 24, color: '#FFFFFF' }}>{LangValue[lang].SUBSCRIPTION_NO} : {this.state.SubscriptionCount}</Text>
+                            <Text style={{ textAlign: 'right', fontSize: 15, color: '#FFFFFF', paddingRight: 20 }}>
+                                {LangValue[lang].MORE_DETAIL}
+                                <Icon name={lang=='en'?'right':'left'} size={15} color='#FFFFFF' />
+                            </Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => {this.props.navigation.navigate('Plangaswaterservice')}} style={[styles.subcontainer, { backgroundColor: '#4fd43d', alignItems: 'center', justifyContent: 'center' }]}>
-                            <Text style={{ fontSize: 24, color: '#FFFFFF' }}>Gas &amp; Water Services</Text>
+                            <Text style={{ fontSize: 24, color: '#FFFFFF' }}>{LangValue[lang].GAS_WATER_SERVICES}</Text>
                         </TouchableOpacity>
                         <View style={{ marginTop: 5, alignItems: 'center' }}>
                             <TouchableOpacity style={[styles.button, { backgroundColor: (this.state.RemainingDays > 5) ? '#999999' : COLORS.Primary, }]}
                                 onPress={() => {
                                     if ((this.state.RemainingDays <= 5)) {
-
+                                        this.props.navigation.navigate('PlanService');
                                     }
                                 }}>
-                                <Text style={{ textAlign: 'center', fontSize: 16, color: '#FFFFFF', fontWeight: 'bold' }}>Renew</Text>
+                                <Text style={{ textAlign: 'center', fontSize: 16, color: '#FFFFFF', fontWeight: 'bold' }}>{LangValue[lang].RENEW}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

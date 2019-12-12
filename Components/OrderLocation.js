@@ -3,12 +3,15 @@ import {
     View, Text, TouchableOpacity,
     Image, StyleSheet, Linking
 } from 'react-native';
-import { COLORS, IOSShadow,MAP_KEY } from '../Constants';
+import { COLORS, IOSShadow, MAP_KEY, API_URL } from '../Constants';
 import { connect } from 'react-redux';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { loadingChange } from '../Actions';
 import Geolocation from 'react-native-geolocation-service';
 import MapView, { Marker } from 'react-native-maps';
+import Toast from 'react-native-simple-toast';
+import Axios from 'axios';
+import { LangValue } from '../lang';
 class OrderLocation extends Component {
     constructor(props) {
         super(props);
@@ -17,8 +20,8 @@ class OrderLocation extends Component {
             orderLocation,
             orderLat: orderLocation[0],
             orderLng: orderLocation[1],
-            UserLat:0,
-            UserLng:0
+            UserLat: 0,
+            UserLng: 0
         }
     }
     componentDidMount() {
@@ -26,20 +29,52 @@ class OrderLocation extends Component {
         Geolocation.getCurrentPosition(
             (position) => {
                 let { latitude, longitude } = position.coords;
-                this.setState({ UserLat: latitude, UserLng: longitude },()=>{this.props.LoadingStatusChange(false);});
-                
+                this.setState({ UserLat: latitude, UserLng: longitude }, () => { this.props.LoadingStatusChange(false); });
+
             },
             (error) => {
                 // See error code charts below.
-                console.log(error.code, error.message);
-                Toast.show(error.message,Toast.SHORT);
+                setTimeout(() => { Toast.show(error.message, Toast.SHORT); }, 100);
                 this.props.LoadingStatusChange(false);
             },
             { enableHighAccuracy: true }
         );
-        
+
+    }
+    saveOrderStatus = (oS) => {
+        let { navigation, reducer } = this.props;
+        let itemData = navigation.getParam('itemdata');
+        let type = navigation.getParam('type');
+        let dataUrl = '';
+        if (type == 'homewastage') {
+            let { userData } = reducer;
+            let newDate = new Date();
+            let day = (newDate.getDate() < 10) ? '0' + newDate.getDate() : newDate.getDate();
+            let month = (newDate.getMonth() < 10) ? '0' + (newDate.getMonth() + 1) : newDate.getMonth() + 1;
+            let Year = newDate.getFullYear();
+            let todayDate = Year + '-' + month + '-' + day;
+            dataUrl = `&type=homewastage&UserId=${itemData.UserId}&ProviderId=${userData.UserId}&HomeWastageDate=${todayDate}&HomeWastageStatus=${oS}`;
+        }
+        else if (type == 'gaswater') {
+            dataUrl = `&type=gaswater&OrderId=${itemData.OrderId}&OrderStatus=${oS}`;
+        }
+        this.props.LoadingStatusChange(true);
+        Axios.get(`${API_URL}orderstatus.php?action=orderstatus${dataUrl}&lang=${this.props.reducer.lang}`)
+            .then(res => {
+                let { success, message } = res.data;
+                this.props.LoadingStatusChange(false);
+                setTimeout(() => { Toast.show(message, Toast.SHORT) }, 100)
+                if (success == 1) {
+                    setTimeout(() => { this.props.navigation.navigate('Home') }, 200);
+                }
+            })
+            .catch(err => {
+                this.props.LoadingStatusChange(false);
+                setTimeout(() => { Toast.show(err.message, Toast.SHORT) }, 100)
+            });
     }
     render() {
+        let { lang } = this.props.reducer;
         return (
             <View style={{ flex: 1 }}>
                 <View style={{ height: '80%' }}>
@@ -62,28 +97,26 @@ class OrderLocation extends Component {
                 </View>
                 <View style={{ paddingHorizontal: 10, paddingVertical: 15 }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text style={{ fontSize: 18, color: COLORS.Primary }}>Order Status</Text>
-                        <TouchableOpacity onPress={()=> {
+                        <Text style={{ fontSize: 18, color: COLORS.Primary }}>{LangValue[lang].ORDER_STATUS}</Text>
+                        <TouchableOpacity onPress={() => {
                             var url = `https://www.google.com/maps/dir/?api=1&travelmode=driving&dir_action=navigate&destination=${this.state.orderLocation}`;
-                            console.log(url);
                             Linking.canOpenURL(url).then(supported => {
                                 if (!supported) {
-                                    console.log('Can\'t handle url: ' + url);
                                 } else {
                                     return Linking.openURL(url);
                                 }
-                            }).catch(err => console.error('An error occurred', err)); 
+                            }).catch(err => console.error('An error occurred', err));
                         }}>
 
                             <Image source={require('../assets/all-order-map-icon.png')} style={{ width: 20, height: 17 }} />
                         </TouchableOpacity>
                     </View>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',marginTop:30 }}>
-                        <TouchableOpacity style={styles.button}>
-                            <Text style={styles.btnText}>Done</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 30 }}>
+                        <TouchableOpacity style={styles.button} onPress={() => { this.saveOrderStatus('Y') }}>
+                            <Text style={styles.btnText}>{LangValue[lang].DONE}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.button}>
-                            <Text style={styles.btnText}>Not Available</Text>
+                        <TouchableOpacity style={styles.button} onPress={() => { this.saveOrderStatus('N') }}>
+                            <Text style={styles.btnText}>{LangValue[lang].NOT_AVAILABLE}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -99,18 +132,18 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: 0,
     },
-    button:{
-        paddingHorizontal:15,
-        paddingVertical:10,
-        backgroundColor:COLORS.Primary,
+    button: {
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        backgroundColor: COLORS.Primary,
         ...IOSShadow,
-        borderRadius:5
+        borderRadius: 20
     },
-    btnText:{
-        textAlign:'center',
-        color:'#FFFFFF',
-        fontSize:15
-    }   
+    btnText: {
+        textAlign: 'center',
+        color: '#FFFFFF',
+        fontSize: 15
+    }
 });
 const mapStateToProps = (state) => {
     const { reducer } = state

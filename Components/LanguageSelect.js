@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { COLORS, IOSShadow } from '../Constants';
 import { connect } from 'react-redux';
 import { loadingChange, SetLanguageAction } from '../Actions';
+import RNRestart from 'react-native-restart';
 class LanguageSelect extends Component {
     static navigationOptions = () => {
         return { header: null }
@@ -19,10 +20,11 @@ class LanguageSelect extends Component {
         await AsyncStorage.setItem('lang', lang)
             .then(res => {
                 this.props.SetLanguageAction(lang)
+                this.props.LoadingStatusChange(false);
                 setTimeout(()=>{
-                    this.props.LoadingStatusChange(false);
-                    this.props.navigation.navigate('Home');
-                },300)
+                    RNRestart.Restart();
+                    //this.props.navigation.navigate('Home');
+                },100)
             })
             .catch(err => {
                 this.props.LoadingStatusChange(false);

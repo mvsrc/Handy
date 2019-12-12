@@ -22,7 +22,6 @@ class Homewastage extends Component {
         let { userData } = this.props.reducer;
         Axios.get(`${API_URL}orderlist.php?action=wastage&UserDistrict=${this.state.districtId}&ProviderId=${userData.UserId}&lang=ar`)
             .then(res => {
-                console.log(res.data);
                 this.setState({ garbage: res.data.result },()=>{
                     this.props.LoadingStatusChange(false);
                 });
@@ -53,8 +52,7 @@ class Homewastage extends Component {
                                     </View>
                                     <View style={{ flexDirection: 'row', justifyContent: "space-around", width: '33%', marginHorizontal: 30, alignItems: 'center' }}>
                                         <TouchableOpacity onPress={()=>{
-                                            console.log(item);
-                                            this.props.navigation.navigate('OrderLocation',{orderLocation:item.UserLocation});
+                                            this.props.navigation.navigate('OrderLocation',{orderLocation:item.UserLocation,itemdata:item,type:'homewastage'});
                                         }}>
 
                                             <Image source={require('../assets/all-order-map-icon.png')} style={{ width: 20, height: 17 }} />

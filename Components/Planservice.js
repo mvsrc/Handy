@@ -9,6 +9,7 @@ import { COLORS, API_URL, IOSShadow } from '../Constants';
 import Axios from 'axios';
 import { loadingChange } from '../Actions';
 import { connect } from 'react-redux';
+import { LangValue } from '../lang';
 import TabBar from './TabBar';
 import CheckBox from 'react-native-check-box';
 class PlanService extends Component {
@@ -29,7 +30,7 @@ class PlanService extends Component {
         //this.curProps.navigation.addListener('didFocus', );
     }
     fetchSubscription = async () => {
-        await Axios.get(`${API_URL}subscription.php?action=subscription`)
+        await Axios.get(`${API_URL}subscription.php?action=subscription&lang=${this.props.reducer.lang}`)
             .then(res => {
                 this.setState({ subscriptionList: res.data.subscription, garbageCan: res.data.garbage[0] }, () => {
                     this.curProps.LoadingStatusChange(false);
@@ -41,12 +42,12 @@ class PlanService extends Component {
             })
     }
     render() {
-        const {authroized} = this.props.reducer;
+        const {authroized, lang} = this.props.reducer;
         return (
             <View style={{ flex: 1 }}>
                 <ScrollView contentContainerStyle={{ padding: 10 }}>
                     <View style={styles.container}>
-                        <Text style={{ textAlign: 'center', color: COLORS.Primary, fontSize: 20 }}>Service Description</Text>
+        <Text style={{ textAlign: 'center', color: COLORS.Primary, fontSize: 20 }}>{LangValue[lang].SERVICE_DESCRIPTION}</Text>
                         <View style={{ marginVertical: 20, marginHorizontal: 5 }}>
                             <Text style={{ fontSize: 17, textAlign: "justify" }}>
                                 {typeof (this.state.subscriptionList[this.state.selectedSubscription]) != "undefined" && this.state.subscriptionList[this.state.selectedSubscription].SubDesc}
@@ -96,7 +97,7 @@ class PlanService extends Component {
                                     this.props.navigation.navigate('Registration',{subscription:this.state.subscriptionList[this.state.selectedSubscription],hasGarbage:(this.state.hasGarbage == true)?'Y':'N'});
                                 }
                             }}>
-                                <Text style={styles.btnText}>SUBSCRIBE</Text>
+                                <Text style={styles.btnText}>{LangValue[lang].SUBSCRIBE}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

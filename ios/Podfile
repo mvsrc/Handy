@@ -39,7 +39,7 @@ target 'handy' do
   pod 'Firebase/Analytics'
   pod 'Firebase/Core', '~> 6.13.0'
   pod 'Firebase/Messaging', '~> 6.13.0'
-
+  pod 'RCTRestart', :path => '../node_modules/react-native-restart/ios'
   target 'handyTests' do
     inherit! :search_paths
     # Pods for testing

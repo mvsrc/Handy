@@ -10,6 +10,7 @@ import Axios from 'axios';
 import RNPickerSelect from 'react-native-picker-select';
 import Toast from "react-native-simple-toast";
 import * as _ from 'underscore';
+import { LangValue } from '../lang';
 const BannerWidth = Dimensions.get('window').width;
 class Plangaswaterservice extends Component {
     currentProps = this.props;
@@ -33,12 +34,13 @@ class Plangaswaterservice extends Component {
             addedCartProductId: 0,
             addedCartList: []
         }
-
+        this.runGasApi = this._runGasApi.bind(this);
+        this.runWaterApi = this._runWaterApi.bind(this);
     }
-    runGasApi = async (countSet) => {
+    _runGasApi = async (countSet) => {
         this.currentProps.LoadingStatusChange(true);
-        let { userData } = this.currentProps.reducer;
-        await Axios.get(`${API_URL}gas.php?action=gas&UserId=${userData.UserId}`)
+        let { userData,lang } = this.currentProps.reducer;
+        await Axios.get(`${API_URL}gas.php?action=gas&UserId=${userData.UserId}&lang=${lang}`)
             .then(res => {
                 let count = typeof (countSet) == 'undefined' ? parseInt(res.data.gas[0].GasMin) : parseInt(countSet);
                 this.setState({
@@ -55,10 +57,10 @@ class Plangaswaterservice extends Component {
                 this.currentProps.LoadingStatusChange(false);
             })
     }
-    runWaterApi = async (countSet) => {
+    _runWaterApi = async (countSet) => {
         this.currentProps.LoadingStatusChange(true);
-        let { userData } = this.currentProps.reducer;
-        await Axios.get(`${API_URL}water.php?action=water&UserId=${userData.UserId}`)
+        let { userData,lang } = this.currentProps.reducer;
+        await Axios.get(`${API_URL}water.php?action=water&UserId=${userData.UserId}&lang=${lang}`)
             .then(res => {
                 let watercompanyList = [];
                 res.data.watercompany.map((item, index) => {
@@ -87,16 +89,16 @@ class Plangaswaterservice extends Component {
     }
     addToCart = (type) => {
         let addToCartUrl = '';
-        let { userData } = this.currentProps.reducer;
+        let { userData,lang } = this.currentProps.reducer;
         if (type == 'water') {
             let WaterData = this.state.waterList[this.state.waterIndex];
             let totalProductPrice = WaterData.WaterPrice * this.state.count;
-            addToCartUrl = `${API_URL}cart.php?action=cart&type=add&ProductId=${WaterData.WaterId}&UserId=${userData.UserId}&ProductQuantity=${this.state.count}&ProductPrice=${WaterData.WaterPrice}&ProductTotalPrice=${totalProductPrice}&ProductType=water`;
+            addToCartUrl = `${API_URL}cart.php?action=cart&type=add&ProductId=${WaterData.WaterId}&UserId=${userData.UserId}&ProductQuantity=${this.state.count}&ProductPrice=${WaterData.WaterPrice}&ProductTotalPrice=${totalProductPrice}&ProductType=water&lang=${lang}`;
         }
         else {
             let GasData = this.state.gasList[this.state.gasIndex];
             let totalProductPrice = GasData.GasPrice * this.state.count;
-            addToCartUrl = `${API_URL}cart.php?action=cart&type=add&ProductId=${GasData.GasId}&UserId=${userData.UserId}&ProductQuantity=${this.state.count}&ProductPrice=${GasData.GasPrice}&ProductTotalPrice=${totalProductPrice}&ProductType=gas`;
+            addToCartUrl = `${API_URL}cart.php?action=cart&type=add&ProductId=${GasData.GasId}&UserId=${userData.UserId}&ProductQuantity=${this.state.count}&ProductPrice=${GasData.GasPrice}&ProductTotalPrice=${totalProductPrice}&ProductType=gas&lang=${lang}`;
         }
         this.currentProps.LoadingStatusChange(true);
         Axios.get(addToCartUrl)
@@ -117,8 +119,8 @@ class Plangaswaterservice extends Component {
             })
     }
     removeFromCart = (type, ProductId) => {
-        let { userData } = this.currentProps.reducer;
-        let removeToCartUrl = `${API_URL}cart.php?action=cart&type=remove&ProductId=${ProductId}&UserId=${userData.UserId}`;
+        let { userData,lang } = this.currentProps.reducer;
+        let removeToCartUrl = `${API_URL}cart.php?action=cart&type=remove&ProductId=${ProductId}&UserId=${userData.UserId}&lang=${lang}`;
         Axios.get(removeToCartUrl)
             .then(res => {
                 this.currentProps.LoadingStatusChange(false);
@@ -145,16 +147,16 @@ class Plangaswaterservice extends Component {
     }
     UpdateCart = (type) => {
         let addToCartUrl = '';
-        let { userData } = this.currentProps.reducer;
+        let { userData,lang } = this.currentProps.reducer;
         if (type == 'water') {
             let WaterData = this.state.waterList[this.state.waterIndex];
             let totalProductPrice = WaterData.WaterPrice * this.state.count;
-            addToCartUrl = `${API_URL}cart.php?action=cart&type=update&ProductId=${WaterData.WaterId}&UserId=${userData.UserId}&ProductQuantity=${this.state.count}&ProductPrice=${WaterData.WaterPrice}&ProductTotalPrice=${totalProductPrice}`;
+            addToCartUrl = `${API_URL}cart.php?action=cart&type=update&ProductId=${WaterData.WaterId}&UserId=${userData.UserId}&ProductQuantity=${this.state.count}&ProductPrice=${WaterData.WaterPrice}&ProductTotalPrice=${totalProductPrice}&lang=${lang}`;
         }
         else {
             let GasData = this.state.gasList[this.state.gasIndex];
             let totalProductPrice = GasData.GasPrice * this.state.count;
-            addToCartUrl = `${API_URL}cart.php?action=cart&type=update&ProductId=${GasData.GasId}&UserId=${userData.UserId}&ProductQuantity=${this.state.count}&ProductPrice=${GasData.GasPrice}&ProductTotalPrice=${totalProductPrice}`;
+            addToCartUrl = `${API_URL}cart.php?action=cart&type=update&ProductId=${GasData.GasId}&UserId=${userData.UserId}&ProductQuantity=${this.state.count}&ProductPrice=${GasData.GasPrice}&ProductTotalPrice=${totalProductPrice}&lang=${lang}`;
         }
         this.currentProps.LoadingStatusChange(true);
         Axios.get(addToCartUrl)
@@ -176,7 +178,7 @@ class Plangaswaterservice extends Component {
     }
     render() {
         //'#29a4b3'
-
+        let {lang} = this.props.reducer;
         return (
             <View style={styles.main}>
                 <ScrollView contentContainerStyle={{ marginHorizontal: 10, marginBottom: 30 }}>
@@ -184,7 +186,7 @@ class Plangaswaterservice extends Component {
 
                         <TouchableOpacity onPress={() => { this.setState({ currentTabs: 'gas' }, () => { this.runGasApi() }) }} activeOpacity={2}>
                             {this.state.currentTabs == 'gas' ? <Image source={require('../assets/gas-blue.png')} style={{ width: 50, height: 105 }} /> : <Image source={require('../assets/gas-gray.png')} style={{ width: 50, height: 105 }} />}
-                            <Text style={{ fontSize: 16, color: (this.state.currentTabs == 'gas') ? '#29a4b3' : 'gray', textAlign: 'center' }} >Gas</Text>
+                            <Text style={{ fontSize: 16, color: (this.state.currentTabs == 'gas') ? '#29a4b3' : 'gray', textAlign: 'center' }} >{LangValue[lang].GAS}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity activeOpacity={2} onPress={() => {
                             this.setState({ currentTabs: 'water', }, () => {
@@ -192,13 +194,13 @@ class Plangaswaterservice extends Component {
                             })
                         }}>
                             {this.state.currentTabs == 'water' ? <Image source={require('../assets/water-blue.png')} style={{ width: 60, height: 100 }} /> : <Image source={require('../assets/water-gray.png')} style={{ width: 60, height: 100 }} />}
-                            <Text style={{ fontSize: 16, color: (this.state.currentTabs == 'water') ? '#29a4b3' : 'gray', textAlign: 'center' }}>Water</Text>
+                            <Text style={{ fontSize: 16, color: (this.state.currentTabs == 'water') ? '#29a4b3' : 'gray', textAlign: 'center' }}>{LangValue[lang].WATER}</Text>
                         </TouchableOpacity>
                     </View>
                     {
                         this.state.currentTabs == 'water' &&
                         <View style={{ flexDirection: 'row', marginBottom: 20, marginHorizontal: 10, justifyContent: 'flex-start', alignItems: 'center' }}>
-                            <Text style={{ fontSize: 16 }}>Company</Text>
+                            <Text style={{ fontSize: 16 }}>{LangValue[lang].COMPANY}</Text>
                             {
                                 this.state.watercompanyList.length > 0 &&
                                 <RNPickerSelect
@@ -322,7 +324,7 @@ class Plangaswaterservice extends Component {
                                     <TouchableOpacity style={styles.button} onPress={() => {
                                         this.addToCart('gas');
                                     }}>
-                                        <Text style={styles.btnText}>ADD TO CART</Text>
+                                        <Text style={styles.btnText}>{LangValue[lang].ADD_TO_CART}</Text>
                                     </TouchableOpacity>
                                 }
                                 {
@@ -331,7 +333,7 @@ class Plangaswaterservice extends Component {
                                         <TouchableOpacity style={styles.button} onPress={() => {
                                             this.UpdateCart('gas');
                                         }}>
-                                            <Text style={styles.btnText}>ADDED TO CART</Text>
+                                            <Text style={styles.btnText}>{LangValue[lang].ADDED_TO_CART}</Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity style={{ marginLeft: 10 }} onPress={() => {
                                             this.removeFromCart('gas', this.state.gasList[this.state.gasIndex].GasId)
@@ -377,7 +379,7 @@ class Plangaswaterservice extends Component {
                                     <TouchableOpacity style={styles.button} onPress={() => {
                                         this.addToCart('water');
                                     }}>
-                                        <Text style={styles.btnText}>ADD TO CART</Text>
+                                        <Text style={styles.btnText}>{LangValue[lang].ADD_TO_CART}</Text>
                                     </TouchableOpacity>
                                 }
                                 {
@@ -386,7 +388,7 @@ class Plangaswaterservice extends Component {
                                         <TouchableOpacity style={styles.button} onPress={() => {
                                             this.UpdateCart('water');
                                         }}>
-                                            <Text style={styles.btnText}>ADDED TO CART</Text>
+                                            <Text style={styles.btnText}>{LangValue[lang].ADDED_TO_CART}</Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity style={{ marginLeft: 10 }} onPress={() => {
                                             this.removeFromCart('water', this.state.waterList[this.state.waterIndex].WaterId)
@@ -400,9 +402,9 @@ class Plangaswaterservice extends Component {
                         </View>
                     }
                     <TouchableOpacity style={{ width: 115, borderBottomWidth: 1, borderBottomColor: '#666666', marginLeft: 10 }}>
-                        <Text style={{ fontSize: 15, color: '#666666', }}>Add More Items.</Text>
+                        <Text style={{ fontSize: 15, color: '#666666', }}>{LangValue[lang].ADD_MORE_ITEMS}.</Text>
                     </TouchableOpacity>
-                    <Text style={{ fontSize: 16, color: COLORS.Primary, marginLeft: 10, paddingVertical: 15 }}>Select Delivery Time</Text>
+                    <Text style={{ fontSize: 16, color: COLORS.Primary, marginLeft: 10, paddingVertical: 15,textAlign:'left' }}>{LangValue[lang].SELECT_DELIVERY_TIME}</Text>
                     {
                         this.state.deliveryItems.length > 0 &&
                         this.state.deliveryItems.map((item, index) => {
@@ -422,7 +424,7 @@ class Plangaswaterservice extends Component {
 
                     <View style={{ marginVertical: 30, alignItems: 'center' }}>
                         <TouchableOpacity onPress={() => { this.props.navigation.navigate('Paycheckout', { dTimeId: this.state.dTimeId }) }} style={styles.button}>
-                            <Text style={styles.btnText}>PAY NOW</Text>
+                            <Text style={styles.btnText}>{LangValue[lang].PAY_NOW}</Text>
                         </TouchableOpacity>
                     </View>
                 </ScrollView>

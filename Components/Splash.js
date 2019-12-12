@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { COLORS } from '../Constants';
 import { connect } from 'react-redux';
 import { checkAuthentication } from '../Actions';
+import { LangValue } from '../lang';
 class Splash extends Component {
     curProps = this.props
     static navigationOptions = () => {
@@ -23,11 +24,11 @@ class Splash extends Component {
                 if (res[0][1] == "true") {
                     if (res[1][1] != "") {
                         let lang = 'en';
-                        if(res[2][1] != ''){
+                        if (res[2][1] != '') {
                             lang = res[2][1];
                         }
                         let uD = JSON.parse(res[1][1]);
-                        this.curProps.checkAuth({ authorized: true, userData: uD,lang });
+                        this.curProps.checkAuth({ authorized: true, userData: uD, lang });
                         if (uD.UserType == 'provider') {
                             setTimeout(() => {
                                 this.curProps.navigation.navigate('ProHome');
@@ -40,20 +41,18 @@ class Splash extends Component {
                         }
                     }
                 }
-                else{
-                    setTimeout(()=>{
-                        this.curProps.checkAuth({ authorized: false, userData: null,lang:'' });
-                        if(this.curProps.reducer.lang == ''){
-                            setTimeout(()=>{
-                                this.curProps.navigation.navigate('LanguageSelect');
-                            },100);
-                        }
-                        else{
-                            setTimeout(()=>{
+                else {
+                    setTimeout(() => {
+                            if(this.props.reducer.isRTL == true){
                                 this.curProps.navigation.navigate('Home');
-                            },100);
-                        }
-                    },1500)
+                            }
+                            else{
+                                this.curProps.checkAuth({ authorized: false, userData: null,lang:'en'});
+                                setTimeout(()=>{
+                                    this.curProps.navigation.navigate('LanguageSelect');
+                                },200)
+                            }
+                    }, 1500)
                 }
             });
         }
@@ -62,10 +61,11 @@ class Splash extends Component {
         }
     }
     render() {
+        let { lang } = this.props.reducer;
         return (
             <View style={{ flex: 1, backgroundColor: COLORS.Primary, justifyContent: 'center', alignItems: 'center' }}>
                 <Image source={require('../assets/handy-logo.png')} style={{ width: 200, height: 200 }} />
-                <Text style={{ fontSize: 25, color: '#FFFFFF', marginTop: 20, fontWeight: 'bold' }}>HANDY</Text>
+                <Text style={{ fontSize: 25, color: '#FFFFFF', marginTop: 20, fontWeight: 'bold' }}>{LangValue[lang].HANDY}</Text>
             </View>
         );
     }

@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import {
-    SafeAreaView, View, Text,
-    Image, ScrollView, Dimensions, KeyboardAvoidingView,
+    View, Text,
     TouchableOpacity, FlatList,
-    StyleSheet,
+    StyleSheet,RefreshControl
 } from 'react-native';
 import { connect } from 'react-redux';
 import { COLORS, API_URL } from '../Constants';
@@ -12,24 +11,25 @@ import Icon1 from 'react-native-vector-icons/Entypo'
 import Axios from 'axios';
 import { loadingChange } from '../Actions';
 import TabBar from './TabBar';
+import SimpleToast from 'react-native-simple-toast';
 class Garbagecan extends Component {
 
     constructor(props) {
         super(props)
         this.state = {
-            garbage: []
+            garbage: [],
+            isRefreshing:false
         }
     }
     garbagedata = () => {
         this.props.LoadingStatusChange(true);
         let { userData } = this.props.reducer;
-        Axios.get(`${API_URL}garbagecan.php?action=getList&DistrictId=1&ProviderId=${userData.UserId}&lang=ar`)
+        Axios.get(`${API_URL}garbagecan.php?action=getList&DistrictId=1&ProviderId=${userData.UserId}&lang=${this.props.reducer.lang}`)
             .then(res => {
-
-                this.setState({ garbage: res.data.result },()=>{
+                this.setState({ garbage: res.data.result,isRefreshing:false }, () => {
                     this.props.LoadingStatusChange(false);
                 });
-
+                setTimeout(()=>{SimpleToast.show(res.data.message,SimpleToast.SHORT)},100);
             })
             .catch(err => {
                 this.props.LoadingStatusChange(false);
@@ -38,6 +38,17 @@ class Garbagecan extends Component {
     }
     componentDidMount() {
         this.garbagedata();
+    }
+    updateGarbageStatus = (status,sId)=>{
+        Axios.get(`${API_URL}garbagecan.php?action=UpdateGarbageStatus&GarbageCanStatus=${status}&SubscriptionId=${sId}&lang=${this.props.reducer.lang}`)
+            .then(res => {
+                setTimeout(()=>{SimpleToast.show(res.data.message,SimpleToast.SHORT)},100);
+                this.garbagedata();
+            })
+            .catch(err => {
+                this.props.LoadingStatusChange(false);
+                console.log('District Error', err);
+            });
     }
     render() {
         return (
@@ -54,10 +65,10 @@ class Garbagecan extends Component {
                                         <Text style={{ fontSize: 17, color: '#666666', }}>{item.UserHome},{item.UserDistrictName}</Text>
                                     </View>
                                     <View style={{ flexDirection: 'row', width: '35%', marginHorizontal: 35 }}>
-                                        <TouchableOpacity>
+                                        <TouchableOpacity onPress={()=>{this.updateGarbageStatus('Y',item.SubscriptionId)}}>
                                             <Icon name='check-circle' size={47} color='#1cc749' />
                                         </TouchableOpacity>
-                                        <TouchableOpacity style={{ paddingLeft: 30 }}>
+                                        <TouchableOpacity style={{ paddingLeft: 30 }} onPress={()=>{this.updateGarbageStatus('N',item.SubscriptionId)}}>
                                             <Icon1 name='circle-with-cross' size={47} color='#e83134' />
                                         </TouchableOpacity>
                                     </View>
@@ -66,6 +77,16 @@ class Garbagecan extends Component {
                         )
                     }}
                     keyExtractor={(item, index) => 'key-' + index}
+                    refreshing={this.state.isRefreshing}
+                    refreshControl={
+                        <RefreshControl
+                          refreshing={this.state.isRefreshing}
+                          onRefresh={()=>{this.setState({isRefreshing:true},()=>{this.garbagedata()})}}
+                          tintColor={COLORS.Primary}
+                          title="Refreshing....."
+                          titleColor={COLORS.Primary}
+                        />
+                      }
                 />
                 <TabBar navigation={this.props.navigation} />
             </View>

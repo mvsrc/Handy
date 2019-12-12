@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-const INITIAL_STATE = { loading: false, userData: null, error: null, authorized: false, showWelcomeMessage: false, lang: '' };
+const INITIAL_STATE = { loading: false, userData: null, error: null, authorized: false, showWelcomeMessage: false, lang: 'en',isRTL:false };
 const reducer = (state = INITIAL_STATE, action) => {
     switch (action.type) {
         case 'USER_SIGNIN':
@@ -50,7 +50,8 @@ processUserSignOut = (state, action) => {
         ...state,
         userData: null,
         authorized: false,
-        lang:''
+        lang:'en',
+        isRTL:false
     };
 }
 processUpdateProfile = (state, action) => {
@@ -68,6 +69,7 @@ processWelcomeMessage = (state, action) => {
 setLanguage = (state, action) => {
     return {
         ...state,
-        lang: action.lang
+        lang: action.lang,
+        isRTL:true
     }
 }
