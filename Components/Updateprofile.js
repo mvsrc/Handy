@@ -7,7 +7,7 @@ import {
 import AsyncStorage from '@react-native-community/async-storage';
 import { COLORS, API_URL, IOSShadow } from '../Constants';
 import Toast from 'react-native-simple-toast';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import Axios from 'axios';
 import { connect } from 'react-redux';
 import { loadingChange, updateProfileAction, SetLanguageAction } from '../Actions';
@@ -248,6 +248,9 @@ class Updateprofile extends Component {
                                             paddingAdjustmentBehavior="automatic"
                                             showsUserLocation={true}
                                             style={styles.map}
+                                            provider={PROVIDER_GOOGLE}
+                                            toolbarEnabled={false}
+                                            liteMode={true}
                                             initialRegion={{
                                                 latitude: this.state.userData.UserLat,
                                                 longitude: this.state.userData.UserLng,

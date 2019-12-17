@@ -3,14 +3,15 @@ import {
     View, Text, TouchableOpacity,
     Image, ScrollView, Dimensions, StyleSheet, Modal
 } from 'react-native';
-import { COLORS, API_URL } from '../Constants';
+import { COLORS, API_URL, checkingUserStatus } from '../Constants';
 import { connect } from 'react-redux';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Carousel from 'react-native-banner-carousel';
 import TabBar from './TabBar';
-import { loadingChange, showWelcomeMessageAction } from '../Actions';
+import { loadingChange, showWelcomeMessageAction, checkUserStatusAction } from '../Actions';
 import Axios from 'axios';
 import { LangValue } from '../lang';
+import SimpleToast from 'react-native-simple-toast';
 const BannerWidth = Dimensions.get('window').width;
 class Home extends Component {
     curProps = this.props;
@@ -29,7 +30,6 @@ class Home extends Component {
                 for (var i in res.data.banners) {
                     banners.push(res.data.banners[i].BannerImg);
                 }
-                console.log(banners);
                 this.setState({ banners })
                 this.props.LoadingStatusChange(false);
             })
@@ -39,7 +39,7 @@ class Home extends Component {
             })
     }
     render() {
-        let { userData, authorized, showWelcomeMessage, lang } = this.props.reducer;
+        let { userData, authorized, showWelcomeMessage, lang, userToken } = this.props.reducer;
         return (
             <View style={{ flex: 1 }}>
                 <ScrollView>
@@ -48,13 +48,13 @@ class Home extends Component {
                         <Carousel
                             autoplay
                             autoplayTimeout={5000}
-                            loop
+                            loop={false}
                             index={0}
                             pageSize={BannerWidth}
                             showsPageIndicator={false}
                         >
                             {this.state.banners.map((image, index) => (
-                                <View key={'banner-'+index}>
+                                <View key={'banner-' + index}>
                                     <Image style={{ width: BannerWidth, height: 200 }} source={{ uri: image }} />
                                 </View>
                             ))}
@@ -65,10 +65,15 @@ class Home extends Component {
                         <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 15 }}>
                             <TouchableOpacity onPress={() => {
                                 if (authorized == true) {
-                                    if (userData.UserType == 'user') {
-
-                                        this.props.navigation.navigate('My Plan');
-                                    }
+                                    this.props.LoadingStatusChange(true);
+                                    checkingUserStatus(userData, userToken, lang, this.props.CheckUserStatusAction).then(res => {
+                                        if (res == true) {
+                                            this.props.navigation.navigate('My Plan');
+                                        }
+                                        else {
+                                            setTimeout(() => { SimpleToast.show(LangValue[lang].VERIFY_ACCOUNT, SimpleToast.SHORT); }, 100);
+                                        }
+                                    });
                                 }
                                 else {
                                     this.props.navigation.navigate('PlanService');
@@ -84,10 +89,15 @@ class Home extends Component {
                             <View style={{ flexDirection: 'row', maxWidth: 500 }}>
                                 <TouchableOpacity style={[styles.servicesBtn, { width: '50%', borderBottomStartRadius: 10, borderRightWidth: 1 }]} onPress={() => {
                                     if (authorized == true) {
-                                        if (userData.UserType == 'user') {
-
-                                            this.props.navigation.navigate('My Plan');
-                                        }
+                                        this.props.LoadingStatusChange(true);
+                                        checkingUserStatus(userData, userToken, lang, this.props.CheckUserStatusAction).then(res => {
+                                            if (res == true) {
+                                                this.props.navigation.navigate('My Plan');
+                                            }
+                                            else {
+                                                setTimeout(() => { SimpleToast.show(LangValue[lang].VERIFY_ACCOUNT, SimpleToast.SHORT); }, 100);
+                                            }
+                                        });
                                     }
                                     else {
                                         this.props.navigation.navigate('PlanService');
@@ -102,10 +112,15 @@ class Home extends Component {
                                 </TouchableOpacity>
                                 <TouchableOpacity style={[styles.servicesBtn, { width: '50%', borderBottomEndRadius: 10 }]} onPress={() => {
                                     if (authorized == true) {
-                                        if (userData.UserType == 'user') {
-
-                                            this.props.navigation.navigate('My Plan');
-                                        }
+                                        this.props.LoadingStatusChange(true);
+                                        checkingUserStatus(userData, userToken, lang, this.props.CheckUserStatusAction).then(res => {
+                                            if (res == true) {
+                                                this.props.navigation.navigate('My Plan');
+                                            }
+                                            else {
+                                                setTimeout(() => { SimpleToast.show(LangValue[lang].VERIFY_ACCOUNT, SimpleToast.SHORT); }, 100);
+                                            }
+                                        });
                                     }
                                     else {
                                         this.props.navigation.navigate('PlanService');
@@ -165,6 +180,7 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = dispatch => ({
     LoadingStatusChange: (loading) => dispatch(loadingChange(loading)),
-    ShowWelcomeMessageAction: (showWelcomeMessage) => dispatch(showWelcomeMessageAction(showWelcomeMessage))
+    ShowWelcomeMessageAction: (showWelcomeMessage) => dispatch(showWelcomeMessageAction(showWelcomeMessage)),
+    CheckUserStatusAction: (userData) => dispatch(checkUserStatusAction(userData))
 });
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

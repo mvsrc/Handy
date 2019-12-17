@@ -1,7 +1,8 @@
-export const actionUserSignIn = (userData) => {
+export const actionUserSignIn = (userData,userToken) => {
     return {
         type: 'USER_SIGNIN',
-        userData
+        userData,
+        userToken
     };
 };
 export const checkAuthentication = (dataSet) => {
@@ -38,5 +39,12 @@ export const SetLanguageAction = (lang)=>{
     return {
         type:'SET_LANGUAGE',
         lang
+    }
+}
+
+export const checkUserStatusAction = (userData)=>{
+    return {
+        type:'CHECK_USER_STATUS',
+        userData
     }
 }

@@ -52,8 +52,8 @@ class Login extends Component {
                                 setTimeout(() => { Toast.show(uD.message, Toast.SHORT); }, 200);
                                 delete uD['success'];
                                 delete uD['message'];
-                                this.props.LoginUserAction({ ...uD });
-                                await AsyncStorage.multiSet([['isUserLoggedIn', "true"], ["userData", JSON.stringify(uD)]]).then(() => {
+                                this.props.LoginUserAction({ ...uD },fcmToken);
+                                await AsyncStorage.multiSet([['isUserLoggedIn', "true"], ["userData", JSON.stringify(uD)],["userToken",fcmToken]]).then(() => {
                                     this.props.ShowWelcomeMessageAction(true);
                                     if (uD.UserType == 'provider') {
                                         setTimeout(() => {
@@ -85,6 +85,45 @@ class Login extends Component {
                     })
             }
             else{
+                await axios.get(`${API_URL}login.php?action=login&UserEmail=${email}&UserPass=${password}&UserToken=ios&lang=${this.props.reducer.lang}`)
+                    .then(async res => {
+                        let uD = res.data;
+                        if (uD.success == 1) {
+                            try {
+                                setTimeout(() => { Toast.show(uD.message, Toast.SHORT); }, 200);
+                                delete uD['success'];
+                                delete uD['message'];
+                                this.props.LoginUserAction({ ...uD },fcmToken);
+                                await AsyncStorage.multiSet([['isUserLoggedIn', "true"], ["userData", JSON.stringify(uD)],["userToken",ios]]).then(() => {
+                                    this.props.ShowWelcomeMessageAction(true);
+                                    if (uD.UserType == 'provider') {
+                                        setTimeout(() => {
+                                            this.props.navigation.navigate('ProHome');
+                                        }, 100);
+                                    }
+                                    else {
+                                        setTimeout(() => {
+                                            this.props.navigation.navigate('Home');
+                                        }, 100);
+                                    }
+                                    this.props.LoadingStatusChange(false);
+                                });
+                            }
+                            catch (e) {
+                                setTimeout(() => { Toast.show("Asyncstorage Reducer Saving Time", Toast.LONG); }, 200);
+                                console.log('Asyncstorage Reducer Saving Time', e);
+                                this.props.LoadingStatusChange(false);
+                            }
+                        }
+                        else {
+                            this.props.LoadingStatusChange(false);
+                            setTimeout(() => { Toast.show(uD.message, Toast.SHORT); }, 200);
+                        }
+                    })
+                    .catch(err => {
+                        this.props.LoadingStatusChange(false);
+                        console.log('Login Error', err);
+                    })
                 this.props.LoadingStatusChange(false);
             }
         });

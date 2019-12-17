@@ -2,19 +2,21 @@ import React, { Component } from 'react';
 import {
     View, Text,
     ScrollView, KeyboardAvoidingView, TextInput, TouchableOpacity,
-    StyleSheet, Keyboard
+    StyleSheet, Keyboard, Dimensions
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import { COLORS, API_URL, IOSShadow } from '../Constants';
 import RNPickerSelect from 'react-native-picker-select';
 import Toast from 'react-native-simple-toast';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import CheckBox from 'react-native-check-box';
 import Axios from 'axios';
 import { connect } from 'react-redux';
 import { actionUserSignIn, loadingChange } from '../Actions';
 import Geolocation from 'react-native-geolocation-service';
 import { LangValue } from '../lang';
+import firebase from 'react-native-firebase';
+const screenWidth = Dimensions.get('window').width;
 class Registration extends Component {
     constructor(props) {
         super(props);
@@ -80,6 +82,7 @@ class Registration extends Component {
 
     }
     registerUser = async () => {
+        let { lang } = this.props.reducer;
         let { name, lname, mob, email, password, cmpassword, UserDistrictName, Homeno, ATC, UserLat, UserLng, subscription, hasGarbage } = this.state;
         let subDuration = subscription.SubDuration.split(' ');
         let subDurationInteger = parseInt(subDuration[0]);
@@ -99,94 +102,129 @@ class Registration extends Component {
         let EndMonth = (endDateString.getMonth() + 1 < 10) ? '0' + (endDateString.getMonth() + 1) : endDateString.getMonth() + 1;
         let EndDate = EndDay + '-' + EndMonth + '-' + endDateString.getFullYear();
         if (name == '') {
-            Toast.show('Name should not be blank', Toast.SHORT);
+            Toast.show(LangValue[lang].ERROR_FIRST_NAME, Toast.SHORT);
             return false;
         }
         if (lname == '') {
-            Toast.show('Last Name should not be blank', Toast.SHORT);
+            Toast.show(LangValue[lang].ERROR_LAST_NAME, Toast.SHORT);
             return false;
         }
-        if (mob == '') {
-            Toast.show('Mobile should not be blank', Toast.SHORT);
+        if (mob == '' || mob.length < 9) {
+            Toast.show(LangValue[lang].ERROR_MOBILE_SHORT, Toast.SHORT);
             return false;
         }
         if (email == '') {
-            Toast.show('Email should not be blank', Toast.SHORT);
+            Toast.show(LangValue[lang].INVALID_EMAIL, Toast.SHORT);
             return false;
         }
         if (password == '') {
-            Toast.show('Password should not be blank', Toast.SHORT);
+            Toast.show(LangValue[lang].PASSWORD_BLANK, Toast.SHORT);
+            return false;
+        }
+        if (password.length < 8) {
+            Toast.show(LangValue[lang].PASSWORD_SHORT, Toast.SHORT);
             return false;
         }
         if (cmpassword == '') {
-            Toast.show('Confirm Password should not be blank', Toast.SHORT);
+            Toast.show(LangValue[lang].PASSWORD_BLANK, Toast.SHORT);
             return false;
         }
         if (password != cmpassword) {
-            Toast.show('Password not matched', Toast.SHORT);
+            Toast.show(LangValue[lang].ERROR_PASS_MATCH, Toast.SHORT);
             return false;
         }
         if (UserDistrictName == '') {
-            Toast.show('User district should not be blank', Toast.SHORT);
+            Toast.show(LangValue[lang].ERROR_SELECT_DISTRICT, Toast.SHORT);
             return false;
         }
         if (Homeno == '') {
-            Toast.show('Apartment/Home should not be blank', Toast.SHORT);
+            Toast.show(LangValue[lang].ERROR_HOME_NO, Toast.SHORT);
             return false;
         }
         if (ATC == false) {
-            Toast.show('Please accept the Terms & Conditions', Toast.SHORT);
+            Toast.show(LangValue[lang].ERROR_TC, Toast.SHORT);
             return false;
         }
         this.props.LoadingStatusChange(true);
-        let urlBuild = `${API_URL}registration.php?action=registration&UserFName=${name}&UserLName=${lname}&UserEmail=${email}&UserPhone=${mob}&UserPass=${password}&UserDistrict=${UserDistrictName}&UserHome=${Homeno}&UserLocation=${UserLat},${UserLng}&lang=${this.props.reducer.lang}`;
-        console.log(urlBuild);
-        await Axios.get(urlBuild)
-            .then(async res => {
-                let uD = res.data;
-                if (uD.success == 1) {
-                    try {
-                        Toast.show(uD.message, Toast.SHORT);
-                        delete uD['success'];
-                        delete uD['message'];
-                        uD['UserType'] = 'user';
-                        this.props.LoginUserAction({ ...uD });
-                        await AsyncStorage.multiSet([['isUserLoggedIn', "true"], ["userData", JSON.stringify(uD)]]).then(async () => {
-                            let subsUrlBuild = `${API_URL}getsubscription.php?action=getsubscription&SubscriptionPlanId=${subscription.SubId}&UserId=${uD.UserId}&SubscriptionAmount=${subscription.SubPrice}&GarbageCan=${hasGarbage}&SubscriptionStartDate=${StartDate}&SubscriptionEndDate=${EndDate}&lang=${this.props.reducer.lang}`;
-                            console.log(subsUrlBuild);
-                            await Axios.get(subsUrlBuild)
-                                .then(res => {
-                                    if (res.data.success == 1) {
-                                        setTimeout(() => {
-                                            this.props.navigation.navigate('Home');
-                                        }, 100);
-                                    }
-                                    else {
-                                        setTimeout(() => { Toast.show(res.data.message, Toast.SHORT); }, 300);
-                                    }
-                                    this.props.LoadingStatusChange(false);
-                                })
-                                .catch(err => {
-                                    this.props.LoadingStatusChange(false);
-                                    console.log('Subscritption Registration Error ', err);
+        this.checkPermission();
+    }
+    async checkPermission() {
+        const enabled = await firebase.messaging().hasPermission();
+        if (enabled) {
+            this.getToken();
+        } else {
+            this.requestPermission();
+        }
+    }
+    async requestPermission() {
+        try {
+            await firebase.messaging().requestPermission();
+            // User has authorised
+            this.getToken();
+        } catch (error) {
+            // User has rejected permissions
+            console.log('permission rejected');
+            Alert.alert('Please give permission for notifications');
+            this.props.LoadingStatusChange(false);
+        }
+    }
+    async getToken() {
+        let { email, password } = this.state;
+        await firebase.messaging().getToken().then(async fcmToken => {
+            if (fcmToken) {
+                let urlBuild = `${API_URL}registration.php?action=registration&UserFName=${name}&UserLName=${lname}&UserEmail=${email}&UserPhone=${mob}&UserPass=${password}&UserDistrict=${UserDistrictName}&UserHome=${Homeno}&UserLocation=${UserLat},${UserLng}&lang=${this.props.reducer.lang}`;
+                console.log(urlBuild);
+                await Axios.get(urlBuild)
+                    .then(async res => {
+                        let uD = res.data;
+                        if (uD.success == 1) {
+                            try {
+                                Toast.show(uD.message, Toast.SHORT);
+                                delete uD['success'];
+                                delete uD['message'];
+                                uD['UserType'] = 'user';
+                                this.props.LoginUserAction({ ...uD }, fcmToken);
+                                await AsyncStorage.multiSet([['isUserLoggedIn', "true"], ["userData", JSON.stringify(uD)], ["userToken", fcmToken]]).then(async () => {
+                                    let subsUrlBuild = `${API_URL}getsubscription.php?action=getsubscription&SubscriptionPlanId=${subscription.SubId}&UserId=${uD.UserId}&SubscriptionAmount=${subscription.SubPrice}&GarbageCan=${hasGarbage}&SubscriptionStartDate=${StartDate}&SubscriptionEndDate=${EndDate}&lang=${this.props.reducer.lang}`;
+                                    console.log(subsUrlBuild);
+                                    await Axios.get(subsUrlBuild)
+                                        .then(res => {
+                                            if (res.data.success == 1) {
+                                                setTimeout(() => {
+                                                    this.props.navigation.navigate('Home');
+                                                }, 100);
+                                            }
+                                            else {
+                                                setTimeout(() => { Toast.show(res.data.message, Toast.SHORT); }, 300);
+                                            }
+                                            this.props.LoadingStatusChange(false);
+                                        })
+                                        .catch(err => {
+                                            this.props.LoadingStatusChange(false);
+                                            console.log('Subscritption Registration Error ', err);
+                                        });
                                 });
-                        });
-                    }
-                    catch (e) {
-                        console.log('Asyncstorage Reducer Saving Time', e);
+                            }
+                            catch (e) {
+                                console.log('Asyncstorage Reducer Saving Time', e);
+                                this.props.LoadingStatusChange(false);
+                                setTimeout(() => { Toast.show("Asyncstorage Reducer Saving Time", Toast.SHORT); }, 300);
+                            }
+                        }
+                        else {
+                            this.props.LoadingStatusChange(false);
+                            setTimeout(() => { Toast.show(uD.message, Toast.SHORT); }, 300);
+                        }
+                    })
+                    .catch(err => {
+                        console.log('Registration Error ', err);
                         this.props.LoadingStatusChange(false);
-                        setTimeout(() => { Toast.show("Asyncstorage Reducer Saving Time", Toast.SHORT); }, 300);
-                    }
-                }
-                else {
-                    this.props.LoadingStatusChange(false);
-                    setTimeout(() => { Toast.show(uD.message, Toast.SHORT); }, 300);
-                }
-            })
-            .catch(err => {
-                console.log('Registration Error ', err);
+                    })
+            }
+            else {
                 this.props.LoadingStatusChange(false);
-            })
+            }
+        });
     }
     render() {
         let { lang } = this.props.reducer;
@@ -194,10 +232,11 @@ class Registration extends Component {
             <View style={styles.main}>
                 <KeyboardAvoidingView enabled={true} style={{ flex: 1 }} behavior="padding">
                     <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 15, paddingVertical: 30 }}>
-                        <Text style={{ color: COLORS.Primary, fontSize: 22, textAlign: (lang == 'ar' ? 'right' : 'left') }}>{LangValue[lang].REGISTER_HERE}</Text>
+                        <Text style={{ color: COLORS.Primary, fontSize: 22, textAlign: 'left' }}>{LangValue[lang].REGISTER_HERE}</Text>
                         <View style={styles.textcontainer}>
                             <View style={styles.textinput}>
                                 <TextInput
+
                                     placeholder={LangValue[lang].FIRST_NAME}
                                     placeholderTextColor='gray'
                                     onChangeText={(txt) => this.setState({ name: txt })}
@@ -228,10 +267,7 @@ class Registration extends Component {
                                 />
                             </View>
                             <View style={[styles.textinput, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 0 }]}>
-                                {
-                                    lang == 'en' &&
-                                    <Text style={{ borderWidth: 1, borderColor: '#000000', width: '11%', textAlign: 'center' }}>+996</Text>
-                                }
+                                <Text style={{ borderWidth: 1, borderColor: '#000000', width: '11%', textAlign: 'center' }}>+996</Text>
                                 <TextInput
 
                                     placeholder={LangValue[lang].PHONE_NUMBER}
@@ -247,10 +283,6 @@ class Registration extends Component {
                                     value={this.state.mob}
                                     style={[styles.textField, { width: '85%', borderBottomColor: '#666666', borderBottomWidth: 1, textAlign: (lang == 'ar' ? 'right' : 'left') }]}
                                 />
-                                {
-                                    lang == 'ar' &&
-                                    <Text style={{ borderWidth: 1, borderColor: '#000000', width: '11%', textAlign: 'center' }}>+996</Text>
-                                }
                             </View>
                             <View style={styles.textinput}>
                                 <TextInput
@@ -346,65 +378,46 @@ class Registration extends Component {
                                 />
                             </View>
 
-                            <Text style={{ fontSize: 15, marginVertical: 10, color: 'gray',textAlign: (lang == 'ar' ? 'right' : 'left') }}>{LangValue[lang].HOME_LOCATION}</Text>
+                            <Text style={{ fontSize: 15, marginVertical: 10, color: 'gray', textAlign: 'left' }}>{LangValue[lang].HOME_LOCATION}</Text>
 
-                            <View style={{ height: 250, width: '100%' }}>
+                            <View style={{ height: 300, width: '100%' }}>
                                 {
                                     this.state.UserLat != 'null' &&
                                     <MapView
                                         loadingEnabled={true}
-                                        userLocationAnnotationTitle="Your Location"
+                                        userLocationAnnotationTitle={LangValue[lang].YOUR_LOCATION}
                                         showsMyLocationButton={true}
                                         paddingAdjustmentBehavior="automatic"
-                                        //provider={PROVIDER_GOOGLE}
+                                        followsUserLocation={true}
+                                        provider={PROVIDER_GOOGLE}
                                         showsUserLocation={true}
                                         style={styles.map}
+                                        loadingIndicatorColor={COLORS.Primary}
                                         region={{
                                             latitude: this.state.UserLat,
                                             longitude: this.state.UserLng,
-                                            latitudeDelta: 0.0922,
-                                            longitudeDelta: 0.0421,
+                                            latitudeDelta: 0.05,
+                                            longitudeDelta: 0.05,
                                         }}>
                                         <Marker coordinate={{ latitude: this.state.UserLat, longitude: this.state.UserLng }} draggable={true} pinColor={COLORS.Primary} />
                                     </MapView>
                                 }
                             </View>
-                            {
-                                lang == 'en' && 
-                                <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
-                                    <CheckBox
-                                        style={{ padding: 10, paddingLeft: 0, }}
-                                        onClick={() => {
-                                            this.setState({
-                                                ATC: !this.state.ATC
-                                            })
-                                        }}
-                                        isChecked={this.state.ATC}
-                                        checkBoxColor={COLORS.Primary}
-                                        checkedCheckBoxColor={COLORS.Primary}
-                                    />
-                                    <Text style={{ fontSize: 17 }}>{LangValue[lang].ACCEPT}</Text>
-                                    <Text style={{ fontSize: 17, color: COLORS.Primary, marginLeft: 5 }}>{LangValue[lang].TERM_CONDITIONS}</Text>
-                                </View>
-                            }
-                            {
-                                lang == 'ar' && 
-                                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' }}>
-                                    <Text style={{ fontSize: 17, color: COLORS.Primary, marginLeft: 5 }}>{LangValue[lang].TERM_CONDITIONS}</Text>
-                                    <Text style={{ fontSize: 17 }}>{LangValue[lang].ACCEPT}</Text>
-                                    <CheckBox
-                                        style={{ padding: 10, paddingLeft: 0, }}
-                                        onClick={() => {
-                                            this.setState({
-                                                ATC: !this.state.ATC
-                                            })
-                                        }}
-                                        isChecked={this.state.ATC}
-                                        checkBoxColor={COLORS.Primary}
-                                        checkedCheckBoxColor={COLORS.Primary}
-                                    />
-                                </View>
-                            }
+                            <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
+                                <CheckBox
+                                    style={{ padding: 10, paddingLeft: 0, }}
+                                    onClick={() => {
+                                        this.setState({
+                                            ATC: !this.state.ATC
+                                        })
+                                    }}
+                                    isChecked={this.state.ATC}
+                                    checkBoxColor={COLORS.Primary}
+                                    checkedCheckBoxColor={COLORS.Primary}
+                                />
+                                <Text style={{ fontSize: 17 }}>{LangValue[lang].ACCEPT}</Text>
+                                <Text style={{ fontSize: 17, color: COLORS.Primary, marginLeft: 5 }}>{LangValue[lang].TERM_CONDITIONS}</Text>
+                            </View>
                             <View style={{ marginVertical: 30, alignItems: 'center' }}>
                                 <TouchableOpacity onPress={() => {
                                     this.registerUser();
@@ -449,11 +462,12 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     map: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        // position: 'absolute',
+        // top: 0,
+        // left: 0,
+        // right: 0,
+        // bottom: 0,
+        ...StyleSheet.absoluteFillObject,
     },
 
 });

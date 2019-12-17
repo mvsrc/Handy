@@ -42,12 +42,12 @@ class PlanService extends Component {
             })
     }
     render() {
-        const {authroized, lang} = this.props.reducer;
+        const { authroized, lang } = this.props.reducer;
         return (
             <View style={{ flex: 1 }}>
                 <ScrollView contentContainerStyle={{ padding: 10 }}>
                     <View style={styles.container}>
-        <Text style={{ textAlign: 'center', color: COLORS.Primary, fontSize: 20 }}>{LangValue[lang].SERVICE_DESCRIPTION}</Text>
+                        <Text style={{ textAlign: 'center', color: COLORS.Primary, fontSize: 20 }}>{LangValue[lang].SERVICE_DESCRIPTION}</Text>
                         <View style={{ marginVertical: 20, marginHorizontal: 5 }}>
                             <Text style={{ fontSize: 17, textAlign: "justify" }}>
                                 {typeof (this.state.subscriptionList[this.state.selectedSubscription]) != "undefined" && this.state.subscriptionList[this.state.selectedSubscription].SubDesc}
@@ -72,7 +72,7 @@ class PlanService extends Component {
 
                         <View style={styles.radioButton} >
                             <CheckBox
-                                style={{ }}
+                                style={{}}
                                 onClick={() => {
                                     this.setState({
                                         hasGarbage: !this.state.hasGarbage
@@ -82,19 +82,21 @@ class PlanService extends Component {
                                 checkBoxColor={COLORS.Primary}
                                 checkedCheckBoxColor={COLORS.Primary}
                             />
-                            <TouchableOpacity activeOpacity={0.5} onPress={()=>{this.setState({
-                                        hasGarbage: !this.state.hasGarbage
-                                    })}}>
+                            <TouchableOpacity activeOpacity={0.5} onPress={() => {
+                                this.setState({
+                                    hasGarbage: !this.state.hasGarbage
+                                })
+                            }}>
                                 <Text style={styles.label}>{this.state.garbageCan.GarbageName} ( SR : {this.state.garbageCan.GarbagePrice} )</Text>
                             </TouchableOpacity>
                         </View>
                         <View style={{ marginVertical: 20, alignItems: 'center' }}>
-                            <TouchableOpacity style={styles.button} onPress={()=>{
-                                if(authroized == true){
+                            <TouchableOpacity style={styles.button} onPress={() => {
+                                if (authroized == true) {
                                     this.props.navigation.navigate('');
                                 }
-                                else{
-                                    this.props.navigation.navigate('Registration',{subscription:this.state.subscriptionList[this.state.selectedSubscription],hasGarbage:(this.state.hasGarbage == true)?'Y':'N'});
+                                else {
+                                    this.props.navigation.navigate('Registration', { subscription: this.state.subscriptionList[this.state.selectedSubscription], hasGarbage: (this.state.hasGarbage == true) ? 'Y' : 'N' });
                                 }
                             }}>
                                 <Text style={styles.btnText}>{LangValue[lang].SUBSCRIBE}</Text>
@@ -138,7 +140,7 @@ const styles = StyleSheet.create({
     {
         flexDirection: 'row',
         margin: 10,
-        marginLeft:0
+        marginLeft: 0
 
     },
     radioButtonHolder:

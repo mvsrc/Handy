@@ -40,14 +40,15 @@ target 'handy' do
   pod 'Firebase/Core', '~> 6.13.0'
   pod 'Firebase/Messaging', '~> 6.13.0'
   pod 'RCTRestart', :path => '../node_modules/react-native-restart/ios'
+  rn_maps_path = '../node_modules/react-native-maps'
+  pod 'GoogleMaps'
+  pod 'react-native-google-maps', :path => rn_maps_path
+  pod 'Google-Maps-iOS-Utils'
   target 'handyTests' do
     inherit! :search_paths
     # Pods for testing
   end
-  rn_maps_path = '../node_modules/react-native-maps'
-  pod 'react-native-google-maps', :path => rn_maps_path
-  pod 'GoogleMaps'
-  pod 'Google-Maps-iOS-Utils'
+  
   use_native_modules!
 end
 

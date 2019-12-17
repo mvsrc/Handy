@@ -138,10 +138,10 @@ class Paycheckout extends Component {
                         <View style={styles.container} >
                             {
                                 this.state.order.map((item, index) => (
-                                    <View style={{ borderBottomWidth: 1, paddingVertical: 10, paddingHorizontal: 10, marginBottom: 20 }} key={'key' + index}>
+                                    <View style={{ borderBottomWidth: 1, paddingVertical: 10, paddingHorizontal: 10, marginBottom: 20,borderBottomColor:'#CCCCCC' }} key={'key' + index}>
                                         <View style={{ flexDirection: 'row', marginHorizontal: 10, justifyContent: "space-between", alignItems: 'center' }}>
                                             <View style={{ flexDirection: 'row', marginVertical: 10, alignItems: 'center' }}>
-                                                <Image source={{ uri: item.ProductImage }} style={{ width: 100, height: 90 }} />
+                                                <Image source={{ uri: item.ProductImage }} style={{ width: 80, height: 80 }} />
                                                 <Text style={{ fontSize: 16, color: COLORS.Primary, paddingLeft: 20 }}>SR: {item.ProductPrice}{}{'\n'}<Text style={{ color: 'black' }}>Qty {item.ProductQuantity}</Text>{'\n'}{LangValue[lang].TOTAL} SR {item.ProductTotalPrice}</Text>
                                             </View>
                                             <TouchableOpacity onPress={() => {
@@ -153,14 +153,14 @@ class Paycheckout extends Component {
                                     </View>)
                                 )
                             }
-                            <View style={{ marginBottom: 30 }}>
+                            <View style={{ marginBottom: 30,paddingHorizontal:20 }}>
                                 <Text style={{ color: COLORS.Primary, fontSize: 16, fontWeight: 'bold', paddingLeft: 10, paddingBottom: 20,textAlign:'left' }}>{LangValue[lang].APPLY_PROMOTION_CODE}</Text>
                                 <View style={{ flexDirection: 'row', justifyContent: "space-between", marginHorizontal: 20 }}>
                                     <TextInput
                                         placeholder='Enter Here'
                                         placeholderTextColor='gray'
                                         autoFocus={false}
-                                        style={{ borderBottomColor: 'black', borderBottomWidth: 1, width: '76%', fontSize: 20 }}
+                                        style={{ borderBottomColor: 'black', borderBottomWidth: 1, width: '60%', fontSize: 20 }}
                                         onChangeText={(txt) => { this.setState({ couponCode: txt }) }}
                                         value={this.state.couponCode}
                                     />
@@ -170,7 +170,6 @@ class Paycheckout extends Component {
                                         <Text style={styles.btnText}>{LangValue[lang].APPLY}</Text>
                                     </TouchableOpacity>
                                 </View>
-
                                 <View style={{ flexDirection: 'row', justifyContent: "space-between", paddingHorizontal: 20, paddingVertical: 15 }}>
                                     <Text style={{ fontSize: 17, color: 'gray', textAlign: 'justify' }}>{LangValue[lang].SUBTOTAL}</Text>
                                     <Text style={{ fontSize: 17, color: 'gray', textAlign: 'justify' }}>SR: {this.state.subTotal}</Text>
@@ -183,8 +182,6 @@ class Paycheckout extends Component {
                                     <Text style={{ fontSize: 17, color: COLORS.Primary }}>{LangValue[lang].TOTAL}</Text>
                                     <Text style={{ fontSize: 17, color: COLORS.Primary }}>SR:{this.state.total}</Text>
                                 </View>
-
-
                                 <View style={{ marginVertical: 30, alignItems: 'center' }}>
                                     <TouchableOpacity style={styles.button} onPress={() => { this.makeOrder() }}>
                                         <Text style={styles.btnText}>{LangValue[lang].PAY}</Text>
@@ -193,8 +190,6 @@ class Paycheckout extends Component {
                             </View>
 
                         </View>
-
-
                     </ScrollView>
                 </KeyboardAvoidingView>
             </View>
@@ -204,23 +199,13 @@ class Paycheckout extends Component {
 const styles = StyleSheet.create({
     main: {
         flex: 1,
-
-
-    },
-    subcontainer: {
-        backgroundColor: COLORS.Primary,
-        width: '100%',
-        height: 200,
-        borderRadius: 15,
-        marginBottom: 35
     },
     container: {
         marginVertical: 5,
-        marginHorizontal: 5
     },
     button: {
         backgroundColor: COLORS.Primary,
-        width: 125,
+        width: '30%',
         paddingVertical: 10,
         borderRadius: 20,
         ...IOSShadow

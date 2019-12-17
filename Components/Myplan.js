@@ -20,7 +20,8 @@ class Myplan extends Component {
         this.state = {
             SubscriptionCount: 0,
             SubscriptionPlan: 0,
-            RemainingDays: 0
+            RemainingDays: 0,
+            resultData:{}
         }
     }
     componentDidMount() {
@@ -36,9 +37,10 @@ class Myplan extends Component {
                 let { success, message, result } = res.data;
                 if (success == 1) {
                     this.setState({
-                        SubscriptionCount: result[0].SubscriptionCount,
+                        SubscriptionCount: result[0].SubscriptionId,
                         SubscriptionPlan: result[0].SubscriptionPlan,
-                        RemainingDays: result[0].RemainingDays
+                        RemainingDays: result[0].RemainingDays,
+                        resultData:result[0]
                     });
                 }
                 else {
@@ -57,9 +59,9 @@ class Myplan extends Component {
             <View style={styles.main}>
                 <ScrollView contentContainerStyle={{ paddingHorizontal: 10, paddingVertical: 20 }}>
                     <View style={styles.container}>
-                        <TouchableOpacity style={styles.subcontainer} onPress={() => { this.props.navigation.navigate('PlanHitory') }}>
+                        <TouchableOpacity style={styles.subcontainer} onPress={() => { this.props.navigation.navigate('PlanHitory',{SubsData:this.state.resultData}) }}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 15, paddingVertical: 13 }}>
-                                <Text style={{ color: '#FFFFFF', fontSize: 15 }}>Plan:{this.state.SubscriptionPlan}</Text>
+                                <Text style={{ color: '#FFFFFF', fontSize: 15 }}>{LangValue[lang].PLAN} : {this.state.SubscriptionPlan}</Text>
                                 <Text style={{ color: '#FFFFFF', fontSize: 15 }}>{this.state.RemainingDays} {LangValue[lang].DAYS_LEFT}</Text>
                             </View>
                             <Text style={{ textAlign: "center", marginVertical: 45, fontSize: 24, color: '#FFFFFF' }}>{LangValue[lang].SUBSCRIPTION_NO} : {this.state.SubscriptionCount}</Text>

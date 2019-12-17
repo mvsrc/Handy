@@ -50,6 +50,8 @@ export const LangValue = {
         HOME_WASTAGE: 'Home Wastage',
         GAS_SERVICES: 'Gas Services',
         WATER_SERVICES: 'Water Services',
+        VERIFY_ACCOUNT:'Please verify account, Verification link send to email',
+
 
         /**  Navigation Text */
         MY_PLAN: 'My Plan',
@@ -86,6 +88,10 @@ export const LangValue = {
         SAVE: 'Save',
         YOUR_LOCATION: 'Your Location',
         PRODUCT_DETAILS:'Product Details',
+        GAS_WATER:'Gas & Water',
+        TIMES:'Times',
+        TOMORROW:'Tomorrow',
+        TODAY:'Today',
 
         /** FEEDBACK PAGE */
         SUGGESTION: 'Suggestion',
@@ -113,6 +119,15 @@ export const LangValue = {
         DISCOUNT:'Discount',
         TOTAL:'Total',
         PAY:'Pay',
+
+        /** Dialogue Text */
+        ERROR_FIRST_NAME:'Please enter your first name',
+        ERROR_LAST_NAME:'Please enter your last name',
+        ERROR_MOBILE_SHORT:'Please enter 9 digit mobile number',
+        ERROR_TC:'Please accept Terms and condition',
+        ERROR_PASS_MATCH:'Password not matched',
+        ERROR_SELECT_DISTRICT:'Please select District',
+        ERROR_HOME_NO:'Please enter apartment name',
     },
     'ar': {
         HANDY: 'هاندي',
@@ -166,6 +181,7 @@ export const LangValue = {
         HOME_WASTAGE: 'نقل النفايات',
         GAS_SERVICES: 'خدمات الغاز',
         WATER_SERVICES: 'خدمات المياة',
+        VERIFY_ACCOUNT:'يرجى التحقق من الحساب ، رابط التحقق من إرسال البريد الإلكتروني',
 
         /**  Navigation Text */
         MY_PLAN: 'خطتي',
@@ -203,6 +219,10 @@ export const LangValue = {
         SAVE: 'حفظ',
         YOUR_LOCATION: 'موقعك',
         PRODUCT_DETAILS:'تفاصيل المنتج',
+        GAS_WATER:'الغاز والماء',
+        TIMES:'مرات',
+        TOMORROW:'غدا',
+        TODAY:'اليوم',
 
 
         /** FEEDBACK PAGE */
@@ -232,5 +252,11 @@ export const LangValue = {
         DISCOUNT:'خصم',
         TOTAL:'المجموع',
         PAY:'ادفع',
+
+        /** Dialogue Text */
+        ERROR_FIRST_NAME:'أدخل الإسم الأول',
+        ERROR_LAST_NAME:'أدخل الأسم الأخير',
+        ERROR_MOBILE_SHORT:'أدخل 9 أرقام لجوالك',
+        ERROR_TC:'الموافقة على الشروط والأحكام',
     }
 }

@@ -39,12 +39,13 @@ class Plangaswaterservice extends Component {
     }
     _runGasApi = async (countSet) => {
         this.currentProps.LoadingStatusChange(true);
-        let { userData,lang } = this.currentProps.reducer;
+        let { userData, lang } = this.currentProps.reducer;
         await Axios.get(`${API_URL}gas.php?action=gas&UserId=${userData.UserId}&lang=${lang}`)
             .then(res => {
+                let { deliverytime } = res.data;
+                this.reOrderTime(deliverytime);
                 let count = typeof (countSet) == 'undefined' ? parseInt(res.data.gas[0].GasMin) : parseInt(countSet);
                 this.setState({
-                    deliveryItems: res.data.deliverytime,
                     gasList: res.data.gas,
                     count,
                     addedCartList: res.data.list
@@ -59,7 +60,7 @@ class Plangaswaterservice extends Component {
     }
     _runWaterApi = async (countSet) => {
         this.currentProps.LoadingStatusChange(true);
-        let { userData,lang } = this.currentProps.reducer;
+        let { userData, lang } = this.currentProps.reducer;
         await Axios.get(`${API_URL}water.php?action=water&UserId=${userData.UserId}&lang=${lang}`)
             .then(res => {
                 let watercompanyList = [];
@@ -67,8 +68,9 @@ class Plangaswaterservice extends Component {
                     watercompanyList.push({ label: item.CompanyName, value: item.CompanyId });
                 });
                 let count = typeof (countSet) == 'undefined' ? parseInt(res.data.water[0].WaterMin) : parseInt(countSet);
+                let { deliverytime } = res.data;
+                this.reOrderTime(deliverytime);
                 this.setState({
-                    deliveryItems: res.data.deliverytime,
                     waterList: res.data.water,
                     count,
                     addedCartList: res.data.list,
@@ -89,7 +91,7 @@ class Plangaswaterservice extends Component {
     }
     addToCart = (type) => {
         let addToCartUrl = '';
-        let { userData,lang } = this.currentProps.reducer;
+        let { userData, lang } = this.currentProps.reducer;
         if (type == 'water') {
             let WaterData = this.state.waterList[this.state.waterIndex];
             let totalProductPrice = WaterData.WaterPrice * this.state.count;
@@ -119,7 +121,7 @@ class Plangaswaterservice extends Component {
             })
     }
     removeFromCart = (type, ProductId) => {
-        let { userData,lang } = this.currentProps.reducer;
+        let { userData, lang } = this.currentProps.reducer;
         let removeToCartUrl = `${API_URL}cart.php?action=cart&type=remove&ProductId=${ProductId}&UserId=${userData.UserId}&lang=${lang}`;
         Axios.get(removeToCartUrl)
             .then(res => {
@@ -147,7 +149,7 @@ class Plangaswaterservice extends Component {
     }
     UpdateCart = (type) => {
         let addToCartUrl = '';
-        let { userData,lang } = this.currentProps.reducer;
+        let { userData, lang } = this.currentProps.reducer;
         if (type == 'water') {
             let WaterData = this.state.waterList[this.state.waterIndex];
             let totalProductPrice = WaterData.WaterPrice * this.state.count;
@@ -176,14 +178,58 @@ class Plangaswaterservice extends Component {
                 console.log('Add to Cart Error', err);
             })
     }
+    reOrderTime = (dT) => {
+        let { lang } = this.props.reducer;
+        let dTimesOrder = [];
+        //let dTime = dT.reverse();
+        dT.map((item, index) => {
+            let DeliveryTimeName = item.DeliveryTimeName.split('-');
+            let fromTime = this.convertTime12to24(DeliveryTimeName[0]);
+            let TodaysDateTime = new Date();
+            let DTDateTime = new Date(`${TodaysDateTime.getFullYear()}-${TodaysDateTime.getMonth() + 1}-${TodaysDateTime.getDate()} ${fromTime}`);
+            let nextText = '';
+            let isToday = false;
+            if (TodaysDateTime.getTime() > DTDateTime.getTime()) {
+                nextText = LangValue[lang].TOMORROW;
+                let TomorrowDate = new Date(DTDateTime.getTime());
+                TomorrowDate.setDate(TomorrowDate.getDate() + 1);
+                dTimesOrder.push({ DeliveryTimeName: `${item.DeliveryTimeName} (${LangValue[lang].TOMORROW})`, DeliveryTimeId: item.DeliveryTimeId, dateTime: TomorrowDate.getTime(), isToday: false });
+            }
+            else {
+                isToday = true;
+                nextText = LangValue[lang].TODAY;
+                let TomorrowDate = new Date(DTDateTime.getTime());
+                TomorrowDate.setDate(TomorrowDate.getDate() + 1);
+                dTimesOrder.push({ DeliveryTimeName: `${item.DeliveryTimeName} (${nextText})`, DeliveryTimeId: item.DeliveryTimeId, dateTime: DTDateTime.getTime(), isToday });
+                dTimesOrder.push({ DeliveryTimeName: `${item.DeliveryTimeName} (${LangValue[lang].TOMORROW})`, DeliveryTimeId: item.DeliveryTimeId, dateTime: TomorrowDate.getTime(), isToday: false });
+            }
+
+        });
+        dTimesOrder.sort(function (a, b) {
+            // Turn your strings into dates, and then subtract them
+            // to get a value that is either negative, positive, or zero.
+            return new Date(a.dateTime) - new Date(b.dateTime);
+        });
+        this.setState({ deliveryItems: dTimesOrder });
+    }
+    convertTime12to24(time12h) {
+        let [time, modifier] = time12h.split(' ');
+        let [hours, minutes] = time.split(':');
+        if (hours === '12') {
+            hours = '00';
+        }
+        if (modifier === 'PM') {
+            hours = parseInt(hours, 10) + 12;
+        }
+        return `${hours}:${minutes}:00`;
+    }
     render() {
         //'#29a4b3'
-        let {lang} = this.props.reducer;
+        let { lang } = this.props.reducer;
         return (
             <View style={styles.main}>
                 <ScrollView contentContainerStyle={{ marginHorizontal: 10, marginBottom: 30 }}>
                     <View style={styles.logoimage}>
-
                         <TouchableOpacity onPress={() => { this.setState({ currentTabs: 'gas' }, () => { this.runGasApi() }) }} activeOpacity={2}>
                             {this.state.currentTabs == 'gas' ? <Image source={require('../assets/gas-blue.png')} style={{ width: 50, height: 105 }} /> : <Image source={require('../assets/gas-gray.png')} style={{ width: 50, height: 105 }} />}
                             <Text style={{ fontSize: 16, color: (this.state.currentTabs == 'gas') ? '#29a4b3' : 'gray', textAlign: 'center' }} >{LangValue[lang].GAS}</Text>
@@ -404,15 +450,16 @@ class Plangaswaterservice extends Component {
                     <TouchableOpacity style={{ width: 115, borderBottomWidth: 1, borderBottomColor: '#666666', marginLeft: 10 }}>
                         <Text style={{ fontSize: 15, color: '#666666', }}>{LangValue[lang].ADD_MORE_ITEMS}.</Text>
                     </TouchableOpacity>
-                    <Text style={{ fontSize: 16, color: COLORS.Primary, marginLeft: 10, paddingVertical: 15,textAlign:'left' }}>{LangValue[lang].SELECT_DELIVERY_TIME}</Text>
+                    <Text style={{ fontSize: 16, color: COLORS.Primary, marginLeft: 10, paddingVertical: 15, textAlign: 'left' }}>{LangValue[lang].SELECT_DELIVERY_TIME}</Text>
                     {
                         this.state.deliveryItems.length > 0 &&
                         this.state.deliveryItems.map((item, index) => {
+                            console.log();
                             return (
                                 <TouchableOpacity onPress={() => { this.setState({ dTimeId: index }) }} activeOpacity={0.6} style={styles.radioButton} key={'dTimes-key-' + index}>
                                     <View style={[styles.radioButtonHolder, { height: 20, width: 20, borderColor: COLORS.Primary }]}>
                                         {
-                                            this.state.deliveryItems[this.state.dTimeId].DeliveryTimeId == item.DeliveryTimeId &&
+                                            this.state.dTimeId == index &&
                                             <View style={[styles.radioIcon, { height: 10, width: 10, backgroundColor: COLORS.Primary }]}></View>
                                         }
                                     </View>
@@ -421,7 +468,6 @@ class Plangaswaterservice extends Component {
                             );
                         })
                     }
-
                     <View style={{ marginVertical: 30, alignItems: 'center' }}>
                         <TouchableOpacity onPress={() => { this.props.navigation.navigate('Paycheckout', { dTimeId: this.state.dTimeId }) }} style={styles.button}>
                             <Text style={styles.btnText}>{LangValue[lang].PAY_NOW}</Text>
@@ -524,7 +570,6 @@ const styles = StyleSheet.create({
 
 
 });
-
 const mapStatetoProps = (state) => {
     const { reducer } = state;
     return { reducer };
