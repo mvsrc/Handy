@@ -13,7 +13,7 @@
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
 #import <GoogleMaps/GoogleMaps.h>
-
+#import <React/RCTI18nUtil.h>
 //@import GoogleMaps;
 
 @implementation AppDelegate
@@ -36,6 +36,7 @@
   [FIRApp configure];
   [[UNUserNotificationCenter currentNotificationCenter] setDelegate:self];
   [RNFirebaseNotifications configure];
+  [[RCTI18nUtil sharedInstance] allowRTL:YES];
   return YES;
 }
 - (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification {

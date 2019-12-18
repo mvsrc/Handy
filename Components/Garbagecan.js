@@ -12,6 +12,7 @@ import Axios from 'axios';
 import { loadingChange } from '../Actions';
 import TabBar from './TabBar';
 import SimpleToast from 'react-native-simple-toast';
+import Geolocation from 'react-native-geolocation-service';
 class Garbagecan extends Component {
 
     constructor(props) {
@@ -23,13 +24,29 @@ class Garbagecan extends Component {
     }
     garbagedata = () => {
         this.props.LoadingStatusChange(true);
-        let { userData } = this.props.reducer;
-        Axios.get(`${API_URL}garbagecan.php?action=getList&DistrictId=1&ProviderId=${userData.UserId}&lang=${this.props.reducer.lang}`)
+        let { userData,proDistrictId } = this.props.reducer;
+        let queryUrl = `${API_URL}garbagecan.php?action=getList&DistrictId=${proDistrictId}&ProviderId=${userData.UserId}&lang=${this.props.reducer.lang}`;
+        Axios.get(queryUrl)
             .then(res => {
-                this.setState({ garbage: res.data.result,isRefreshing:false }, () => {
-                    this.props.LoadingStatusChange(false);
-                });
-                setTimeout(()=>{SimpleToast.show(res.data.message,SimpleToast.SHORT)},100);
+                let {success,message,result} = res.data;
+                let newResponses = [];
+                if(success == 1){
+                    for (let i = 0; i < result.length; i++) {
+                        if(!result[i].GarbageCanStatus){
+                            let [latitude,longitude] = result[i].UserLocation.split(',');
+                            result[i]["distance"] = this.calculateDistance(this.state.UserLat, this.state.UserLng, latitude, longitude, "K");
+                            newResponses.push({...result[i]});
+                        }
+                    }
+                    newResponses.sort(function(a, b) { 
+                        return a.distance - b.distance;
+                      });
+                    this.setState({ garbage: newResponses,isRefreshing:false }, () => {
+                        this.props.LoadingStatusChange(false);
+                    });
+                }
+                
+                setTimeout(()=>{SimpleToast.show(message,SimpleToast.SHORT)},100);
             })
             .catch(err => {
                 this.props.LoadingStatusChange(false);
@@ -37,7 +54,24 @@ class Garbagecan extends Component {
             });
     }
     componentDidMount() {
-        this.garbagedata();
+        this.props.LoadingStatusChange(true);
+        Geolocation.getCurrentPosition(
+            (position) => {
+                let { latitude, longitude } = position.coords;
+                
+                this.setState({ UserLat: latitude, UserLng: longitude }, () => {
+                    this.garbagedata();
+                });
+
+            },
+            (error) => {
+                // See error code charts below.
+                console.log(error.code, error.message);
+                Toast.show(error.message, Toast.SHORT);
+                this.props.LoadingStatusChange(false);
+            },
+            { enableHighAccuracy: true }
+        );
     }
     updateGarbageStatus = (status,sId)=>{
         Axios.get(`${API_URL}garbagecan.php?action=UpdateGarbageStatus&GarbageCanStatus=${status}&SubscriptionId=${sId}&lang=${this.props.reducer.lang}`)
@@ -49,6 +83,21 @@ class Garbagecan extends Component {
                 this.props.LoadingStatusChange(false);
                 console.log('District Error', err);
             });
+    }
+    calculateDistance(lat1, lon1, lat2, lon2, unit) {
+        var radlat1 = Math.PI * lat1 / 180
+        var radlat2 = Math.PI * lat2 / 180
+        var radlon1 = Math.PI * lon1 / 180
+        var radlon2 = Math.PI * lon2 / 180
+        var theta = lon1 - lon2
+        var radtheta = Math.PI * theta / 180
+        var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+        dist = Math.acos(dist)
+        dist = dist * 180 / Math.PI
+        dist = dist * 60 * 1.1515
+        if (unit == "K") { dist = dist * 1.609344 }
+        if (unit == "N") { dist = dist * 0.8684 }
+        return dist
     }
     render() {
         return (

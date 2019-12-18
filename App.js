@@ -8,6 +8,7 @@ import Loader from './Components/Loader';
 import { SetLanguageAction } from './Actions';
 import AsyncStorage from '@react-native-community/async-storage';
 import firebase from 'react-native-firebase';
+import RNRestart from 'react-native-restart';
 console.disableYellowBox = true;
 class AppComponent extends Component {
   constructor(props) {
@@ -28,9 +29,11 @@ class AppComponent extends Component {
   setRTL = () => {
     if (this.props.reducer.lang == 'ar') {
       I18nManager.forceRTL(true);
+      I18nManager.swapLeftAndRightInRTL(true);
     }
     else if (this.props.reducer.lang == 'en') {
       I18nManager.forceRTL(false);
+      I18nManager.swapLeftAndRightInRTL(false);
     }
   }
   componentDidUpdate(prevProp) {
@@ -38,6 +41,20 @@ class AppComponent extends Component {
       this.setRTL();
     }
   }
+  setLanguage = async () => {
+    let {lang} = this.props.reducer;
+    let changeLang = (lang == 'en')?'ar':'en';
+    await AsyncStorage.setItem('lang', changeLang)
+        .then(res => {
+            this.props.SetLanguageAction(changeLang)
+            setTimeout(()=>{
+                RNRestart.Restart();
+            },100)
+        })
+        .catch(err => {
+            console.log(err);
+        })
+}
   render() {
     return (
       <View style={{ flex: 1 }}>
@@ -45,7 +62,7 @@ class AppComponent extends Component {
         <Loader loading={this.props.reducer.loading} />
         {
           this.state.isProcessing == false &&
-          <MainNavigation screenProps={{ lang: this.props.reducer.lang }} />
+          <MainNavigation screenProps={{ lang: this.props.reducer.lang,setLanguage:this.setLanguage }} />
         }
       </View>
     )

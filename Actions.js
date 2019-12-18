@@ -48,3 +48,9 @@ export const checkUserStatusAction = (userData)=>{
         userData
     }
 }
+export const setProDistrictIdAction = (proDistrictId)=>{
+    return {
+        type:'SET_PRO_DISTRICT_ID',
+        proDistrictId
+    }
+}

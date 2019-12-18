@@ -111,7 +111,7 @@ class Updateprofile extends Component {
                                 }
                             </View>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => { this.setLanguage() }} style={{ marginBottom: 20 }}>
+                        {/* <TouchableOpacity onPress={() => { this.setLanguage() }} style={{ marginBottom: 20 }}>
                             <View style={{ flexDirection: 'row', justifyContent: "space-between", paddingHorizontal: 17, backgroundColor: COLORS.Primary, paddingVertical: 14 }}>
 
                                 <Text style={{ fontSize: 17, color: '#FFFFFF' }}>{LangValue[reducer.lang].CHANGE_LANGUAGE}</Text>
@@ -124,7 +124,7 @@ class Updateprofile extends Component {
                                     <Icon name='right' size={18} color='#FFFFFF' />
                                 }
                             </View>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                         <Text style={{ fontSize: 18, textAlign: (reducer.lang == 'ar' ? 'left' : 'left') }}>{LangValue[reducer.lang].PROFILE_DETAILS}</Text>
                         <View style={styles.textcontainer}>
                             <Text style={[styles.inputtext, { textAlign: (reducer.lang == 'ar' ? 'left' : 'left') }]}>{LangValue[reducer.lang].FIRST_NAME}</Text>

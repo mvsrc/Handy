@@ -1,7 +1,5 @@
 import { combineReducers } from 'redux';
-
-import { API_URL } from './Constants';
-const INITIAL_STATE = { loading: false, userData: null, error: null, authorized: false, showWelcomeMessage: false, lang: 'en',isRTL:false,userToken:'' };
+const INITIAL_STATE = { loading: false, userData: null, error: null, authorized: false, showWelcomeMessage: false, lang: 'en',isRTL:false,userToken:'',proDistrictId:0 };
 const reducer = (state = INITIAL_STATE, action) => {
     switch (action.type) {
         case 'USER_SIGNIN':
@@ -20,6 +18,8 @@ const reducer = (state = INITIAL_STATE, action) => {
             return setLanguage(state, action);
         case 'CHECK_USER_STATUS':
             return checkUserStatus(state,action);
+        case 'SET_PRO_DISTRICT_ID':
+            return processSetProDistrictId(state,action);
         default:
             return state
     }
@@ -83,5 +83,11 @@ checkUserStatus = (state,action)=>{
         ...state,
         userData:action.userData,
         loading:false
+    }
+}
+processSetProDistrictId = (state,action)=>{
+    return{
+        ...state,
+        proDistrictId:action.proDistrictId
     }
 }

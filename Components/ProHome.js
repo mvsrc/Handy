@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import TabBar from './TabBar';
 import RNPickerSelect from 'react-native-picker-select';
-import { loadingChange, showWelcomeMessageAction } from '../Actions';
+import { loadingChange, showWelcomeMessageAction,setProDistrictIdAction } from '../Actions';
 import Axios from 'axios';
 import { LangValue } from '../lang';
 class ProHome extends Component {
@@ -39,6 +39,7 @@ class ProHome extends Component {
             for (let i in UserDistrictIds) {
                 districtList.push({ label: UserDistrictNames[i], value: UserDistrictIds[i] });
             }
+            this.props.setProDistrcitId(districtList[0].value);
             this.setState({ districtList, UserDistrictName: districtList[0].value }, () => {
                 this.runProHomeApi();
             })
@@ -80,8 +81,8 @@ class ProHome extends Component {
                                     borderColor: '#F1F1F1',
                                     color: '#000000',
                                     textAlign: (lang == 'ar' ? 'right' : 'left'),
-                                    paddingRight: (lang == 'ar' ? 10 : 30), // to ensure the text is never behind the icon
-                                    paddingLeft: (lang == 'en' ? 30 : 10), // to ensure the text is never behind the icon
+                                    paddingRight: (lang == 'ar' ? 10 : 10), // to ensure the text is never behind the icon
+                                    paddingLeft: (lang == 'en' ? 10 : 10), // to ensure the text is never behind the icon
                                 },
                             }}
                             onValueChange={value => {
@@ -208,6 +209,7 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = dispatch => ({
     LoadingStatusChange: (loading) => dispatch(loadingChange(loading)),
-    ShowWelcomeMessageAction: (showWelcomeMessage) => dispatch(showWelcomeMessageAction(showWelcomeMessage))
+    ShowWelcomeMessageAction: (showWelcomeMessage) => dispatch(showWelcomeMessageAction(showWelcomeMessage)),
+    setProDistrcitId: (proDistrictId) => dispatch(setProDistrictIdAction(proDistrictId)),
 });
 export default connect(mapStateToProps, mapDispatchToProps)(ProHome);
