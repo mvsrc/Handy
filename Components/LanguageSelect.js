@@ -35,7 +35,7 @@ class LanguageSelect extends Component {
             <View style={{ flex: 1, backgroundColor: COLORS.Primary, justifyContent: 'center', alignItems: 'center' }}>
                 <Image source={require('../assets/handy-logo.png')} style={{ width: 200, height: 200 }} />
                 <Text style={{ fontSize: 25, color: '#FFFFFF', marginTop: 20, fontWeight: 'bold' }}>HANDY</Text>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '70%', marginTop: 70 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '80%', marginTop: 70 }}>
                     <TouchableOpacity onPress={()=>{this.setUserLanguage('en');}} style={{
                         backgroundColor: '#FFFFFF',
                         paddingHorizontal: 30,

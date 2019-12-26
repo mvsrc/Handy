@@ -70,7 +70,7 @@ class Myplan extends Component {
                                 <Icon name={lang=='en'?'right':'left'} size={15} color='#FFFFFF' />
                             </Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => {this.props.navigation.navigate('Plangaswaterservice')}} style={[styles.subcontainer, { backgroundColor: '#4fd43d', alignItems: 'center', justifyContent: 'center' }]}>
+                        {/* <TouchableOpacity onPress={() => {this.props.navigation.navigate('Plangaswaterservice')}} style={[styles.subcontainer, { backgroundColor: '#4fd43d', alignItems: 'center', justifyContent: 'center' }]}>
                             <Text style={{ fontSize: 24, color: '#FFFFFF' }}>{LangValue[lang].GAS_WATER_SERVICES}</Text>
                         </TouchableOpacity>
                         <View style={{ marginTop: 5, alignItems: 'center' }}>
@@ -82,7 +82,7 @@ class Myplan extends Component {
                                 }}>
                                 <Text style={{ textAlign: 'center', fontSize: 16, color: '#FFFFFF', fontWeight: 'bold' }}>{LangValue[lang].RENEW}</Text>
                             </TouchableOpacity>
-                        </View>
+                        </View> */}
                     </View>
                 </ScrollView>
                 <TabBar navigation={this.props.navigation} />

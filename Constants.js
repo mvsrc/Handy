@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 export const API_URL = 'http://stakesolution.com/handy/webservices/';
 export const MAP_KEY = 'AIzaSyBICJw17y2dHRe3KG2tqi_ZRkXN4g51i8A';
 export const COLORS = {
-    Primary: '#29a4b3',
+    Primary: '#29A4B3',
     Secondary: '#97c94c',
 }
 export const IOSShadow = {

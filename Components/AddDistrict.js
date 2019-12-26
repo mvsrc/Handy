@@ -18,7 +18,6 @@ class AddDistrict extends Component {
         let {userData} = this.props.reducer;
         let UserDistrictIds = [];
         UserDistrictIds = (userData.UserDistrictId.replace(/,+$/,'')).split(',');
-        console.log(UserDistrictIds);
         this.state = {
             district: [],
             selectedIds:UserDistrictIds
@@ -46,7 +45,6 @@ class AddDistrict extends Component {
         this.props.LoadingStatusChange(true);
         Axios.get(`${API_URL}adddistrict.php?action=add&UserId=${userData.UserId}&UserDistrict=${mergeDIds}`)
         .then(res=>{
-            console.log(res.data);
             setTimeout(()=>{Toast.show(res.data.message,Toast.SHORT)},100);
             this.props.LoadingStatusChange(false);
         })

@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-const INITIAL_STATE = { loading: false, userData: null, error: null, authorized: false, showWelcomeMessage: false, lang: 'en',isRTL:false,userToken:'',proDistrictId:0 };
+const INITIAL_STATE = { loading: false, userData: null, error: null, authorized: false, showWelcomeMessage: false, lang: 'en',isRTL:false,userToken:'',proDistrictId:0,credentialList:[] };
 const reducer = (state = INITIAL_STATE, action) => {
     switch (action.type) {
         case 'USER_SIGNIN':
@@ -20,6 +20,8 @@ const reducer = (state = INITIAL_STATE, action) => {
             return checkUserStatus(state,action);
         case 'SET_PRO_DISTRICT_ID':
             return processSetProDistrictId(state,action);
+        case 'SET_USERNAME_PASSWORD':
+            return processSetUsernamePassword(state,action);
         default:
             return state
     }
@@ -89,5 +91,11 @@ processSetProDistrictId = (state,action)=>{
     return{
         ...state,
         proDistrictId:action.proDistrictId
+    }
+}
+processSetUsernamePassword = (state,action)=>{
+    return {
+        ...state,
+        credentialList:action.credentialList
     }
 }

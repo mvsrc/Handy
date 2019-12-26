@@ -8,16 +8,22 @@ import {
 import { COLORS, API_URL, IOSShadow } from '../Constants';
 import { connect } from 'react-redux';
 import { actionUserSignIn, loadingChange, showWelcomeMessageAction } from '../Actions';
+import CheckBox from 'react-native-check-box';
 import { LangValue } from '../lang';
 import axios from 'axios';
 import Toast from 'react-native-simple-toast';
 import firebase from 'react-native-firebase';
+import Autocomplete from 'react-native-autocomplete-input';
+import * as _ from 'underscore';
 class Login extends Component {
     constructor(props) {
-        super(props)
+        super(props);
         this.state = {
             email: '',
             password: '',
+            rememberPassword: false,
+            credentialList: this.props.reducer.credentialList,
+            query: ''
         }
     }
     async checkPermission() {
@@ -41,7 +47,8 @@ class Login extends Component {
         }
     }
     async getToken() {
-        let { email, password } = this.state;
+        let { email, password, rememberPassword } = this.state;
+        let { credentialList } = this.props.reducer;
         await firebase.messaging().getToken().then(async fcmToken => {
             if (fcmToken) {
                 await axios.get(`${API_URL}login.php?action=login&UserEmail=${email}&UserPass=${password}&UserToken=${fcmToken}&lang=${this.props.reducer.lang}`)
@@ -52,8 +59,13 @@ class Login extends Component {
                                 setTimeout(() => { Toast.show(uD.message, Toast.SHORT); }, 200);
                                 delete uD['success'];
                                 delete uD['message'];
-                                this.props.LoginUserAction({ ...uD },fcmToken);
-                                await AsyncStorage.multiSet([['isUserLoggedIn', "true"], ["userData", JSON.stringify(uD)],["userToken",fcmToken]]).then(() => {
+                                this.props.LoginUserAction({ ...uD }, fcmToken);
+                                let setAsuncValues = [['isUserLoggedIn', "true"], ["userData", JSON.stringify(uD)], ["userToken", fcmToken],];
+                                if (rememberPassword == true) {
+                                    credentialList.push({ "username": email, "password": password });
+                                    setAsuncValues.push(["credentialList", JSON.stringify(credentialList)]);
+                                }
+                                await AsyncStorage.multiSet(setAsuncValues).then(() => {
                                     this.props.ShowWelcomeMessageAction(true);
                                     if (uD.UserType == 'provider') {
                                         setTimeout(() => {
@@ -84,7 +96,7 @@ class Login extends Component {
                         console.log('Login Error', err);
                     })
             }
-            else{
+            else {
                 await axios.get(`${API_URL}login.php?action=login&UserEmail=${email}&UserPass=${password}&UserToken=ios&lang=${this.props.reducer.lang}`)
                     .then(async res => {
                         let uD = res.data;
@@ -93,8 +105,8 @@ class Login extends Component {
                                 setTimeout(() => { Toast.show(uD.message, Toast.SHORT); }, 200);
                                 delete uD['success'];
                                 delete uD['message'];
-                                this.props.LoginUserAction({ ...uD },fcmToken);
-                                await AsyncStorage.multiSet([['isUserLoggedIn', "true"], ["userData", JSON.stringify(uD)],["userToken",ios]]).then(() => {
+                                this.props.LoginUserAction({ ...uD }, fcmToken);
+                                await AsyncStorage.multiSet([['isUserLoggedIn', "true"], ["userData", JSON.stringify(uD)], ["userToken", ios]]).then(() => {
                                     this.props.ShowWelcomeMessageAction(true);
                                     if (uD.UserType == 'provider') {
                                         setTimeout(() => {
@@ -142,32 +154,68 @@ class Login extends Component {
         this.props.LoadingStatusChange(true);
         this.checkPermission();
     };
+    findCreds(query) {
+        if (query === '') {
+            return [];
+        }
+
+        const { credentialList } = this.state;
+        const regex = new RegExp(`${query.trim()}`, 'i');
+        let list = credentialList.filter(cL => cL.username.search(regex) >= 0);
+        return list;
+    }
     render() {
         let { navigation, reducer } = this.props;
-        const behavior = (Platform.OS == 'ios') ? 'padding' : '';
+        const { email } = this.state;
+        const credentialList = this.findCreds(email);
+        const comp = (a, b) => a.toLowerCase().trim() === b.toLowerCase().trim();
         return (
             <View style={styles.main}>
-                <KeyboardAvoidingView enabled behavior={behavior} style={{ flex: 1 }}>
-                    <ScrollView keyboardShouldPersistTaps="handled">
+                <KeyboardAvoidingView enabled behavior='padding' style={{ flex: 1 }}>
+                    <ScrollView keyboardShouldPersistTaps="always">
                         <View style={styles.logoimage}>
                             <Image source={require('../assets/handy-logo.png')} style={{ width: 140, height: 140 }} />
                         </View>
                         <Text style={{ color: COLORS.Primary, marginLeft: 20, fontSize: 20, fontWeight: 'bold', textAlign: 'center' }}>{LangValue[reducer.lang].WELCOME}</Text>
                         <View style={styles.textcontainer}>
-                            <View style={styles.textinput}>
-                                <TextInput
+                            <View style={[styles.textinput,{zIndex:5}]}>
+                                <Autocomplete
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                    containerStyle={{borderWidth:0}}
+                                    inputContainerStyle={{borderWidth:0,backgroundColor:'#FFFFFF'}}
+                                    listContainerStyle={{backgroundColor:'#FFFFFF',borderColor:'gray'}}
+                                    data={credentialList.length === 1 && comp(email, credentialList[0].username) ? [] : credentialList}
+                                    defaultValue={email}
+                                    onChangeText={text => this.setState({ email: text })}
                                     placeholder={LangValue[reducer.lang].EMAIL_ID}
-                                    placeholderTextColor='gray'
-                                    onChangeText={(txt) => this.setState({ email: txt })}
-                                    onSubmitEditing={() => { this.password.focus(); }}
-                                    underlineColorAndroid="transparent"
-                                    keyboardType="email-address"
-                                    autoCapitalize='none'
-                                    blurOnSubmit={false}
-                                    returnKeyType={"next"}
-                                    value={this.state.email}
-                                    style={[styles.textField, { textAlign: (reducer.lang == 'ar' ? 'right' : 'left') }]}
+                                    renderTextInput={() => (
+                                        <TextInput
+                                            placeholder={LangValue[reducer.lang].EMAIL_ID}
+                                            placeholderTextColor='gray'
+                                            onChangeText={(txt) => this.setState({ email: txt })}
+                                            onSubmitEditing={() => { this.password.focus(); }}
+                                            underlineColorAndroid="transparent"
+                                            keyboardType="email-address"
+                                            autoCapitalize='none'
+                                            autoCorrect={false}
+                                            blurOnSubmit={false}
+                                            returnKeyType={"next"}
+                                            value={this.state.email}
+                                            style={[styles.textField, { textAlign: (reducer.lang == 'ar' ? 'right' : 'left') }]}
+                                        />
+                                    )}
+                                    renderItem={({ item: { username, password } }) => {
+                                        return (
+                                            <TouchableOpacity style={{backgroundColor:'#FFFFFF'}} onPress={() => this.setState({ password, email: username })}>
+                                                <Text style={[styles.itemText,{textAlign:"left"}]}>
+                                                    {username}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        )
+                                    }}
                                 />
+
                             </View>
 
                             <View style={styles.textinput}>
@@ -186,11 +234,23 @@ class Login extends Component {
                                     style={[styles.textField, { textAlign: (reducer.lang == 'ar' ? 'right' : 'left') }]}
                                 />
                             </View>
-                            <View style={{ marginLeft: 10, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', width: '100%', marginTop: 20 }}>
-                                {/* <CheckBox value={false} style={{ width: '10%' }} />
-                                <Text style={{ fontWeight: 'bold', width: '42%' }}>Remember password</Text> */}
-                                <TouchableOpacity style={{ marginRight: 15, width: '45%' }} onPress={() => { navigation.navigate('ForgotPassword') }}>
-                                    <Text style={{ fontWeight: 'bold', textAlign: 'right', }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <CheckBox
+                                        style={{ padding: 7, paddingLeft: 0, }}
+                                        onClick={() => {
+                                            this.setState({
+                                                rememberPassword: !this.state.rememberPassword
+                                            })
+                                        }}
+                                        isChecked={this.state.rememberPassword}
+                                        checkBoxColor={COLORS.Primary}
+                                        checkedCheckBoxColor={COLORS.Primary}
+                                    />
+                                    <Text style={{ fontWeight: 'bold', fontSize: 14 }}>{LangValue[reducer.lang].REMEMBER_PASSWORD}</Text>
+                                </View>
+                                <TouchableOpacity style={{ width: '45%' }} onPress={() => { navigation.navigate('ForgotPassword') }}>
+                                    <Text style={{ fontWeight: 'bold', textAlign: 'right', fontSize: 14 }}>
                                         {LangValue[reducer.lang].FORGOT_PASSWORD}
                                     </Text>
                                 </TouchableOpacity>
@@ -246,8 +306,11 @@ const styles = StyleSheet.create({
         fontSize: 15,
         color: '#FFFFFF',
         fontWeight: 'bold'
-    }
-
+    },
+    itemText: {
+        fontSize: 20,
+        padding: 5
+    },
 });
 const mapStatetoProps = (state) => {
     const { reducer } = state;

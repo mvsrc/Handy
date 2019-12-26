@@ -10,6 +10,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { connect } from 'react-redux';
 import { loadingChange } from '../Actions';
 import { LangValue } from '../lang';
+import SimpleToast from 'react-native-simple-toast';
 class Homewastageorderdetail extends Component {
     constructor(props) {
         super(props)
@@ -18,6 +19,19 @@ class Homewastageorderdetail extends Component {
             productList: this.props.navigation.getParam('productList')
         }
     }
+    makeCall = (userPhone) => {
+        let phoneNumber = '';
+        phoneNumber = `telprompt:+966${userPhone}`;
+        try {
+            Linking.openURL(phoneNumber).then(res => {
+            }).catch(err => {
+                SimpleToast.show(err.message, SimpleToast.SHORT);
+            });
+        }
+        catch (err) {
+            SimpleToast.show(err, SimpleToast.SHORT);
+        }
+    };
     render() {
         let user = this.props.navigation.getParam('itemdata');
         let { lang } = this.props.reducer;
@@ -28,38 +42,42 @@ class Homewastageorderdetail extends Component {
                     <View style={styles.container}>
 
                         <View style={{ flexDirection: 'row', width: '100%', marginTop: 20 }}>
-                            <Text style={{ width: '47%', fontSize: 16, }}>Name</Text>
-                            <Text style={{ width: '47%', fontSize: 16, }}>{user.UserFName} {user.UserLName}</Text>
+                            <Text style={{ width: '47%', fontSize: 14, textAlign: 'left' }}>{LangValue[lang].NAME}</Text>
+                            <Text style={{ width: '47%', fontSize: 14, textAlign: 'left' }}>{user.UserFName} {user.UserLName}</Text>
                         </View>
 
                         <View style={{ flexDirection: 'row', width: '100%', marginTop: 20 }}>
-                            <Text style={{ width: '47%', fontSize: 16, }}>{LangValue[lang].PHONE_NUMBER}</Text>
-                            <Text style={{ width: '47%', fontSize: 16, }}>{user.UserPhone}</Text>
+                            <Text style={{ width: '47%', fontSize: 14, textAlign: 'left' }}>{LangValue[lang].PHONE_NUMBER}</Text>
+                            <Text style={{ width: '47%', fontSize: 14, textAlign: 'left' }}>{user.UserPhone}</Text>
                         </View>
 
                         <View style={{ flexDirection: 'row', width: '100%', marginTop: 20 }}>
-                            <Text style={{ width: '47%', fontSize: 16, }}>{LangValue[lang].REGISTER_EMAIL}</Text>
-                            <Text style={{ width: '47%', fontSize: 16, }}>{user.UserEmail}</Text>
+                            <Text style={{ width: '47%', fontSize: 14, textAlign: 'left' }}>{LangValue[lang].REGISTER_EMAIL}</Text>
+                            <Text style={{ width: '47%', fontSize: 14, textAlign: 'left' }}>{user.UserEmail}</Text>
                         </View>
 
                         <View style={{ flexDirection: 'row', width: '100%', marginTop: 20 }}>
-                            <Text style={{ width: '47%', fontSize: 16, }}>{LangValue[lang].HOME_LOCATION}</Text>
-                            <Text style={{ width: '47%', fontSize: 16, }}>{user.UserHome}</Text>
+                            <Text style={{ width: '47%', fontSize: 14, textAlign: 'left' }}>{LangValue[lang].HOME_LOCATION}</Text>
+                            <Text style={{ width: '47%', fontSize: 14, textAlign: 'left' }}>{user.UserHome}</Text>
                         </View>
 
                         <View style={{ flexDirection: 'row', width: '100%', marginTop: 20 }}>
-                            <Text style={{ width: '47%', fontSize: 16, }}>{LangValue[lang].CITY}</Text>
-                            <Text style={{ width: '47%', fontSize: 16, }}>{user.UserDistrictName}</Text>
+                            <Text style={{ width: '47%', fontSize: 14, textAlign: 'left' }}>{LangValue[lang].CITY}</Text>
+                            <Text style={{ width: '47%', fontSize: 14, textAlign: 'left' }}>{user.UserDistrictName}</Text>
+                        </View>
+                        <View style={{ flexDirection: 'row', width: '100%', marginTop: 20 }}>
+                            <Text style={{ width: '47%', fontSize: 14, textAlign: 'left' }}>{LangValue[lang].DELIVERY_TIMING}</Text>
+                            <Text style={{ width: '47%', fontSize: 14, textAlign: 'left' }}>{user.delivery}</Text>
                         </View>
 
-                        <View style={{ flexDirection: 'row', justifyContent: "center", alignItems: 'center', marginTop: 30 }}>
-                            {/* <TouchableOpacity style={styles.button}  onPress={() => { this.dialCall(user.UserPhone) }}>
-                                <Text style={styles.btnText}>Call</Text>
-                            </TouchableOpacity> */}
+                        <View style={{ flexDirection: 'row', justifyContent: "space-around", alignItems: 'center', marginTop: 30 }}>
+                            <TouchableOpacity style={styles.button} onPress={() => { this.makeCall(user.UserPhone) }}>
+                                <Text style={styles.btnText}>{LangValue[lang].CALL}</Text>
+                            </TouchableOpacity>
                             <TouchableOpacity style={styles.button} onPress={() => {
                                 this.props.navigation.navigate('OrderLocation', { orderLocation: user.UserLocation, itemdata: user, type: this.props.navigation.getParam('type') });
                             }}>
-                                <Icon name='paper-plane-o' size={23} color='#FFFFFF' style={styles.btnText} />
+                                <Icon name='paper-plane-o' size={25} color='#FFFFFF' style={styles.btnText} />
                             </TouchableOpacity>
                         </View>
 

@@ -9,6 +9,7 @@ import { connect } from 'react-redux';
 import { loadingChange } from '../Actions';
 import Toast from 'react-native-simple-toast';
 import Axios from 'axios';
+import { LangValue } from '../lang';
 class Changepassword extends Component {
     constructor(props) {
         super(props);
@@ -55,6 +56,7 @@ class Changepassword extends Component {
         })
     }
     render() {
+        let {lang} = this.props.reducer;
         return (
             <View style={styles.main}>
                 <KeyboardAvoidingView enabled>
@@ -63,7 +65,7 @@ class Changepassword extends Component {
                             onChangeText={(txt) => this.setState({ oldpassword: txt })}
                             onSubmitEditing={() => { this.newpassword.focus(); }}
                             returnKeyType="next"
-                            placeholder='Old Password'
+                            placeholder={LangValue[lang].OLD_PASSWORD}
                             placeholderTextColor='#999999'
                             underlineColorAndroid="transparent"
                             style={styles.textField}
@@ -75,7 +77,7 @@ class Changepassword extends Component {
                             onSubmitEditing={() => { this.confirmpassword.focus(); }}
                             ref={(input) => { this.newpassword = input; }}
                             returnKeyType="next"
-                            placeholder='New Password'
+                            placeholder={LangValue[lang].NEW_PASSWORD}
                             placeholderTextColor='#999999'
                             underlineColorAndroid="transparent"
                             style={styles.textField}
@@ -87,7 +89,7 @@ class Changepassword extends Component {
                             onSubmitEditing={() => { this._updatePassword(); }}
                             ref={(input) => { this.confirmpassword = input; }}
                             returnKeyType="go"
-                            placeholder='Confirm Password'
+                            placeholder={LangValue[lang].CONFIRM_PASSWORD}
                             placeholderTextColor='#999999'
                             underlineColorAndroid="transparent"
                             style={styles.textField}
@@ -96,7 +98,7 @@ class Changepassword extends Component {
                         />
                         <View style={{ marginTop: 30, alignItems: 'center' }}>
                             <TouchableOpacity onPress={()=>{this._updatePassword();}} style={{ width: '50%', backgroundColor: COLORS.Primary, borderRadius: 30 }}>
-                                <Text style={styles.button}>Submit</Text>
+                                <Text style={styles.button}>{LangValue[lang].SUBMIT}</Text>
                             </TouchableOpacity>
                         </View>
                     </ScrollView>

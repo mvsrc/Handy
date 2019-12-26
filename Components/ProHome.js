@@ -1,23 +1,25 @@
 import React, { Component } from 'react';
 import {
     View, Text, TouchableOpacity,
-    Image, ScrollView, StyleSheet, Modal
+    Image, ScrollView, StyleSheet, Modal, Dimensions
 } from 'react-native';
 import { COLORS, API_URL } from '../Constants';
 import { connect } from 'react-redux';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import TabBar from './TabBar';
 import RNPickerSelect from 'react-native-picker-select';
-import { loadingChange, showWelcomeMessageAction,setProDistrictIdAction } from '../Actions';
+import { loadingChange, showWelcomeMessageAction, setProDistrictIdAction } from '../Actions';
 import Axios from 'axios';
 import { LangValue } from '../lang';
+import SimpleToast from 'react-native-simple-toast';
+const { height } = Dimensions.get('screen');
 class ProHome extends Component {
     curProps = this.props;
     constructor(props) {
         super(props);
         this.state = {
             districtList: [],
-            UserDistrictName: '0',
+            UserDistrictName: '',
             gasCount: 0,
             waterCount: 0,
             wastageCount: 0
@@ -39,7 +41,7 @@ class ProHome extends Component {
             for (let i in UserDistrictIds) {
                 districtList.push({ label: UserDistrictNames[i], value: UserDistrictIds[i] });
             }
-            this.props.setProDistrcitId(districtList[0].value);
+            this.curProps.setProDistrcitId(districtList[0].value);
             this.setState({ districtList, UserDistrictName: districtList[0].value }, () => {
                 this.runProHomeApi();
             })
@@ -47,9 +49,26 @@ class ProHome extends Component {
         });
     }
     runProHomeApi = () => {
-        Axios.get(`${API_URL}/prohome.php?action=home&UserDistrict=${this.state.UserDistrictName}&lang=${this.curProps.reducer.lang}`)
+        let { userData, lang } = this.curProps.reducer;
+        Axios.get(`${API_URL}/prohome.php?action=home&UserDistrict=${this.state.UserDistrictName}&lang=${lang}&UserId=${userData.UserId}`)
             .then(res => {
-                this.setState({ gasCount: res.data.gas[0], waterCount: res.data.water[0], wastageCount: res.data.wastage[0] }, () => {
+                let UserDistrictIdsString = res.data.UserDistrictId.split(',');
+                let UserDistrictIds = UserDistrictIdsString.filter(function (el) {
+                    return el != "" && el != null && el != undefined;
+                });
+                let UserDistrictNamesString = res.data.UserDistrictName.split(',');
+                let UserDistrictNames = UserDistrictNamesString.filter(function (el) {
+                    return el != "" && el != null && el != undefined;
+                });
+                let districtList = [];
+                for (let i in UserDistrictIds) {
+                    districtList.push({ label: UserDistrictNames[i], value: UserDistrictIds[i] });
+                }
+                let UserDistrictName = this.state.UserDistrictName;
+                if(UserDistrictName == ''){
+                    UserDistrictName = districtList[0].value;
+                }
+                this.setState({ gasCount: res.data.gas[0], waterCount: res.data.water[0], wastageCount: res.data.wastage[0],districtList, UserDistrictName }, () => {
                     this.curProps.LoadingStatusChange(false);
                 });
             })
@@ -115,9 +134,9 @@ class ProHome extends Component {
                                     <Text style={{ color: '#FFFFFF', fontSize: 18 }}>{LangValue[lang].HOME_WASTAGE}</Text>
                                 </View>
                             </TouchableOpacity>
-                            <View style={{ flexDirection: 'row', maxWidth: 500 }}>
-                                <TouchableOpacity style={[styles.servicesBtn, { width: '50%', borderBottomStartRadius: 10, borderRightWidth: 1 }]} onPress={() => {
-                                    this.curProps.navigation.navigate('ProGasWaterList', { districtId: this.state.UserDistrictName });
+                            <View style={{ flexDirection: 'row', maxWidth: 500, alignItems: 'center' }}>
+                                <TouchableOpacity style={[styles.servicesBtn, { width: '50%', borderBottomStartRadius: 10, borderRightWidth: 1, alignItems: 'center', justifyContent: 'center' }]} onPress={() => {
+                                    this.curProps.navigation.navigate('ProGasWaterList', { districtId: this.state.UserDistrictName,productType:'gas' });
                                 }}>
                                     <View style={styles.countWrapper}>
                                         <Text style={styles.countText}>{this.state.gasCount}</Text>
@@ -130,8 +149,8 @@ class ProHome extends Component {
                                         <Text style={{ color: '#FFFFFF', fontSize: 18 }}>{LangValue[lang].GAS_SERVICES}</Text>
                                     </View>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={[styles.servicesBtn, { width: '50%', borderBottomEndRadius: 10 }]} onPress={() => {
-                                    this.curProps.navigation.navigate('ProGasWaterList', { districtId: this.state.UserDistrictName });
+                                <TouchableOpacity style={[styles.servicesBtn, { width: '50%', borderBottomEndRadius: 10, alignItems: 'center', justifyContent: 'center' }]} onPress={() => {
+                                    this.curProps.navigation.navigate('ProGasWaterList', { districtId: this.state.UserDistrictName,productType:'water' });
                                 }}>
                                     <View style={styles.countWrapper}>
                                         <Text style={styles.countText}>{this.state.waterCount}</Text>
@@ -177,7 +196,8 @@ const styles = StyleSheet.create({
     servicesBtn: {
         backgroundColor: COLORS.Primary,
         borderColor: '#FFFFFF',
-        paddingVertical: 15
+        paddingVertical: 15,
+        minHeight: (height / 2) - 140
     },
     textWrapper: {
         alignItems: 'center',

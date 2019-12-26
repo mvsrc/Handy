@@ -32,7 +32,8 @@ class Plangaswaterservice extends Component {
             fWC: false,
             isAddedtoCart: false,
             addedCartProductId: 0,
-            addedCartList: []
+            addedCartList: [],
+            cIndex: 0
         }
         this.runGasApi = this._runGasApi.bind(this);
         this.runWaterApi = this._runWaterApi.bind(this);
@@ -48,7 +49,8 @@ class Plangaswaterservice extends Component {
                 this.setState({
                     gasList: res.data.gas,
                     count,
-                    addedCartList: res.data.list
+                    addedCartList: res.data.list,
+                    cIndex: 0
                 }, () => {
                     this.currentProps.LoadingStatusChange(false);
                 })
@@ -74,7 +76,8 @@ class Plangaswaterservice extends Component {
                     waterList: res.data.water,
                     count,
                     addedCartList: res.data.list,
-                    watercompanyList
+                    watercompanyList,
+                    cIndex: 0
                 }, () => {
                     this.currentProps.LoadingStatusChange(false);
                 })
@@ -205,11 +208,26 @@ class Plangaswaterservice extends Component {
             }
 
         });
+        let lengthOfToday = _.where(dTimesOrder, { isToday: true });
+
         dTimesOrder.sort(function (a, b) {
             // Turn your strings into dates, and then subtract them
             // to get a value that is either negative, positive, or zero.
+
             return new Date(a.dateTime) - new Date(b.dateTime);
         });
+        if (lengthOfToday.length > 1) {
+            // dTimesOrder.map((item, index) => {
+            //     if (item.isToday == false) {
+            //         dTimesOrder.splice(index, 1);
+            //     }
+            // });
+            dTimesOrder = _.reject(dTimesOrder, (item) => {
+                return item.isToday == false;
+
+            })
+        }
+
         this.setState({ deliveryItems: dTimesOrder });
     }
     convertTime12to24(time12h) {
@@ -289,56 +307,114 @@ class Plangaswaterservice extends Component {
                             }
                         </View>
                     }
-                    <Carousel
-                        loop={false}
-                        autoplay={false}
-                        index={0}
-                        pageSize={BannerWidth}
-                        showsPageIndicator={true}
-                        onPageChanged={(index) => {
-                            if (this.state.currentTabs == 'gas') {
-                                let SetCount = parseInt(this.state.gasList[index].GasMin);
-                                let checkisAddedtoCart = this.checkisAddedtoCart('gas', this.state.gasList[index].GasId)[0];
-                                if (checkisAddedtoCart) {
-                                    SetCount = checkisAddedtoCart.ProductQuantity;
+                    {
+                        this.state.currentTabs == 'gas' && this.state.gasList.length > 0 &&
+                        <Carousel
+                            loop={false}
+                            autoplay={false}
+                            index={this.state.cIndex}
+                            pageSize={BannerWidth}
+                            showsPageIndicator={true}
+                            onPageChanged={(index) => {
+                                if (this.state.currentTabs == 'gas') {
+                                    let SetCount = parseInt(this.state.gasList[index].GasMin);
+                                    let checkisAddedtoCart = this.checkisAddedtoCart('gas', this.state.gasList[index].GasId)[0];
+                                    if (checkisAddedtoCart) {
+                                        SetCount = checkisAddedtoCart.ProductQuantity;
+                                    }
+                                    this.setState({ gasIndex: index, count: SetCount, cIndex: index });
                                 }
-                                this.setState({ gasIndex: index, count: SetCount });
-                            }
-                            if (this.state.currentTabs == 'water') {
-                                let SetCount = parseInt(this.state.waterList[index].WaterMin);
-                                let checkisAddedtoCart = this.checkisAddedtoCart('water', this.state.waterList[index].WaterId)[0];
-                                if (checkisAddedtoCart) {
-                                    SetCount = checkisAddedtoCart.ProductQuantity;
+                                if (this.state.currentTabs == 'water') {
+                                    let SetCount = parseInt(this.state.waterList[index].WaterMin);
+                                    let checkisAddedtoCart = this.checkisAddedtoCart('water', this.state.waterList[index].WaterId)[0];
+                                    if (checkisAddedtoCart) {
+                                        SetCount = checkisAddedtoCart.ProductQuantity;
+                                    }
+                                    this.setState({ waterIndex: index, count: SetCount, cIndex: index });
                                 }
-                                this.setState({ waterIndex: index, count: SetCount });
+                            }}
+                        >
+                            {
+                                this.state.gasList.map((item, index) => (
+                                    <View key={'carousal-' + index}>
+                                        <Image style={{ width: BannerWidth - 20, height: 180 }} source={{ uri: item.GasImg }} />
+                                    </View>
+                                ))
                             }
-                        }}
-                    >
-                        {
-                            this.state.currentTabs == 'gas' && this.state.gasList.length > 0 &&
-                            this.state.gasList.map((item, index) => (
-                                <View key={'carousal-' + index}>
-                                    <Image style={{ width: BannerWidth - 20, height: 180 }} source={{ uri: item.GasImg }} />
-                                </View>
-                            ))
-                        }
-                        {
-                            this.state.currentTabs == 'water' && this.state.waterList.length > 0 && this.state.fWC == false &&
-                            this.state.waterList.map((item, index) => (
-                                <View key={'carousal-' + index}>
-                                    <Image style={{ width: BannerWidth - 20, height: 180 }} source={{ uri: item.WaterImg }} />
-                                </View>
-                            ))
-                        }
-                        {
-                            this.state.currentTabs == 'water' && this.state.filteredWaterList.length > 0 && this.state.fWC == true &&
-                            this.state.filteredWaterList.map((item, index) => (
-                                <View key={'carousal-' + index}>
-                                    <Image style={{ width: BannerWidth, height: 180 }} source={{ uri: item.WaterImg }} />
-                                </View>
-                            ))
-                        }
-                    </Carousel>
+                        </Carousel>
+                    }
+                    {
+                        this.state.currentTabs == 'water' && this.state.waterList.length > 0 && this.state.fWC == false &&
+                        <Carousel
+                            loop={false}
+                            autoplay={false}
+                            index={this.state.cIndex}
+                            pageSize={BannerWidth}
+                            showsPageIndicator={true}
+                            onPageChanged={(index) => {
+                                if (this.state.currentTabs == 'gas') {
+                                    let SetCount = parseInt(this.state.gasList[index].GasMin);
+                                    let checkisAddedtoCart = this.checkisAddedtoCart('gas', this.state.gasList[index].GasId)[0];
+                                    if (checkisAddedtoCart) {
+                                        SetCount = checkisAddedtoCart.ProductQuantity;
+                                    }
+                                    this.setState({ gasIndex: index, count: SetCount, cIndex: index });
+                                }
+                                if (this.state.currentTabs == 'water') {
+                                    let SetCount = parseInt(this.state.waterList[index].WaterMin);
+                                    let checkisAddedtoCart = this.checkisAddedtoCart('water', this.state.waterList[index].WaterId)[0];
+                                    if (checkisAddedtoCart) {
+                                        SetCount = checkisAddedtoCart.ProductQuantity;
+                                    }
+                                    this.setState({ waterIndex: index, count: SetCount, cIndex: index });
+                                }
+                            }}
+                        >
+                            {
+                                this.state.waterList.map((item, index) => (
+                                    <View key={'carousal-' + index}>
+                                        <Image style={{ width: BannerWidth - 20, height: 180 }} source={{ uri: item.WaterImg }} />
+                                    </View>
+                                ))
+                            }
+                        </Carousel>
+                    }
+                    {
+                        this.state.currentTabs == 'water' && this.state.filteredWaterList.length > 0 && this.state.fWC == true &&
+                        <Carousel
+                            loop={false}
+                            autoplay={false}
+                            index={this.state.cIndex}
+                            pageSize={BannerWidth}
+                            showsPageIndicator={true}
+                            onPageChanged={(index) => {
+                                if (this.state.currentTabs == 'gas') {
+                                    let SetCount = parseInt(this.state.gasList[index].GasMin);
+                                    let checkisAddedtoCart = this.checkisAddedtoCart('gas', this.state.gasList[index].GasId)[0];
+                                    if (checkisAddedtoCart) {
+                                        SetCount = checkisAddedtoCart.ProductQuantity;
+                                    }
+                                    this.setState({ gasIndex: index, count: SetCount, cIndex: index });
+                                }
+                                if (this.state.currentTabs == 'water') {
+                                    let SetCount = parseInt(this.state.waterList[index].WaterMin);
+                                    let checkisAddedtoCart = this.checkisAddedtoCart('water', this.state.waterList[index].WaterId)[0];
+                                    if (checkisAddedtoCart) {
+                                        SetCount = checkisAddedtoCart.ProductQuantity;
+                                    }
+                                    this.setState({ waterIndex: index, count: SetCount, cIndex: index });
+                                }
+                            }}
+                        >
+                            {
+                                this.state.filteredWaterList.map((item, index) => (
+                                    <View key={'carousal-' + index}>
+                                        <Image style={{ width: BannerWidth-20, height: 180 }} source={{ uri: item.WaterImg }} />
+                                    </View>
+                                ))
+                            }
+                        </Carousel>
+                    }
                     {
                         this.state.currentTabs == 'gas' && this.state.gasList.length > 0 &&
                         <View>

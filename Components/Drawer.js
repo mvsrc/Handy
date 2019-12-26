@@ -8,6 +8,64 @@ import { loadingChange, checkUserStatusAction } from '../Actions';
 import SimpleToast from 'react-native-simple-toast';
 const CustomDrawerContentComponent = props => {
     const { navigation, items, activeItemKey, reducer, descriptors } = props;
+    let navsItesm = [];
+    items.map((item, index) => {
+        let dL = descriptors[item.key].options.drawerLabel;
+        let navigateTo = item.routeName;
+        if (reducer.authorized == false) {
+            if (withLoggedIn.includes(item.key)) {
+                navigateTo = 'Login';
+            }
+        }
+        let key = item.key;
+        if (key == 'UpdateProfile') {
+            key = 'Update Profile';
+        }
+        if (key == 'My Plan') {
+            navsItesm.push(
+                <TouchableOpacity key={'drawer-key-renew'} style={{
+                    borderBottomColor: '#CCCCCC',
+                    borderBottomWidth: 1,
+                    paddingHorizontal: 10,
+                    paddingVertical: 7,
+                    backgroundColor: '#FFFFFF'
+                }} onPress={() => {
+                    navigation.dispatch(DrawerActions.closeDrawer());
+                }}>
+                    <Text style={{ fontSize: 14, color: '#333333', textAlign: 'left' }}>{LangValue[reducer.lang].RENEW}</Text>
+                </TouchableOpacity>
+            );
+        }
+        navsItesm.push(
+            <TouchableOpacity key={'drawer-key' + index} style={{
+                borderBottomColor: '#CCCCCC',
+                borderBottomWidth: 1,
+                paddingHorizontal: 10,
+                paddingVertical: 7,
+                backgroundColor: '#FFFFFF'
+            }} onPress={() => {
+                if (navigateTo == 'My Plan') {
+                    props.LoadingStatusChange(true);
+                    checkingUserStatus(reducer.userData, reducer.userToken, reducer.lang, props.CheckUserStatusAction).then(res => {
+                        if (res == true) {
+                            navigation.dispatch(DrawerActions.closeDrawer());
+                            navigation.navigate(navigateTo);
+                        }
+                        else {
+                            setTimeout(() => { SimpleToast.show(LangValue[reducer.lang].VERIFY_ACCOUNT, SimpleToast.SHORT); }, 100);
+                            navigation.dispatch(DrawerActions.closeDrawer());
+                        }
+                    });
+                }
+                else {
+                    navigation.dispatch(DrawerActions.closeDrawer());
+                    navigation.navigate(navigateTo);
+                }
+            }}>
+                <Text style={{ fontSize: 14, color: '#333333', textAlign: 'left' }}>{LangValue[reducer.lang][dL]}</Text>
+            </TouchableOpacity>
+        );
+    })
     return (
         <SafeAreaView
             style={styles.container}
@@ -23,48 +81,7 @@ const CustomDrawerContentComponent = props => {
             </View>
             <ScrollView >
                 {
-                    items.map((item, index) => {
-                        let dL = descriptors[item.key].options.drawerLabel;
-                        let navigateTo = item.routeName;
-                        if (reducer.authorized == false) {
-                            if (withLoggedIn.includes(item.key)) {
-                                navigateTo = 'Login';
-                            }
-                        }
-                        let key = item.key;
-                        if (key == 'UpdateProfile') {
-                            key = 'Update Profile';
-                        }
-                        return (
-                            <TouchableOpacity key={'drawer-key' + index} style={{
-                                borderBottomColor: '#CCCCCC',
-                                borderBottomWidth: 1,
-                                paddingHorizontal: 10,
-                                paddingVertical: 7,
-                                backgroundColor: (activeItemKey == item.key) ? COLORS.Secondary : '#FFFFFF'
-                            }} onPress={() => {
-                                if (navigateTo == 'My Plan') {
-                                    props.LoadingStatusChange(true);
-                                    checkingUserStatus(reducer.userData, reducer.userToken, reducer.lang, props.CheckUserStatusAction).then(res => {
-                                        if (res == true) {
-                                            navigation.dispatch(DrawerActions.closeDrawer());
-                                            navigation.navigate(navigateTo);
-                                        }
-                                        else {
-                                            setTimeout(() => { SimpleToast.show(LangValue[reducer.lang].VERIFY_ACCOUNT, SimpleToast.SHORT); }, 100);
-                                            navigation.dispatch(DrawerActions.closeDrawer());
-                                        }
-                                    });
-                                }
-                                else {
-                                    navigation.dispatch(DrawerActions.closeDrawer());
-                                    navigation.navigate(navigateTo);
-                                }
-                            }}>
-                                <Text style={{ fontSize: 14, color: (activeItemKey == item.key) ? '#FFFFFF' : '#333333', textAlign: (reducer.lang == 'ar' ? 'right' : 'left') }}>{LangValue[reducer.lang][dL]}</Text>
-                            </TouchableOpacity>
-                        );
-                    })
+                    navsItesm
                 }
                 {
                     reducer.authorized == false &&
@@ -78,7 +95,7 @@ const CustomDrawerContentComponent = props => {
                         navigation.dispatch(DrawerActions.closeDrawer());
                         navigation.navigate('Login');
                     }}>
-                        <Text style={{ fontSize: 14, color: '#333333', textAlign: (reducer.lang == 'ar' ? 'right' : 'left') }}>{LangValue[reducer.lang].LOGIN}</Text>
+                        <Text style={{ fontSize: 14, color: '#333333', textAlign: 'left' }}>{LangValue[reducer.lang].LOGIN}</Text>
                     </TouchableOpacity>
                 }
                 {
@@ -93,7 +110,7 @@ const CustomDrawerContentComponent = props => {
                         navigation.dispatch(DrawerActions.closeDrawer());
                         navigation.navigate('Logout');
                     }}>
-                        <Text style={{ fontSize: 14, color: '#333333', textAlign: (reducer.lang == 'ar' ? 'right' : 'left') }}>{LangValue[reducer.lang].LOGOUT}</Text>
+                        <Text style={{ fontSize: 14, color: '#333333', textAlign: 'left' }}>{LangValue[reducer.lang].LOGOUT}</Text>
                     </TouchableOpacity>
                 }
             </ScrollView>

@@ -3,7 +3,7 @@ import { View, Text, Image } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import { COLORS } from '../Constants';
 import { connect } from 'react-redux';
-import { checkAuthentication } from '../Actions';
+import { checkAuthentication, setUsernamePasswordAction } from '../Actions';
 import { LangValue } from '../lang';
 class Splash extends Component {
     curProps = this.props
@@ -20,7 +20,7 @@ class Splash extends Component {
     }
     _checkingAuth = async () => {
         try {
-            await AsyncStorage.multiGet(['isUserLoggedIn', 'userData', 'lang']).then(async (res) => {
+            await AsyncStorage.multiGet(['isUserLoggedIn', 'userData', 'lang', 'credentialList']).then(async (res) => {
                 if (res[0][1] == "true") {
                     if (res[1][1] != "") {
                         let lang = 'en';
@@ -29,6 +29,9 @@ class Splash extends Component {
                         }
                         let uD = JSON.parse(res[1][1]);
                         this.curProps.checkAuth({ authorized: true, userData: uD, lang });
+                        let credentialList = JSON.parse(res[3][1]);
+                        credentialList = (credentialList && credentialList !== 'null' && credentialList !== 'undefined')?credentialList:[];
+                        this.props.setUsernamePassword(credentialList);
                         if (uD.UserType == 'provider') {
                             setTimeout(() => {
                                 this.curProps.navigation.navigate('ProHome');
@@ -43,15 +46,18 @@ class Splash extends Component {
                 }
                 else {
                     setTimeout(() => {
-                            if(this.props.reducer.isRTL == true){
-                                this.curProps.navigation.navigate('Home');
-                            }
-                            else{
-                                this.curProps.checkAuth({ authorized: false, userData: null,lang:'en'});
-                                setTimeout(()=>{
-                                    this.curProps.navigation.navigate('LanguageSelect');
-                                },200)
-                            }
+                        let credentialList = JSON.parse(res[3][1]);
+                        credentialList = (credentialList && credentialList !== 'null' && credentialList !== 'undefined')?credentialList:[];
+                        this.props.setUsernamePassword(credentialList);
+                        if (this.props.reducer.isRTL == true) {
+                            this.curProps.navigation.navigate('Home');
+                        }
+                        else {
+                            this.curProps.checkAuth({ authorized: false, userData: null, lang: 'en' });
+                            setTimeout(() => {
+                                this.curProps.navigation.navigate('LanguageSelect');
+                            }, 200)
+                        }
                     }, 1500)
                 }
             });
@@ -76,5 +82,6 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = dispatch => ({
     checkAuth: (dataSet) => dispatch(checkAuthentication(dataSet)),
+    setUsernamePassword: (credentialList) => dispatch(setUsernamePasswordAction(credentialList))
 });
 export default connect(mapStateToProps, mapDispatchToProps)(Splash);

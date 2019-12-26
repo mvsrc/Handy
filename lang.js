@@ -38,7 +38,7 @@ export const LangValue = {
         PAY_NOW: 'Pay Now',
         MORE_DETAIL: 'More Detail',
         GAS_WATER_SERVICES: 'Gas & Water Services',
-        RENEW: 'Renew',
+        RENEW: 'RE-NEW Subscription',
         PROFILE_DETAILS: 'Profile Details',
         /**  Serive Plan Page */
         SERVICE_DESCRIPTION: 'Service Description',
@@ -92,6 +92,9 @@ export const LangValue = {
         TIMES:'Times',
         TOMORROW:'Tomorrow',
         TODAY:'Today',
+        NAME:'Name',
+        DELIVERY_TIMING:'Delivery Timing',
+        ADMIN_REPLY:'Admin Reply',
 
         /** FEEDBACK PAGE */
         SUGGESTION: 'Suggestion',
@@ -168,7 +171,7 @@ export const LangValue = {
         PAY_NOW: 'إدفع الآن ',
         MORE_DETAIL: 'تفاصيل أكثر ',
         GAS_WATER_SERVICES: 'خدمات الغاز و الماء',
-        RENEW: 'تجديد ',
+        RENEW: 'تجديد الاشتراك',
         PROFILE_DETAILS: 'تفاصيل الملف الشخصي',
 
         /**  Serive Plan Page */
@@ -223,6 +226,9 @@ export const LangValue = {
         TIMES:'مرات',
         TOMORROW:'غدا',
         TODAY:'اليوم',
+        NAME:'اسم',
+        DELIVERY_TIMING:'توقيت التسليم',
+        ADMIN_REPLY:'رد المسؤول',
 
 
         /** FEEDBACK PAGE */

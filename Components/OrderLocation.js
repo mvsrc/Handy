@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { loadingChange } from '../Actions';
 import Geolocation from 'react-native-geolocation-service';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker,PROVIDER_GOOGLE } from 'react-native-maps';
 import Toast from 'react-native-simple-toast';
 import Axios from 'axios';
 import { LangValue } from '../lang';
@@ -80,10 +80,11 @@ class OrderLocation extends Component {
                 <View style={{ height: '80%' }}>
                     <MapView
                         loadingEnabled={true}
+                        showsUserLocation={true}
                         userLocationAnnotationTitle="Your Location"
                         showsMyLocationButton={true}
                         paddingAdjustmentBehavior="automatic"
-                        //provider={PROVIDER_GOOGLE}
+                        provider={PROVIDER_GOOGLE}
                         showsCompass={true}
                         style={styles.map}
                         region={{

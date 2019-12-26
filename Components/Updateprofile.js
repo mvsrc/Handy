@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import {
     Platform, View, Text,
     ScrollView, KeyboardAvoidingView, TextInput, TouchableOpacity,
-    StyleSheet, Keyboard
+    StyleSheet, Keyboard, Image, Dimensions, Modal
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
-import { COLORS, API_URL, IOSShadow } from '../Constants';
+import { COLORS, API_URL, IOSShadow, MAP_KEY } from '../Constants';
 import Toast from 'react-native-simple-toast';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import Axios from 'axios';
@@ -16,6 +16,9 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import RNPickerSelect from 'react-native-picker-select';
 import { LangValue } from '../lang';
 import RNRestart from 'react-native-restart';
+import * as _ from 'underscore';
+const screenWidth = Dimensions.get('window').width;
+const screenHeight = Dimensions.get('window').height;
 class Updateprofile extends Component {
     constructor(props) {
         super(props);
@@ -24,12 +27,16 @@ class Updateprofile extends Component {
         if (userData.UserType == 'user') {
             userLatLng = userData.UserLocation.split(',');
         }
-        let districtList = [{ label: userData.UserDistrictName, value: userData.UserDistrictId }];
+        let UserDistrictId=0;
+        if(userData.UserDistrictName){
+            UserDistrictId = userData.UserDistrictId;
+        }
         this.state = {
             showTabs: true,
-            userData: { ...userData, UserLat: userLatLng[0], UserLng: userLatLng[1] },
+            userData: { ...userData, UserLat: userLatLng[0], UserLng: userLatLng[1],UserDistrictId:UserDistrictId },
             district: [],
-            districtList
+            mapUrl: '',
+            mapModelVisible: false
         }
     }
     componentDidMount() {
@@ -42,6 +49,29 @@ class Updateprofile extends Component {
             'keyboardDidHide',
             () => { this.setState({ showTabs: true }); },
         );
+        this.setState({
+            region: {
+                latitude: this.state.userData.UserLat,
+                longitude: this.state.userData.UserLng,
+                latitudeDelta: 0.005,
+                longitudeDelta: 0.005,
+            },
+            mapUrl: `https://maps.googleapis.com/maps/api/staticmap?key=${MAP_KEY}&center=${this.state.userData.UserLat},${this.state.userData.UserLng}&zoom=16&scale=4&maptype=roadmap&size=${screenWidth - 30}x150&markers=${this.state.userData.UserLat},${this.state.userData.UserLng}`
+        });
+        Axios.get(`${API_URL}district.php?action=district`)
+        .then(res => {
+            let districtList = this.state.district;
+            res.data.district.map((item,index)=>{
+                districtList.push({label:item.DistrictName,value:item.DistrictId});
+            });
+            this.setState({ district: districtList }, () => {
+                this.props.LoadingStatusChange(false);
+            });
+        })
+        .catch(err => {
+            this.props.LoadingStatusChange(false);
+            console.log('District Error', err);
+        });
     }
     componentWillUnmount() {
         this.keyboardDidShowListener.remove();
@@ -50,22 +80,22 @@ class Updateprofile extends Component {
     _updateProfile() {
         this.props.LoadingStatusChange(true);
         let { userData } = this.state;
+        console.log(userData);
         Axios.post(`${API_URL}updateprofile.php?action=updateprofile`, {
-            ...userData
+            ...userData,
         })
             .then(async res => {
                 let { success, message } = res.data;
                 if (success == 1) {
                     this.props.UpdateProfileData(userData);
-                    Toast.show(message, Toast.SHORT);
                     await AsyncStorage.setItem("userData", JSON.stringify(userData)).then(() => {
                         this.props.LoadingStatusChange(false);
                     });
                 }
                 else {
-                    Toast.show(message, Toast.SHORT);
                     this.props.LoadingStatusChange(false);
                 }
+                setTimeout(()=>{Toast.show(message, Toast.SHORT);},200);
             })
             .catch(err => {
                 console.log('Update Profile Error', err);
@@ -73,17 +103,17 @@ class Updateprofile extends Component {
             })
     }
     setLanguage = async () => {
-        let {lang} = this.props.reducer;
-        let changeLang = (lang == 'en')?'ar':'en';
+        let { lang } = this.props.reducer;
+        let changeLang = (lang == 'en') ? 'ar' : 'en';
         this.props.LoadingStatusChange(true);
         await AsyncStorage.setItem('lang', changeLang)
             .then(res => {
                 this.props.SetLanguageAction(changeLang)
                 this.props.LoadingStatusChange(false);
-                setTimeout(()=>{
+                setTimeout(() => {
                     //this.props.navigation.navigate('Home');
                     RNRestart.Restart();
-                },100)
+                }, 100)
             })
             .catch(err => {
                 console.log(err);
@@ -200,7 +230,7 @@ class Updateprofile extends Component {
                                             value: null,
                                             color: COLORS.Primary,
                                         }}
-                                        items={this.state.districtList}
+                                        items={this.state.district}
                                         value={this.state.userData.UserDistrictId}
                                         style={{
                                             inputIOS: {
@@ -211,8 +241,8 @@ class Updateprofile extends Component {
                                                 borderColor: '#666666',
                                                 color: '#000000',
                                                 textAlign: (reducer.lang == 'ar' ? 'right' : 'left'),
-                                                paddingRight: (reducer.lang == 'ar' ? 0 : 30), // to ensure the text is never behind the icon
-                                                paddingLeft: (reducer.lang == 'en' ? 30 : 0), // to ensure the text is never behind the icon
+                                                paddingRight: (reducer.lang == 'ar' ? 0 : 10), // to ensure the text is never behind the icon
+                                                paddingLeft: (reducer.lang == 'en' ? 10 : 0), // to ensure the text is never behind the icon
                                                 ...styles.textinput
                                             },
                                         }}
@@ -240,8 +270,12 @@ class Updateprofile extends Component {
                                     {/* Home No Ends */}
 
                                     <Text style={{ fontSize: 18, marginLeft: 10, marginVertical: 10, marginTop: 20, textAlign: (reducer.lang == 'ar' ? 'left' : 'left') }}>{LangValue[reducer.lang].HOME_LOCATION}</Text>
-                                    <View style={{ height: 250 }}>
-                                        <MapView
+                                    <TouchableOpacity style={{ width: '100%' }} onPress={() => { this.setState({ mapModelVisible: true }) }}>
+                                        {
+                                            this.state.mapUrl != '' &&
+                                            <Image source={{ uri: this.state.mapUrl }} style={{ width: '100%', height: 150 }} />
+                                        }
+                                        {/* <MapView
                                             loadingEnabled={true}
                                             userLocationAnnotationTitle={LangValue[reducer.lang].YOUR_LOCATION}
                                             showsMyLocationButton={true}
@@ -262,8 +296,8 @@ class Updateprofile extends Component {
                                                     coordinate={{ latitude: this.state.userData.UserLat, longitude: this.state.userData.UserLng }} draggable={true} pinColor={COLORS.Primary}
                                                 />
                                             }
-                                        </MapView>
-                                    </View>
+                                        </MapView> */}
+                                    </TouchableOpacity>
                                 </View>
                             }
                             <View style={{ marginVertical: 30, alignItems: 'center' }}>
@@ -278,6 +312,44 @@ class Updateprofile extends Component {
                     this.state.showTabs == true &&
                     <TabBar navigation={navigation} />
                 }
+                <Modal animationType="slide"
+                    transparent={false}
+                    visible={this.state.mapModelVisible} presentationStyle="formSheet">
+                    <View style={{ flex: 1 }}>
+                        <View style={{ height: screenHeight - 140, width: '100%' }}>
+                            {
+                                //typeof(this.state.userdata) != "undefined" &&
+                                <MapView
+                                    paddingAdjustmentBehavior="always"
+                                    loadingEnabled={true}
+                                    userLocationAnnotationTitle={LangValue[reducer.lang].YOUR_LOCATION}
+                                    showsMyLocationButton={true}
+                                    followsUserLocation={true}
+                                    provider={PROVIDER_GOOGLE}
+                                    showsUserLocation={true}
+                                    style={styles.map}
+                                    mapType="standard"
+                                    loadingIndicatorColor={COLORS.Primary}
+                                    initialRegion={this.state.region}
+                                    onRegionChange={(region) => {
+                                        this.setState({ region, userData: { ...this.state.userData, UserLat: region.latitude, UserLng: region.longitude,UserLocation:`${this.state.userData.UserLat},${this.state.userData.UserLng}`} });
+                                    }}
+                                >
+                                    <Marker coordinate={{ latitude: this.state.userData.UserLat, longitude: this.state.userData.UserLng }} draggable onDragEnd={(e) => this.setState({ userData: { ...this.state.userData, UserLat: e.nativeEvent.coordinate.latitude, UserLng: e.nativeEvent.coordinate.longtiude } })} pinColor={COLORS.Primary} />
+                                </MapView>
+                            }
+                        </View>
+                        <TouchableOpacity style={{ position: 'absolute', bottom: 40, backgroundColor: COLORS.Primary, padding: 10, alignItems: 'center', justifyContent: 'center', width: screenWidth - 20, left: 10, right: 10, borderRadius: 5, ...IOSShadow }}
+                            onPress={() => {
+                                this.setState({
+                                    mapModelVisible: false,
+                                    mapUrl: `https://maps.googleapis.com/maps/api/staticmap?key=${MAP_KEY}&center=${this.state.userData.UserLat},${this.state.userData.UserLng}&zoom=16&scale=4&maptype=roadmap&size=${screenWidth - 30}x150&markers=${this.state.userData.UserLat},${this.state.userData.UserLng}`
+                                });
+                            }}>
+                            <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 14 }}>{LangValue[reducer.lang].SUBMIT}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </Modal>
             </View >
         )
     }

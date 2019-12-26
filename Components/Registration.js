@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import {
     View, Text,
     ScrollView, KeyboardAvoidingView, TextInput, TouchableOpacity,
-    StyleSheet, Keyboard, Dimensions
+    StyleSheet, Keyboard, Dimensions, Modal, Image
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
-import { COLORS, API_URL, IOSShadow } from '../Constants';
+import { COLORS, API_URL, IOSShadow, MAP_KEY } from '../Constants';
 import RNPickerSelect from 'react-native-picker-select';
 import Toast from 'react-native-simple-toast';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
@@ -16,7 +16,9 @@ import { actionUserSignIn, loadingChange } from '../Actions';
 import Geolocation from 'react-native-geolocation-service';
 import { LangValue } from '../lang';
 import firebase from 'react-native-firebase';
+import { SafeAreaView } from 'react-navigation';
 const screenWidth = Dimensions.get('window').width;
+const screenHeight = Dimensions.get('window').height;
 class Registration extends Component {
     constructor(props) {
         super(props);
@@ -38,6 +40,8 @@ class Registration extends Component {
             UserLng: 'null',
             subscription: this.props.navigation.getParam('subscription'),
             hasGarbage: this.props.navigation.getParam('hasGarbage'),
+            mapModelVisible: false,
+            mapUrl: ''
         }
     }
     static navigationOptions = {
@@ -66,10 +70,21 @@ class Registration extends Component {
         Geolocation.getCurrentPosition(
             (position) => {
                 let { latitude, longitude } = position.coords;
-                this.setState({ UserLat: latitude, UserLng: longitude }, () => {
+                this.setState({
+                    UserLat: latitude,
+                    UserLng: longitude,
+                    region: {
+                        latitude: latitude,
+                        longitude: longitude,
+                        latitudeDelta: 0.005,
+                        longitudeDelta: 0.005,
+                    }
+                }, () => {
                     this.districtdata();
                 });
-
+                this.setState({
+                    mapUrl: `https://maps.googleapis.com/maps/api/staticmap?key=${MAP_KEY}&center=${this.state.UserLat},${this.state.UserLng}&zoom=16&scale=4&maptype=roadmap&size=${screenWidth - 30}x150&markers=${this.state.UserLat},${this.state.UserLng}`
+                })
             },
             (error) => {
                 // See error code charts below.
@@ -83,24 +98,7 @@ class Registration extends Component {
     }
     registerUser = async () => {
         let { lang } = this.props.reducer;
-        let { name, lname, mob, email, password, cmpassword, UserDistrictName, Homeno, ATC, UserLat, UserLng, subscription, hasGarbage } = this.state;
-        let subDuration = subscription.SubDuration.split(' ');
-        let subDurationInteger = parseInt(subDuration[0]);
-        let subDurationMonth = subDuration[1].toLowerCase();
-        let todayDate = new Date();
-        let StartDateString = new Date();
-        let extendsMonth = todayDate.getFullYear();
-        if (subDurationMonth === "month") {
-            extendsMonth = todayDate.getMonth()
-        }
-        let endDateString = new Date(todayDate.setMonth(extendsMonth + subDurationInteger));
-        let StartDay = (StartDateString.getDate() < 10) ? '0' + StartDateString.getDate() : StartDateString.getDate();
-        let StartMonth = (StartDateString.getMonth() + 1 < 10) ? '0' + (StartDateString.getMonth() + 1) : StartDateString.getMonth() + 1;
-        let StartDate = StartDay + '-' + StartMonth + '-' + StartDateString.getFullYear();
-        //End Date
-        let EndDay = (endDateString.getDate() < 10) ? '0' + endDateString.getDate() : endDateString.getDate();
-        let EndMonth = (endDateString.getMonth() + 1 < 10) ? '0' + (endDateString.getMonth() + 1) : endDateString.getMonth() + 1;
-        let EndDate = EndDay + '-' + EndMonth + '-' + endDateString.getFullYear();
+        let { name, lname, mob, email, password, cmpassword, UserDistrictName, Homeno, ATC } = this.state;
         if (name == '') {
             Toast.show(LangValue[lang].ERROR_FIRST_NAME, Toast.SHORT);
             return false;
@@ -169,11 +167,28 @@ class Registration extends Component {
         }
     }
     async getToken() {
-        let { email, password } = this.state;
+        let { lang } = this.props.reducer;
+        let { name, lname, mob, email, password, UserDistrictName, Homeno, UserLat, UserLng, subscription, hasGarbage } = this.state;
+        let subDuration = subscription.SubDuration.split(' ');
+        let subDurationInteger = parseInt(subDuration[0]);
+        let subDurationMonth = subDuration[1].toLowerCase();
+        let todayDate = new Date();
+        let StartDateString = new Date();
+        let extendsMonth = todayDate.getFullYear();
+        if (subDurationMonth === "month") {
+            extendsMonth = todayDate.getMonth()
+        }
+        let endDateString = new Date(todayDate.setMonth(extendsMonth + subDurationInteger));
+        let StartDay = (StartDateString.getDate() < 10) ? '0' + StartDateString.getDate() : StartDateString.getDate();
+        let StartMonth = (StartDateString.getMonth() + 1 < 10) ? '0' + (StartDateString.getMonth() + 1) : StartDateString.getMonth() + 1;
+        let StartDate = StartDay + '-' + StartMonth + '-' + StartDateString.getFullYear();
+        //End Date
+        let EndDay = (endDateString.getDate() < 10) ? '0' + endDateString.getDate() : endDateString.getDate();
+        let EndMonth = (endDateString.getMonth() + 1 < 10) ? '0' + (endDateString.getMonth() + 1) : endDateString.getMonth() + 1;
+        let EndDate = EndDay + '-' + EndMonth + '-' + endDateString.getFullYear();
         await firebase.messaging().getToken().then(async fcmToken => {
             if (fcmToken) {
-                let urlBuild = `${API_URL}registration.php?action=registration&UserFName=${name}&UserLName=${lname}&UserEmail=${email}&UserPhone=${mob}&UserPass=${password}&UserDistrict=${UserDistrictName}&UserHome=${Homeno}&UserLocation=${UserLat},${UserLng}&lang=${this.props.reducer.lang}`;
-                console.log(urlBuild);
+                let urlBuild = `${API_URL}registration.php?action=registration&UserFName=${name}&UserLName=${lname}&UserEmail=${email}&UserPhone=${mob}&UserPass=${password}&UserDistrict=${UserDistrictName}&UserHome=${Homeno}&UserLocation=${UserLat},${UserLng}&lang=${lang}`;
                 await Axios.get(urlBuild)
                     .then(async res => {
                         let uD = res.data;
@@ -185,8 +200,7 @@ class Registration extends Component {
                                 uD['UserType'] = 'user';
                                 this.props.LoginUserAction({ ...uD }, fcmToken);
                                 await AsyncStorage.multiSet([['isUserLoggedIn', "true"], ["userData", JSON.stringify(uD)], ["userToken", fcmToken]]).then(async () => {
-                                    let subsUrlBuild = `${API_URL}getsubscription.php?action=getsubscription&SubscriptionPlanId=${subscription.SubId}&UserId=${uD.UserId}&SubscriptionAmount=${subscription.SubPrice}&GarbageCan=${hasGarbage}&SubscriptionStartDate=${StartDate}&SubscriptionEndDate=${EndDate}&lang=${this.props.reducer.lang}`;
-                                    console.log(subsUrlBuild);
+                                    let subsUrlBuild = `${API_URL}getsubscription.php?action=getsubscription&SubscriptionPlanId=${subscription.SubId}&UserId=${uD.UserId}&SubscriptionAmount=${subscription.SubPrice}&GarbageCan=${hasGarbage}&SubscriptionStartDate=${StartDate}&SubscriptionEndDate=${EndDate}&lang=${lang}`;
                                     await Axios.get(subsUrlBuild)
                                         .then(res => {
                                             if (res.data.success == 1) {
@@ -224,6 +238,9 @@ class Registration extends Component {
             else {
                 this.props.LoadingStatusChange(false);
             }
+        }).catch(err=>{
+            console.log('Token Error ', err);
+            this.props.LoadingStatusChange(false);
         });
     }
     render() {
@@ -279,6 +296,7 @@ class Registration extends Component {
                                     autoCapitalize='none'
                                     ref={(input) => { this.mob = input; }}
                                     blurOnSubmit={false}
+                                    maxLength={9}
                                     returnKeyType={"next"}
                                     value={this.state.mob}
                                     style={[styles.textField, { width: '85%', borderBottomColor: '#666666', borderBottomWidth: 1, textAlign: (lang == 'ar' ? 'right' : 'left') }]}
@@ -311,7 +329,6 @@ class Registration extends Component {
                                     secureTextEntry={true}
                                     ref={(input) => { this.password = input; }}
                                     blurOnSubmit={false}
-                                    maxLength={8}
                                     underlineColorAndroid="transparent"
                                     value={this.state.password}
                                     style={[styles.textField, { textAlign: (lang == 'ar' ? 'right' : 'left') }]}
@@ -327,7 +344,6 @@ class Registration extends Component {
                                     secureTextEntry={true}
                                     ref={(input) => { this.cmpassword = input; }}
                                     blurOnSubmit={false}
-                                    maxLength={8}
                                     underlineColorAndroid="transparent"
                                     value={this.state.cmpassword}
                                     style={[styles.textField, { textAlign: (lang == 'ar' ? 'right' : 'left') }]}
@@ -350,8 +366,8 @@ class Registration extends Component {
                                             borderColor: '#666666',
                                             color: '#000000',
                                             textAlign: (lang == 'ar' ? 'right' : 'left'),
-                                            paddingRight: (lang == 'ar' ? 0 : 30), // to ensure the text is never behind the icon
-                                            paddingLeft: (lang == 'en' ? 30 : 0), // to ensure the text is never behind the icon
+                                            paddingRight: (lang == 'ar' ? 0 : 0), // to ensure the text is never behind the icon
+                                            paddingLeft: (lang == 'en' ? 0 : 0), // to ensure the text is never behind the icon
                                         },
                                     }}
                                     onValueChange={value => {
@@ -380,29 +396,33 @@ class Registration extends Component {
 
                             <Text style={{ fontSize: 15, marginVertical: 10, color: 'gray', textAlign: 'left' }}>{LangValue[lang].HOME_LOCATION}</Text>
 
-                            <View style={{ height: 300, width: '100%' }}>
+                            <TouchableOpacity style={{ width: '100%' }} onPress={() => { this.setState({ mapModelVisible: true }) }}>
                                 {
-                                    this.state.UserLat != 'null' &&
-                                    <MapView
-                                        loadingEnabled={true}
-                                        userLocationAnnotationTitle={LangValue[lang].YOUR_LOCATION}
-                                        showsMyLocationButton={true}
-                                        paddingAdjustmentBehavior="automatic"
-                                        followsUserLocation={true}
-                                        provider={PROVIDER_GOOGLE}
-                                        showsUserLocation={true}
-                                        style={styles.map}
-                                        loadingIndicatorColor={COLORS.Primary}
-                                        region={{
-                                            latitude: this.state.UserLat,
-                                            longitude: this.state.UserLng,
-                                            latitudeDelta: 0.05,
-                                            longitudeDelta: 0.05,
-                                        }}>
-                                        <Marker coordinate={{ latitude: this.state.UserLat, longitude: this.state.UserLng }} draggable={true} pinColor={COLORS.Primary} />
-                                    </MapView>
+                                    this.state.mapUrl != '' &&
+                                    <Image source={{ uri: this.state.mapUrl }} style={{ width: '100%', height: 150 }} />
                                 }
-                            </View>
+                                {
+                                    // this.state.UserLat != 'null' &&
+                                    // <MapView
+                                    //     loadingEnabled={true}
+                                    //     userLocationAnnotationTitle={LangValue[lang].YOUR_LOCATION}
+                                    //     showsMyLocationButton={true}
+                                    //     paddingAdjustmentBehavior="automatic"
+                                    //     followsUserLocation={true}
+                                    //     provider={PROVIDER_GOOGLE}
+                                    //     showsUserLocation={true}
+                                    //     style={styles.map}
+                                    //     loadingIndicatorColor={COLORS.Primary}
+                                    //     region={{
+                                    //         latitude: this.state.UserLat,
+                                    //         longitude: this.state.UserLng,
+                                    //         latitudeDelta: 0.05,
+                                    //         longitudeDelta: 0.05,
+                                    //     }}>
+                                    //     <Marker coordinate={{ latitude: this.state.UserLat, longitude: this.state.UserLng }} draggable={true} pinColor={COLORS.Primary} />
+                                    // </MapView>
+                                }
+                            </TouchableOpacity>
                             <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
                                 <CheckBox
                                     style={{ padding: 10, paddingLeft: 0, }}
@@ -428,6 +448,44 @@ class Registration extends Component {
                         </View>
                     </ScrollView>
                 </KeyboardAvoidingView>
+                <Modal animationType="slide"
+                    transparent={false}
+                    visible={this.state.mapModelVisible} presentationStyle="formSheet">
+                    <View style={{ flex: 1 }}>
+                        <View style={{ height: screenHeight - 140, width: '100%' }}>
+                            {
+                                this.state.UserLat != 'null' &&
+                                <MapView
+                                    paddingAdjustmentBehavior="always"
+                                    loadingEnabled={true}
+                                    userLocationAnnotationTitle={LangValue[lang].YOUR_LOCATION}
+                                    showsMyLocationButton={true}
+                                    followsUserLocation={true}
+                                    provider={PROVIDER_GOOGLE}
+                                    showsUserLocation={true}
+                                    style={styles.map}
+                                    mapType="standard"
+                                    loadingIndicatorColor={COLORS.Primary}
+                                    initialRegion={this.state.region}
+                                    onRegionChange={(region) => {
+                                        this.setState({ region, UserLat: region.latitude, UserLng: region.longitude });
+                                    }}
+                                >
+                                    <Marker coordinate={{ latitude: this.state.UserLat, longitude: this.state.UserLng }} draggable onDragEnd={(e) => this.setState({ UserLat: e.nativeEvent.coordinate.latitude, UserLng: e.nativeEvent.coordinate.longtiude })} pinColor={COLORS.Primary} />
+                                </MapView>
+                            }
+                        </View>
+                        <TouchableOpacity style={{ position: 'absolute', bottom: 40, backgroundColor: COLORS.Primary, padding: 10, alignItems: 'center', justifyContent: 'center', width: screenWidth - 20, left: 10, right: 10, borderRadius: 5, ...IOSShadow }}
+                            onPress={() => {
+                                this.setState({
+                                    mapModelVisible: false,
+                                    mapUrl: `https://maps.googleapis.com/maps/api/staticmap?key=${MAP_KEY}&center=${this.state.UserLat},${this.state.UserLng}&zoom=16&scale=4&maptype=roadmap&size=${screenWidth - 30}x150&markers=${this.state.UserLat},${this.state.UserLng}`
+                                });
+                            }}>
+                            <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 14 }}>{LangValue[lang].SUBMIT}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </Modal>
             </View>
         )
     }

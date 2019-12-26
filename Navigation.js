@@ -109,12 +109,12 @@ const ProDrawerNavigator = createDrawerNavigator({
             drawerLabel: 'HOME'
         }
     },
-    ['All Orders']: {
-        screen: ProHome,
-        navigationOptions: {
-            drawerLabel: 'ALL_ORDERS'
-        }
-    },
+    // ['All Orders']: {
+    //     screen: ProHome,
+    //     navigationOptions: {
+    //         drawerLabel: 'ALL_ORDERS'
+    //     }
+    // },
     ['Add District']: {
         screen: AddDistrict,
         navigationOptions: {
@@ -177,14 +177,16 @@ const AppNavigator = createStackNavigator({
             return {
                 title,
                 headerLeft: () => {
-                    if (navigation.state.routes[navigation.state.index].key == 'Home') {
+                    if (navigation.state.routes[navigation.state.index].key == 'Home' && navigation.state.isDrawerOpen == false) {
                         return (<TouchableOpacity onPress={() => { navigation.dispatch(DrawerActions.toggleDrawer()) }} style={{ paddingLeft: 20 }}>
                             <Icon name="bars" size={25} style={{ color: '#FFFFFF' }} />
                         </TouchableOpacity>)
+                    } else if(navigation.state.isDrawerOpen == false){
+                        return (<TouchableOpacity onPress={() => { navigation.navigate('Home') }} style={{ paddingLeft: 10 }}>
+                            <MIcon name={screenProps.lang == 'en' ? "chevron-left" : "chevron-right"} size={35} style={{ color: '#FFFFFF' }} />
+                        </TouchableOpacity>)
                     }
-                    return (<TouchableOpacity onPress={() => { navigation.navigate('Home') }} style={{ paddingLeft: 10 }}>
-                        <MIcon name={screenProps.lang == 'en' ? "chevron-left" : "chevron-right"} size={35} style={{ color: '#FFFFFF' }} />
-                    </TouchableOpacity>)
+                    return null;
                 },  // If you want to override the back button, use this.
 
             }
@@ -204,14 +206,16 @@ const AppNavigator = createStackNavigator({
             return {
                 title,
                 headerLeft: () => {
-                    if (navigation.state.routes[navigation.state.index].key == 'Home') {
+                    if (navigation.state.routes[navigation.state.index].key == 'Home' && navigation.state.isDrawerOpen == false) {
                         return (<TouchableOpacity onPress={() => { navigation.dispatch(DrawerActions.toggleDrawer()) }} style={{ paddingLeft: 20 }}>
                             <Icon name="bars" size={25} style={{ color: '#FFFFFF' }} />
                         </TouchableOpacity>)
+                    } else if(navigation.state.isDrawerOpen == false){
+                        return (<TouchableOpacity onPress={() => { navigation.navigate('Home') }} style={{ paddingLeft: 10 }}>
+                            <MIcon name={screenProps.lang == 'en' ? "chevron-left" : "chevron-right"} size={35} style={{ color: '#FFFFFF' }} />
+                        </TouchableOpacity>)
                     }
-                    return (<TouchableOpacity onPress={() => { navigation.navigate('Home') }} style={{ paddingLeft: 10 }}>
-                        <MIcon name={screenProps.lang == 'en' ? "chevron-left" : "chevron-right"} size={35} style={{ color: '#FFFFFF' }} />
-                    </TouchableOpacity>)
+                    return null;
                 },  // If you want to override the back button, use this.
 
 
@@ -341,7 +345,7 @@ const AppNavigator = createStackNavigator({
                 screenProps.setLanguage();
             }} style={{ paddingRight: 10, flexDirection: 'row', alignItems: 'center' }}>
                 <Icon name="language" size={20} style={{ color: '#FFFFFF' }} />
-                <Text style={{ color: '#FFFFFF', marginLeft: 5,fontSize:13 }}>{(screenProps.lang == 'en') ? 'English' : 'عربى'}</Text>
+                <Text style={{ color: '#FFFFFF', marginLeft: 5,fontSize:13 }}>{(screenProps.lang == 'en') ? 'عربى':'English'  }</Text>
             </TouchableOpacity>
         ),
         headerLeft: (

@@ -19,8 +19,8 @@ class Homewastage extends Component {
     }
     garbagedata = () => {
         this.props.LoadingStatusChange(true);
-        let { userData } = this.props.reducer;
-        Axios.get(`${API_URL}orderlist.php?action=wastage&UserDistrict=${this.state.districtId}&ProviderId=${userData.UserId}&lang=ar`)
+        let { userData,lang } = this.props.reducer;
+        Axios.get(`${API_URL}orderlist.php?action=wastage&UserDistrict=${this.state.districtId}&ProviderId=${userData.UserId}&lang=${lang}`)
             .then(res => {
                 this.setState({ garbage: res.data.result },()=>{
                     this.props.LoadingStatusChange(false);
@@ -57,7 +57,7 @@ class Homewastage extends Component {
 
                                             <Image source={require('../assets/all-order-map-icon.png')} style={{ width: 20, height: 17 }} />
                                         </TouchableOpacity>
-                                        <TouchableOpacity onPress={() => { this.props.navigation.navigate('ProOrderDetails', { itemdata: item }) }}><Image source={require('../assets/all-order-view-icon.png')} style={{ width: 22, height: 22 }} /></TouchableOpacity>
+                                        <TouchableOpacity onPress={() => { this.props.navigation.navigate('ProOrderDetails', { itemdata: item,type:'homewastage' }) }}><Image source={require('../assets/all-order-view-icon.png')} style={{ width: 22, height: 22 }} /></TouchableOpacity>
                                         <Image source={require('../assets/wastage-gray.png')} style={{ width: 28, height: 34 }} />
                                     </View>
                                 </View>

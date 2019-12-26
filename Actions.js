@@ -54,3 +54,9 @@ export const setProDistrictIdAction = (proDistrictId)=>{
         proDistrictId
     }
 }
+export const setUsernamePasswordAction = (credentialList)=>{
+    return {
+        type:'SET_USERNAME_PASSWORD',
+        credentialList
+    }
+}

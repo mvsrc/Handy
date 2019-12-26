@@ -13,6 +13,7 @@ import Axios from 'axios';
 import { LangValue } from '../lang';
 import SimpleToast from 'react-native-simple-toast';
 const BannerWidth = Dimensions.get('window').width;
+const {height} = Dimensions.get('screen');
 class Home extends Component {
     curProps = this.props;
     constructor(props) {
@@ -66,9 +67,25 @@ class Home extends Component {
                             <TouchableOpacity onPress={() => {
                                 if (authorized == true) {
                                     this.props.LoadingStatusChange(true);
-                                    checkingUserStatus(userData, userToken, lang, this.props.CheckUserStatusAction).then(res => {
+                                    checkingUserStatus(userData, userToken, lang, this.props.CheckUserStatusAction).then(async res => {
                                         if (res == true) {
-                                            this.props.navigation.navigate('My Plan');
+                                            //this.props.navigation.navigate('My Plan');
+                                            this.props.LoadingStatusChange(true);
+                                            await Axios.get(`${API_URL}myplan.php?action=myplan&UserId=${userData.UserId}&lang=${lang}`)
+                                                .then(res => {
+                                                    let { success, message, result } = res.data;
+                                                    if (success == 1) {
+                                                        this.props.navigation.navigate('PlanHitory',{SubsData:result[0]})
+                                                    }
+                                                    else{
+                                                        setTimeout(()=>{SimpleToast.show(message, SimpleToast.SHORT);},300);
+                                                    }
+                                                    this.props.LoadingStatusChange(false);
+                                                })
+                                                .catch(err => {
+                                                    console.log('My Plan Error ', err);
+                                                    this.props.LoadingStatusChange(false);
+                                                })
                                         }
                                         else {
                                             setTimeout(() => { SimpleToast.show(LangValue[lang].VERIFY_ACCOUNT, SimpleToast.SHORT); }, 100);
@@ -87,12 +104,12 @@ class Home extends Component {
                                 </View>
                             </TouchableOpacity>
                             <View style={{ flexDirection: 'row', maxWidth: 500 }}>
-                                <TouchableOpacity style={[styles.servicesBtn, { width: '50%', borderBottomStartRadius: 10, borderRightWidth: 1 }]} onPress={() => {
+                                <TouchableOpacity style={[styles.servicesBtn, { width: '50%', borderBottomStartRadius: 10, borderRightWidth: 1,alignItems:'center',justifyContent:'center' }]} onPress={() => {
                                     if (authorized == true) {
                                         this.props.LoadingStatusChange(true);
                                         checkingUserStatus(userData, userToken, lang, this.props.CheckUserStatusAction).then(res => {
                                             if (res == true) {
-                                                this.props.navigation.navigate('My Plan');
+                                                this.props.navigation.navigate('Plangaswaterservice');
                                             }
                                             else {
                                                 setTimeout(() => { SimpleToast.show(LangValue[lang].VERIFY_ACCOUNT, SimpleToast.SHORT); }, 100);
@@ -110,12 +127,12 @@ class Home extends Component {
                                         <Text style={{ color: '#FFFFFF', fontSize: 18 }}>{LangValue[lang].GAS_SERVICES}</Text>
                                     </View>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={[styles.servicesBtn, { width: '50%', borderBottomEndRadius: 10 }]} onPress={() => {
+                                <TouchableOpacity style={[styles.servicesBtn, { width: '50%', borderBottomEndRadius: 10,alignItems:'center',justifyContent:'center' }]} onPress={() => {
                                     if (authorized == true) {
                                         this.props.LoadingStatusChange(true);
                                         checkingUserStatus(userData, userToken, lang, this.props.CheckUserStatusAction).then(res => {
                                             if (res == true) {
-                                                this.props.navigation.navigate('My Plan');
+                                                this.props.navigation.navigate('Plangaswaterservice');
                                             }
                                             else {
                                                 setTimeout(() => { SimpleToast.show(LangValue[lang].VERIFY_ACCOUNT, SimpleToast.SHORT); }, 100);
@@ -166,7 +183,8 @@ const styles = StyleSheet.create({
     servicesBtn: {
         backgroundColor: COLORS.Primary,
         borderColor: '#FFFFFF',
-        paddingVertical: 15
+        paddingVertical: 15,
+        minHeight:(height/2) - 210
     },
     textWrapper: {
         alignItems: 'center',

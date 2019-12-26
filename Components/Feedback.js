@@ -16,7 +16,7 @@ class Feedback extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            selectedItem: 'feedback',
+            selectedItem: 'Feedback',
             comtxt: ''
         }
     }
@@ -50,28 +50,28 @@ class Feedback extends Component {
                     <ScrollView keyboardShouldPersistTaps="always">
                         <View style={styles.container}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <TouchableOpacity onPress={() => { { this.changeActiveRadioButton('feedback') } }} activeOpacity={0.8} style={styles.radioButton}>
+                                <TouchableOpacity onPress={() => { { this.changeActiveRadioButton('Feedback') } }} activeOpacity={0.8} style={styles.radioButton}>
                                     <View style={[styles.radioButtonHolder, { height: 20, width: 20, borderColor: '#000000' }]}>
                                         {
-                                            this.state.selectedItem == 'feedback' &&
+                                            this.state.selectedItem == 'Feedback' &&
                                             <View style={[styles.radioIcon, { height: 10, width: 10, backgroundColor: '#000000' }]}></View>
                                         }
                                     </View>
                                     <Text style={[styles.label, { color: '#000000' }]}>{LangValue[lang].FEEDBACK}</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => { { this.changeActiveRadioButton('suggestion') } }} activeOpacity={0.8} style={styles.radioButton}>
+                                <TouchableOpacity onPress={() => { { this.changeActiveRadioButton('Suggestion') } }} activeOpacity={0.8} style={styles.radioButton}>
                                     <View style={[styles.radioButtonHolder, { height: 20, width: 20, borderColor: '#000000' }]}>
                                         {
-                                            this.state.selectedItem == 'suggestion' &&
+                                            this.state.selectedItem == 'Suggestion' &&
                                             <View style={[styles.radioIcon, { height: 10, width: 10, backgroundColor: '#000000' }]}></View>
                                         }
                                     </View>
                                     <Text style={[styles.label, { color: '#000000' }]}>{LangValue[lang].SUGGESTION}</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => { { this.changeActiveRadioButton('complaint') } }} activeOpacity={0.8} style={styles.radioButton}>
+                                <TouchableOpacity onPress={() => { { this.changeActiveRadioButton('Complaint') } }} activeOpacity={0.8} style={styles.radioButton}>
                                     <View style={[styles.radioButtonHolder, { height: 20, width: 20, borderColor: '#000000' }]}>
                                         {
-                                            this.state.selectedItem == 'complaint' &&
+                                            this.state.selectedItem == 'Complaint' &&
                                             <View style={[styles.radioIcon, { height: 10, width: 10, backgroundColor: '#000000' }]}></View>
                                         }
                                     </View>
